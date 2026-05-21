@@ -12,6 +12,8 @@ import TestimonialSlider from "../components/TestimonialSlider"
 import KeyFeaturesAndServices from "../components/key-features-and-services"
 import EmpoweringEthiopias from "../components/empowering-ethiopias"
 import LatestNews from "../components/latest-news"
+import Register from "./register"
+import AdminLogin from "./admin/AdminLogin"
 import {
   Search,
   Users,
@@ -47,6 +49,10 @@ export default function Home() {
 
   // PWA Install Prompt State
   const [deferredPrompt, setDeferredPrompt] = useState(null)
+
+  // Modals for Register and Login
+  const [showRegisterModal, setShowRegisterModal] = useState(false)
+  const [showLoginModal, setShowLoginModal] = useState(false)
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
@@ -306,26 +312,26 @@ export default function Home() {
 
             <div className="flex space-x-4">
               {/* Register Button */}
-              <a
-                href="/register"
+              <button
+                onClick={() => setShowRegisterModal(true)}
                 className="bg-gradient-to-r from-blue-400 to-blue-500 text-white font-semibold rounded-md px-6 py-2 inline-block 
              shadow-sm transition-all duration-300 hover:from-blue-500 hover:to-blue-600 hover:shadow-lg 
              hover:scale-105 border border-blue-300 hover:border-blue-400"
               >
                 Agreement
-              </a>
+              </button>
 
 
 
               {/* Login Button */}
-              <a
-                href="/login"
+              <button
+                onClick={() => setShowLoginModal(true)}
                 className="bg-white text-black font-semibold rounded-md px-6 py-2 inline-block
              border border-gray-300 shadow-sm transition-all duration-300
              hover:bg-gray-50 hover:shadow-lg hover:scale-105 hover:border-gray-400"
               >
                 See
-              </a>
+              </button>
 
               {/* Video Play Button */}
               <button
@@ -656,13 +662,13 @@ export default function Home() {
             </p>
 
             {/* Replaced <Button> with a normal <a> */}
-            <a
-              href="/register"
+            <button
+              onClick={() => setShowRegisterModal(true)}
               className="inline-block shrink-0 rounded px-12 py-6 min-w-[180px] min-h-[56px] text-xl font-semibold text-white shadow-md
         bg-[rgba(99,149,235,0.74)] hover:bg-[rgba(66,111,185,0.9)] transition"
             >
               Agreement
-            </a>
+            </button>
           </div>
 
           <div className="flex justify-center lg:justify-end">
@@ -690,12 +696,12 @@ export default function Home() {
                 E-LMIS is making headlines for its innovative approach to labor market development as a key government
                 initiative. Discover our journey and impact on empowering Ethiopia&apos;s workforce.
               </p>
-              <a
-                href="/login"
+              <button
+                onClick={() => setShowLoginModal(true)}
                 className="bg-white text-black px-6 py-3 rounded shadow-md hover:shadow-lg transition-shadow duration-300 inline-flex items-center justify-center"
               >
                 See
-              </a>
+              </button>
 
             </div>
             <div className="flex justify-center items-end">
@@ -721,10 +727,13 @@ export default function Home() {
             for you.
           </p>
           <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
-            <a href="/register" className="bg-white text-primary-600 px-8 py-4 rounded-lg font-bold hover:bg-gray-100 transition-all duration-200 flex items-center justify-center">
+            <button
+              onClick={() => setShowRegisterModal(true)}
+              className="bg-white text-primary-600 px-8 py-4 rounded-lg font-bold hover:bg-gray-100 transition-all duration-200 flex items-center justify-center"
+            >
               <Briefcase className="w-5 h-5" />
               <span>Apply Now</span>
-            </a>
+            </button>
             <div className="text-center mt-12">
               <a
                 href="/contact"
@@ -792,6 +801,48 @@ export default function Home() {
             >
               <XCircle className="w-5 h-5" />
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Register Modal */}
+      {showRegisterModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 md:p-10">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
+            onClick={() => setShowRegisterModal(false)}
+          />
+          <div className="relative w-full max-w-5xl h-auto max-h-[90vh] bg-white rounded-[32px] overflow-y-auto shadow-2xl animate-in zoom-in-95 duration-500 border border-white/10">
+            <button
+              onClick={() => setShowRegisterModal(false)}
+              className="absolute top-4 right-4 z-[110] p-2.5 bg-black/60 hover:bg-black/80 backdrop-blur-md rounded-full text-white transition-all hover:rotate-90 active:scale-90 border border-white/10"
+            >
+              <XCircle className="w-8 h-8 sm:w-10 sm:h-10 text-red-500" />
+            </button>
+            <div className="w-full">
+              <Register />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Login Modal */}
+      {showLoginModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 md:p-10">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
+            onClick={() => setShowLoginModal(false)}
+          />
+          <div className="relative w-full max-w-2xl h-auto max-h-[90vh] bg-white rounded-[32px] overflow-y-auto shadow-2xl animate-in zoom-in-95 duration-500 border border-white/10">
+            <button
+              onClick={() => setShowLoginModal(false)}
+              className="absolute top-4 right-4 z-[110] p-2.5 bg-black/60 hover:bg-black/80 backdrop-blur-md rounded-full text-white transition-all hover:rotate-90 active:scale-90 border border-white/10"
+            >
+              <XCircle className="w-8 h-8 sm:w-10 sm:h-10 text-red-500" />
+            </button>
+            <div className="w-full">
+              <AdminLogin />
+            </div>
           </div>
         </div>
       )}
