@@ -301,18 +301,7 @@ export default function Home() {
               build a prosperous future for all. Agreement today to get your official Labor ID.
             </p>
 
-            <div className="flex items-center space-x-2 mb-8">
-              <Link
-                to="/registration-payment"
-                className="flex items-center space-x-2 px-3 sm:px-4 py-2 bg-green-50 rounded-full border border-green-200 hover:bg-green-100 transition-colors duration-200 group max-w-full overflow-hidden"
-              >
-                <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 group-hover:scale-110 transition-transform flex-shrink-0" />
-                <span className="text-green-800 font-bold whitespace-nowrap text-[clamp(9px,3.2vw,14px)] sm:text-base tracking-tight">
-                  Agreement Submission Fee{registrationFee ? ` - ${registrationFee.toLocaleString()} Birr` : ""} | የስምምነት ማስገቢያ ክፍያ
-                </span>
-                <ArrowRight className="h-4 w-4 text-green-600 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </div>
+
 
 
             <div className="flex space-x-4">
