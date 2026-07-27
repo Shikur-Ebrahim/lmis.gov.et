@@ -263,6 +263,31 @@ const TRANSLATIONS = {
     "I Agree *": "እስማማለሁ *",
     "Sign with your finger": "በጣትዎ ይፈርሙ",
     "Please use your finger to sign here": "እባክዎ እዚህ ለመፈረም ጣትዎን ይጠቀሙ",
+    "Preferred Cities for Selected Countries": "ለተመረጡ አገሮች ተመራጭ ከተሞች",
+    // Countries
+    "Canada": "ካናዳ", "Germany": "ጀርመን", "United Kingdom": "ዩናይትድ ኪንግደም",
+    "France": "ፈረንሳይ", "Netherlands": "ኔዘርላንድስ", "Sweden": "ስዊድን",
+    "Norway": "ኖርዌይ", "Denmark": "ዴንማርክ", "Switzerland": "ስዊዘርላንድ",
+    "Ireland": "አየርላንድ", "Poland": "ፖላንድ", "Romania": "ሮማኒያ",
+    "Hungary": "ሃንጋሪ", "Czech Republic": "ቼክ ሪፐብሊክ", "Slovakia": "ስሎቫኪያ",
+    "Portugal": "ፖርቱጋል", "United Arab Emirates (UAE)": "የተባበሩት አረብ ኤምሬትስ (UAE)",
+    "Saudi Arabia": "ሳዑዲ አረቢያ", "Qatar": "ኳታር", "Kuwait": "ኩዌት", "Oman": "ኦማን",
+    // Middle East Cities
+    "Dubai": "ዱባይ", "Abu Dhabi": "አቡ ዳቢ", "Sharjah": "ሻርጃ", "Al Ain": "አል አይን", "Ajman": "አጅማን",
+    "Riyadh": "ሪያድ", "Jeddah": "ጅዳ", "Mecca": "መካ", "Medina": "መዲና", "Dammam": "ዳማም",
+    "Doha": "ዶሃ", "Al Rayyan": "አል ራያን", "Al Wakrah": "አል ዋክራ",
+    "Kuwait City": "ኩዌት ከተማ", "Al Ahmadi": "አል አህማዲ", "Hawalli": "ሃዋሊ",
+    "Muscat": "ሙስካት", "Salalah": "ሳላላ", "Seeb": "ሲብ",
+    // Western Cities
+    "Toronto": "ቶሮንቶ", "Montreal": "ሞንትሪያል", "Vancouver": "ቫንኮቨር", "Calgary": "ካልጋሪ",
+    "Berlin": "በርሊን", "Hamburg": "ሃምቡርግ", "Munich": "ሙኒክ", "Frankfurt": "ፍራንክፈርት",
+    "London": "ለንደን", "Birmingham": "በርሚንግሃም", "Glasgow": "ግላስጎው", "Liverpool": "ሊቨርፑል",
+    "Paris": "ፓሪስ", "Marseille": "ማርሴይ", "Lyon": "ሊዮን",
+    "Amsterdam": "አምስተርዳም", "Rotterdam": "ሮተርዳም", "The Hague": "ዘ ሄግ",
+    "Stockholm": "ስቶክሆልም", "Gothenburg": "ጎተንበርግ",
+    "Oslo": "ኦስሎ", "Bergen": "በርገን",
+    "Copenhagen": "ኮፐንሃገን", "Aarhus": "አርሁስ",
+    "Zurich": "ዙሪክ", "Geneva": "ጄኔቫ",
   },
   en: {
     title: "Employment Agreement",
@@ -953,7 +978,7 @@ export default function Register() {
                     />
                   </div>
                   <span className={`text-sm ${formData.selectedCountries.includes(country) ? "font-bold text-blue-700" : "text-gray-600"} group-hover:text-blue-600 transition-colors`}>
-                    {country}
+                    {t(country)}
                   </span>
                 </div>
               </label>
@@ -965,7 +990,7 @@ export default function Register() {
         {formData.selectedCountries.length > 0 && (
           <div className="animate-in slide-in-from-top-4 duration-500">
             <h3 className="text-sm font-bold text-gray-600 mb-4 flex items-center gap-2">
-              <MapPin className="w-4 h-4" /> Preferred Cities for Selected Countries
+              <MapPin className="w-4 h-4" /> {t('Preferred Cities for Selected Countries')}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {formData.selectedCountries.map(country => (
@@ -975,7 +1000,7 @@ export default function Register() {
                       <div className="w-6 h-4 rounded-sm overflow-hidden border shadow-sm bg-gray-100">
                         <img src={`/images/${flagMapping[country]}`} alt="" className="w-full h-full object-cover" />
                       </div>
-                      <span className="text-xs font-semibold text-blue-600">{country}</span>
+                      <span className="text-xs font-semibold text-blue-600">{t(country)}</span>
                     </div>
                     <Globe size={14} className="text-blue-200" />
                   </div>
@@ -986,7 +1011,7 @@ export default function Register() {
                       const newCities = { ...formData.selectedCities, [country]: e.target.value }
                       setFormData(prev => ({ ...prev, selectedCities: newCities }))
                     }}
-                    options={(cityMapping[country] || []).map(city => ({ value: city, label: city }))}
+                    options={(cityMapping[country] || []).map(city => ({ value: city, label: t(city) }))}
                     placeholder={t('selectCity')}
                     error={!formData.selectedCities[country] && errors.selectedCities}
                   />
