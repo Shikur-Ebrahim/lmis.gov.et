@@ -57,7 +57,7 @@ export default function PaymentMethods() {
             {/* Mobile-Style Header */}
             <div className="w-full max-w-md bg-white sticky top-0 z-50 px-6 py-4 flex items-center justify-between border-b border-gray-100 shadow-sm">
                 <button
-                    onClick={() => navigate("/registration-payment")}
+                    onClick={() => navigate("/register")}
                     className="p-2 hover:bg-gray-50 rounded-full transition-colors"
                 >
                     <ChevronLeft className="w-6 h-6 text-gray-900" />
