@@ -538,16 +538,16 @@ export default function Register() {
   // --- RENDERERS ---
 
   const renderProgressBar = () => (
-    <div className="mb-10">
-      <div className="flex justify-between items-center mb-4">
-        <span className="text-sm font-bold text-gray-600">Section {currentSection} of 9</span>
-        <span className="text-sm font-medium text-blue-600">
+    <div className="mb-6">
+      <div className="flex justify-between items-center mb-2">
+        <span className="text-xs font-bold text-gray-600">Section {currentSection} of 9</span>
+        <span className="text-xs font-medium text-blue-600">
           {Math.round((currentSection / 9) * 100)}% Complete
         </span>
       </div>
-      <div className="w-full bg-gray-200 rounded-full h-2.5">
+      <div className="w-full bg-gray-200 rounded-full h-1.5">
         <div
-          className="bg-blue-600 h-2.5 rounded-full transition-all duration-500 ease-out shadow-sm"
+          className="bg-blue-600 h-1.5 rounded-full transition-all duration-500 ease-out shadow-sm"
           style={{ width: `${(currentSection / 9) * 100}%` }}
         ></div>
       </div>
@@ -558,42 +558,42 @@ export default function Register() {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex items-center gap-3 mb-4 pb-2 border-b">
         <User className="w-6 h-6 text-blue-600" />
-        <h2 className="text-xl font-bold text-gray-800">Personal Information</h2>
+        <h2 className="text-lg font-bold text-gray-800">Personal Information</h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-bold text-gray-700 mb-1">Full Name *</label>
+          <label className="block text-xs font-bold text-gray-700 mb-1">Full Name *</label>
           <input
             type="text"
             name="fullName"
             value={formData.fullName}
             onChange={handleInputChange}
-            className={`w-full px-4 py-2.5 rounded-lg border ${errors.fullName ? "border-red-500" : "border-gray-300"} focus:ring-2 focus:ring-blue-500 transition-all`}
+            className={`w-full px-3 py-2 text-sm rounded-lg border ${errors.fullName ? "border-red-500" : "border-gray-300"} focus:ring-2 focus:ring-blue-500 transition-all`}
             placeholder=""
           />
           {errors.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>}
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-gray-700 mb-1">Date of Birth *</label>
+          <label className="block text-xs font-bold text-gray-700 mb-1">Date of Birth *</label>
           <input
             type="date"
             name="dateOfBirth"
             value={formData.dateOfBirth}
             onChange={handleInputChange}
-            className={`w-full px-4 py-2.5 rounded-lg border ${errors.dateOfBirth ? "border-red-500" : "border-gray-300"} focus:ring-2 focus:ring-blue-500 transition-all`}
+            className={`w-full px-3 py-2 text-sm rounded-lg border ${errors.dateOfBirth ? "border-red-500" : "border-gray-300"} focus:ring-2 focus:ring-blue-500 transition-all`}
           />
           {errors.dateOfBirth && <p className="text-red-500 text-xs mt-1">{errors.dateOfBirth}</p>}
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-gray-700 mb-1">Gender *</label>
+          <label className="block text-xs font-bold text-gray-700 mb-1">Gender *</label>
           <select
             name="gender"
             value={formData.gender}
             onChange={handleInputChange}
-            className={`w-full px-4 py-2.5 rounded-lg border ${errors.gender ? "border-red-500" : "border-gray-300"} focus:ring-2 focus:ring-blue-500 transition-all`}
+            className={`w-full px-3 py-2 text-sm rounded-lg border ${errors.gender ? "border-red-500" : "border-gray-300"} focus:ring-2 focus:ring-blue-500 transition-all`}
           >
             <option value="">Select Gender</option>
             <option value="Male">Male</option>
@@ -603,7 +603,7 @@ export default function Register() {
         </div>
 
         <div className="space-y-1">
-          <label className="block text-sm font-bold text-gray-700">Phone Number *</label>
+          <label className="block text-xs font-bold text-gray-700">Phone Number *</label>
           <div className="relative">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold border-r pr-3">+251</span>
             <input
@@ -619,26 +619,26 @@ export default function Register() {
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-gray-700 mb-1">Region *</label>
+          <label className="block text-xs font-bold text-gray-700 mb-1">Region *</label>
           <input
             type="text"
             name="region"
             value={formData.region}
             onChange={handleInputChange}
-            className={`w-full px-4 py-2.5 rounded-lg border ${errors.region ? "border-red-500" : "border-gray-300"} focus:ring-2 focus:ring-blue-500 transition-all`}
+            className={`w-full px-3 py-2 text-sm rounded-lg border ${errors.region ? "border-red-500" : "border-gray-300"} focus:ring-2 focus:ring-blue-500 transition-all`}
             placeholder=""
           />
           {errors.region && <p className="text-red-500 text-xs mt-1">{errors.region}</p>}
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-gray-700 mb-1">City *</label>
+          <label className="block text-xs font-bold text-gray-700 mb-1">City *</label>
           <input
             type="text"
             name="city"
             value={formData.city}
             onChange={handleInputChange}
-            className={`w-full px-4 py-2.5 rounded-lg border ${errors.city ? "border-red-500" : "border-gray-300"} focus:ring-2 focus:ring-blue-500 transition-all`}
+            className={`w-full px-3 py-2 text-sm rounded-lg border ${errors.city ? "border-red-500" : "border-gray-300"} focus:ring-2 focus:ring-blue-500 transition-all`}
             placeholder=""
           />
           {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
@@ -646,7 +646,7 @@ export default function Register() {
 
         <div className="md:col-span-2 space-y-4">
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2">Do you have a Passport? *</label>
+            <label className="block text-xs font-bold text-gray-700 mb-2">Do you have a Passport? *</label>
             <div className="flex gap-6">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
@@ -676,13 +676,13 @@ export default function Register() {
 
           {formData.hasPassport === "Yes" && (
             <div className="animate-in slide-in-from-top-2 duration-300">
-              <label className="block text-sm font-bold text-gray-700 mb-1">Passport Number *</label>
+              <label className="block text-xs font-bold text-gray-700 mb-1">Passport Number *</label>
               <input
                 type="text"
                 name="passportNumber"
                 value={formData.passportNumber}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-2.5 rounded-lg border ${errors.passportNumber ? "border-red-500" : "border-gray-300"} focus:ring-2 focus:ring-blue-500 transition-all`}
+                className={`w-full px-3 py-2 text-sm rounded-lg border ${errors.passportNumber ? "border-red-500" : "border-gray-300"} focus:ring-2 focus:ring-blue-500 transition-all`}
                 placeholder=""
               />
               {errors.passportNumber && <p className="text-red-500 text-xs mt-1">{errors.passportNumber}</p>}
@@ -698,12 +698,12 @@ export default function Register() {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex items-center gap-3 mb-4 pb-2 border-b">
         <Briefcase className="w-6 h-6 text-blue-600" />
-        <h2 className="text-xl font-bold text-gray-800">Job Information</h2>
+        <h2 className="text-lg font-bold text-gray-800">Job Information</h2>
       </div>
 
       <div className="space-y-8">
         <div>
-          <label className="block text-sm font-bold text-gray-700 mb-1">Job Type *</label>
+          <label className="block text-xs font-bold text-gray-700 mb-1">Job Type *</label>
           <select
             name="jobTitle"
             value={formData.jobTitle}
@@ -719,7 +719,7 @@ export default function Register() {
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-gray-700 mb-2">
+          <label className="block text-xs font-bold text-gray-700 mb-2">
             Select Exactly 5 Countries * 
             <span className="text-xs font-normal text-gray-500 ml-2">({formData.selectedCountries.length} selected)</span>
           </label>
@@ -793,7 +793,7 @@ export default function Register() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t">
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">Contract Type *</label>
+            <label className="block text-xs font-bold text-gray-700 mb-1">Contract Type *</label>
             <select
               name="contractType"
               value={formData.contractType}
@@ -808,7 +808,7 @@ export default function Register() {
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">Contract Length *</label>
+            <label className="block text-xs font-bold text-gray-700 mb-1">Contract Length *</label>
             <select
               name="contractLength"
               value={formData.contractLength}
@@ -833,7 +833,7 @@ export default function Register() {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex items-center gap-3 mb-4 pb-2 border-b">
         <Upload className="w-6 h-6 text-blue-600" />
-        <h2 className="text-xl font-bold text-gray-800">Personal Documents</h2>
+        <h2 className="text-lg font-bold text-gray-800">Personal Documents</h2>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
@@ -844,7 +844,7 @@ export default function Register() {
           { id: "educationalCertificate", label: "Educational Certificate (Optional)", icon: <Globe size={20} /> }
         ].map(doc => (
           <div key={doc.id} className="space-y-2">
-            <label className="block text-sm font-bold text-gray-700">{doc.label}</label>
+            <label className="block text-xs font-bold text-gray-700">{doc.label}</label>
             <div className={`relative border-2 border-dashed rounded-xl p-6 transition-all ${errors[doc.id] ? "border-red-300 bg-red-50" : "border-gray-300 hover:border-blue-400 bg-gray-50"}`}>
               {previews[doc.id] ? (
                 <div className="flex flex-col items-center gap-3">
@@ -899,12 +899,12 @@ export default function Register() {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex items-center gap-3 mb-4 pb-2 border-b">
         <DollarSign className="w-6 h-6 text-blue-600" />
-        <h2 className="text-xl font-bold text-gray-800">Salary & Benefits</h2>
+        <h2 className="text-lg font-bold text-gray-800">Salary & Benefits</h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
-          <label className="block text-sm font-bold text-gray-700 mb-1">Monthly Salary *</label>
+          <label className="block text-xs font-bold text-gray-700 mb-1">Monthly Salary *</label>
           <div className="relative">
             <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
@@ -920,7 +920,7 @@ export default function Register() {
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-gray-700 mb-1">Hours per week *</label>
+          <label className="block text-xs font-bold text-gray-700 mb-1">Hours per week *</label>
           <div className="relative">
             <Clock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
@@ -937,7 +937,7 @@ export default function Register() {
 
         {["accommodation", "transport", "food"].map(benefit => (
           <div key={benefit} className="space-y-2">
-            <label className="block text-sm font-bold text-gray-700 capitalize">
+            <label className="block text-xs font-bold text-gray-700 capitalize">
               {benefit === "accommodation" ? "Accommodation / House for living" : benefit} *
             </label>
             <div className="flex gap-6">
@@ -966,12 +966,12 @@ export default function Register() {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex items-center gap-3 mb-4 pb-2 border-b">
         <Globe className="w-6 h-6 text-blue-600" />
-        <h2 className="text-xl font-bold text-gray-800">International Process</h2>
+        <h2 className="text-lg font-bold text-gray-800">International Process</h2>
       </div>
 
       <div className="space-y-8">
         <div className="space-y-3">
-          <label className="block text-sm font-bold text-gray-700">Visa Provided by Company? *</label>
+          <label className="block text-xs font-bold text-gray-700">Visa Provided by Company? *</label>
           <div className="flex gap-8">
             {["Yes", "No"].map(option => (
               <label key={option} className="flex items-center gap-2 cursor-pointer group">
@@ -991,7 +991,7 @@ export default function Register() {
         </div>
 
         <div className="space-y-3">
-          <label className="block text-sm font-bold text-gray-700">Work Permit *</label>
+          <label className="block text-xs font-bold text-gray-700">Work Permit *</label>
           <div className="flex gap-8">
             {["Yes", "No"].map(option => (
               <label key={option} className="flex items-center gap-2 cursor-pointer group">
@@ -1011,7 +1011,7 @@ export default function Register() {
         </div>
 
         <div className="space-y-3">
-          <label className="block text-sm font-bold text-gray-700">Flight Ticket *</label>
+          <label className="block text-xs font-bold text-gray-700">Flight Ticket *</label>
           <div className="flex gap-8">
             {["Company", "Employee"].map(option => (
               <label key={option} className="flex items-center gap-2 cursor-pointer group">
@@ -1122,7 +1122,7 @@ export default function Register() {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex items-center gap-3 mb-4 pb-2 border-b">
         <ClipboardCheck className="w-6 h-6 text-blue-600" />
-        <h2 className="text-xl font-bold text-gray-800">My Confirmation</h2>
+        <h2 className="text-lg font-bold text-gray-800">My Confirmation</h2>
       </div>
 
       <div className="bg-gray-50 border-2 border-gray-200 rounded-2xl p-8 space-y-8">
@@ -1154,13 +1154,13 @@ export default function Register() {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex items-center gap-3 mb-4 pb-2 border-b">
         <Shield className="w-6 h-6 text-blue-600" />
-        <h2 className="text-xl font-bold text-gray-800">Account Security</h2>
+        <h2 className="text-lg font-bold text-gray-800">Account Security</h2>
       </div>
 
       <div className="bg-white border-2 border-gray-100 rounded-2xl p-8 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">Create Password *</label>
+            <label className="block text-xs font-bold text-gray-700 mb-1">Create Password *</label>
             <div className="relative">
               <Shield className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
@@ -1183,7 +1183,7 @@ export default function Register() {
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">Confirm Password *</label>
+            <label className="block text-xs font-bold text-gray-700 mb-1">Confirm Password *</label>
             <div className="relative">
               <Shield className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
@@ -1255,7 +1255,7 @@ export default function Register() {
       <div className="space-y-6">
         <div className="flex items-center gap-3 mb-4 pb-2 border-b">
           <PenTool className="w-6 h-6 text-blue-600" />
-          <h2 className="text-xl font-bold text-gray-800">Sign with your finger</h2>
+          <h2 className="text-lg font-bold text-gray-800">Sign with your finger</h2>
         </div>
         
         <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-2xl p-4 flex flex-col items-center gap-4">
@@ -1365,20 +1365,20 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
+    <div className="w-full bg-white font-sans py-4 px-2 sm:px-6">
       <div className="max-w-4xl mx-auto">
         
         {/* Header */}
-        <div className="text-center mb-10">
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight mb-2 uppercase">
+        <div className="text-center mb-6">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight mb-2 uppercase">
             Employment Agreement
           </h1>
         </div>
 
         {/* Form Container */}
-        <div className="bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-white/50 backdrop-blur-sm">
+        <div className="w-full">
           
-          <div className="p-8 sm:p-12">
+          <div className="py-2">
             
             {renderProgressBar()}
 
@@ -1403,12 +1403,12 @@ export default function Register() {
               )}
 
               {/* Navigation Buttons */}
-              <div className="mt-12 flex flex-col sm:flex-row gap-4 items-center justify-between pt-8 border-t">
+              <div className="mt-8 flex flex-col sm:flex-row gap-4 items-center justify-between pt-4 border-t">
                 {currentSection > 1 && (
                   <button
                     type="button"
                     onClick={handleBack}
-                    className="w-full sm:w-auto px-8 py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95"
+                    className="w-full sm:w-auto px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 text-sm"
                   >
                     <ArrowLeft size={20} /> Back
                   </button>
@@ -1419,7 +1419,7 @@ export default function Register() {
                     <button
                       type="button"
                       onClick={handleNext}
-                      className="w-full sm:w-auto px-10 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-blue-200 transition-all active:scale-95 group"
+                      className="w-full sm:w-auto px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-blue-200 transition-all active:scale-95 group text-sm"
                     >
                       {currentSection === 6 ? "Proceed" : currentSection === 7 ? "Send the Agreement" : "Next Section"} <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                     </button>
@@ -1427,7 +1427,7 @@ export default function Register() {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full sm:w-auto px-12 py-4 bg-green-600 hover:bg-green-700 text-white rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-green-200 transition-all active:scale-95 disabled:opacity-70"
+                      className="w-full sm:w-auto px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-green-200 transition-all active:scale-95 disabled:opacity-70 text-sm"
                     >
                       {loading ? (
                         <>

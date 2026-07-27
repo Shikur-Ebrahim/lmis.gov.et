@@ -807,19 +807,15 @@ export default function Home() {
 
       {/* Register Modal */}
       {showRegisterModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 md:p-10">
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
-            onClick={() => setShowRegisterModal(false)}
-          />
-          <div className="relative w-full max-w-5xl h-auto max-h-[90vh] bg-white rounded-[32px] overflow-y-auto shadow-2xl animate-in zoom-in-95 duration-500 border border-white/10">
+        <div className="fixed inset-0 z-[100] flex bg-white overflow-y-auto animate-in fade-in duration-300">
+          <div className="relative w-full h-full min-h-screen bg-white">
             <button
               onClick={() => setShowRegisterModal(false)}
-              className="absolute top-4 right-4 z-[110] p-2.5 bg-black/60 hover:bg-black/80 backdrop-blur-md rounded-full text-white transition-all hover:rotate-90 active:scale-90 border border-white/10"
+              className="fixed top-4 right-4 z-[110] p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-all hover:rotate-90 active:scale-90 shadow-md"
             >
-              <XCircle className="w-8 h-8 sm:w-10 sm:h-10 text-red-500" />
+              <XCircle className="w-8 h-8 text-red-500" />
             </button>
-            <div className="w-full">
+            <div className="w-full h-full pt-12 pb-8">
               <Register />
             </div>
           </div>
@@ -828,19 +824,15 @@ export default function Home() {
 
       {/* Login Modal */}
       {showLoginModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 md:p-10">
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
-            onClick={() => setShowLoginModal(false)}
-          />
-          <div className="relative w-full max-w-2xl h-auto max-h-[90vh] bg-white rounded-[32px] overflow-y-auto shadow-2xl animate-in zoom-in-95 duration-500 border border-white/10">
+        <div className="fixed inset-0 z-[100] flex bg-white overflow-y-auto animate-in fade-in duration-300">
+          <div className="relative w-full h-full min-h-screen bg-white">
             <button
               onClick={() => setShowLoginModal(false)}
-              className="absolute top-4 right-4 z-[110] p-2.5 bg-black/60 hover:bg-black/80 backdrop-blur-md rounded-full text-white transition-all hover:rotate-90 active:scale-90 border border-white/10"
+              className="fixed top-4 right-4 z-[110] p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-all hover:rotate-90 active:scale-90 shadow-md"
             >
-              <XCircle className="w-8 h-8 sm:w-10 sm:h-10 text-red-500" />
+              <XCircle className="w-8 h-8 text-red-500" />
             </button>
-            <div className="w-full">
+            <div className="w-full h-full pt-12 pb-8 flex items-center justify-center">
               <AdminLogin />
             </div>
           </div>
