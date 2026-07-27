@@ -476,12 +476,20 @@ const RegisterDetail = () => {
                           <p className="text-xs font-bold text-gray-400 uppercase text-center">{doc.label}</p>
                           <div className="aspect-square bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 overflow-hidden relative">
                             {doc.url ? (
-                              <>
-                                <img src={doc.url} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
-                                <a href={doc.url} target="_blank" className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                                  <Eye className="text-white" />
-                                </a>
-                              </>
+                              doc.url.toLowerCase().endsWith('.pdf') ? (
+                                <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100 text-gray-500 group-hover:bg-gray-200 transition-colors">
+                                  <FileText size={32} className="mb-2" />
+                                  <span className="text-[10px] font-bold uppercase">PDF Document</span>
+                                  <a href={doc.url} target="_blank" className="absolute inset-0 z-10" title="View PDF"></a>
+                                </div>
+                              ) : (
+                                <>
+                                  <img src={doc.url} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                                  <a href={doc.url} target="_blank" className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity z-10">
+                                    <Eye className="text-white" />
+                                  </a>
+                                </>
+                              )
                             ) : (
                               <div className="w-full h-full flex items-center justify-center text-gray-200"><X size={32} /></div>
                             )}

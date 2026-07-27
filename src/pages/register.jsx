@@ -412,27 +412,40 @@ export default function Register() {
 
   const handleProceedToPayment = async () => {
     setLoading(true)
-    setSubmitMessage({ type: "info", message: "Preparing your documents..." })
+    setErrors({})
+    setSubmitMessage({ type: "info", message: "Uploading profile photo..." })
 
     try {
-      const uploadedUrls = {
-        profilePhotoUrl: await handleFileUpload(formData.profilePhoto, "profilePhoto"),
-        idCardFrontUrl: await handleFileUpload(formData.idCardFront, "idCardFront"),
-        idCardBackUrl: await handleFileUpload(formData.idCardBack, "idCardBack"),
-        educationalCertificateUrl: formData.educationalCertificate ? await handleFileUpload(formData.educationalCertificate, "educationalCertificate") : ""
-      }
+      const profilePhotoUrl = await handleFileUpload(formData.profilePhoto, "profilePhoto")
+      if (!profilePhotoUrl) throw new Error("Profile photo upload failed. Please re-upload and try again.")
 
-      if (!uploadedUrls.profilePhotoUrl || !uploadedUrls.idCardFrontUrl || !uploadedUrls.idCardBackUrl) {
-        throw new Error("Document upload failed. Please check your internet connection.")
-      }
+      setSubmitMessage({ type: "info", message: "Uploading ID card (front)..." })
+      const idCardFrontUrl = await handleFileUpload(formData.idCardFront, "idCardFront")
+      if (!idCardFrontUrl) throw new Error("ID card front upload failed. Please re-upload and try again.")
+
+      setSubmitMessage({ type: "info", message: "Uploading ID card (back)..." })
+      const idCardBackUrl = await handleFileUpload(formData.idCardBack, "idCardBack")
+      if (!idCardBackUrl) throw new Error("ID card back upload failed. Please re-upload and try again.")
+
+      setSubmitMessage({ type: "info", message: "Uploading educational certificate..." })
+      const educationalCertificateUrl = formData.educationalCertificate
+        ? await handleFileUpload(formData.educationalCertificate, "educationalCertificate")
+        : ""
 
       const finalData = {
         ...formData,
-        profilePhoto: uploadedUrls.profilePhotoUrl,
-        idCardFront: uploadedUrls.idCardFrontUrl,
-        idCardBack: uploadedUrls.idCardBackUrl,
-        educationalCertificate: uploadedUrls.educationalCertificateUrl,
+        profilePhoto: profilePhotoUrl,
+        idCardFront: idCardFrontUrl,
+        idCardBack: idCardBackUrl,
+        educationalCertificate: educationalCertificateUrl,
+        // Remove File objects from formData spread
+        signatureData: formData.signatureData || null,
+        faceVerified: formData.faceVerified || false,
       }
+
+      // Remove non-serializable fields before saving to Firestore
+      delete finalData.password
+      delete finalData.confirmPassword
 
       setLoading(false)
       navigate("/payment-methods", { 
@@ -460,12 +473,15 @@ export default function Register() {
     if (!file) return null
     try {
       setUploadProgress(prev => ({ ...prev, [fieldName]: 10 }))
-      const result = await (fieldName === "profilePhoto" || fieldName.includes("idCard") ? uploadToCloudinary(file) : uploadDocument(file))
+      // Use image upload for all image files; use document upload only for PDFs
+      const isImage = file.type.startsWith('image/')
+      const result = await (isImage ? uploadToCloudinary(file) : uploadDocument(file))
       setUploadProgress(prev => ({ ...prev, [fieldName]: 100 }))
+      if (!result || !result.url) throw new Error('No URL returned from upload')
       return result.url
     } catch (error) {
       console.error(`Upload failed for ${fieldName}:`, error)
-      setErrors(prev => ({ ...prev, [fieldName]: "Upload failed. Please try again." }))
+      setErrors(prev => ({ ...prev, [fieldName]: `Upload failed: ${error.message}` }))
       return null
     }
   }

@@ -4,7 +4,7 @@ export const CLOUDINARY_CONFIG = {
   cloudName: import.meta.env.VITE_CLOUDINARY_CLOUD_NAME,
   uploadPresets: {
     profile: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || "profile_upload",
-    documents: "document_upload",
+    documents: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || "profile_upload",
   },
 }
 
@@ -39,12 +39,14 @@ export async function uploadToCloudinary(file) {
 }
 
 export async function uploadDocument(file) {
-  const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloudName}/raw/upload`
+  // Use image endpoint for images, raw endpoint for PDFs/other files
+  const isImage = file.type.startsWith('image/')
+  const resourceType = isImage ? 'image' : 'raw'
+  const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloudName}/${resourceType}/upload`
   const formData = new FormData()
   formData.append("file", file)
   formData.append("upload_preset", CLOUDINARY_CONFIG.uploadPresets.documents)
   formData.append("folder", "lmis/documents")
-  formData.append("resource_type", "raw")
 
   try {
     const response = await fetch(url, {
@@ -53,7 +55,8 @@ export async function uploadDocument(file) {
     })
 
     if (!response.ok) {
-      throw new Error(`Upload failed: ${response.statusText}`)
+      const errData = await response.json().catch(() => ({}))
+      throw new Error(`Upload failed: ${errData?.error?.message || response.statusText}`)
     }
 
     const data = await response.json()
@@ -66,7 +69,7 @@ export async function uploadDocument(file) {
     }
   } catch (error) {
     console.error("Document upload error:", error)
-    throw new Error("Failed to upload document")
+    throw new Error(`Failed to upload document: ${error.message}`)
   }
 }
 
