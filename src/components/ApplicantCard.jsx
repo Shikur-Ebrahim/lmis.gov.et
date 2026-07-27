@@ -11,7 +11,7 @@ export default function ApplicantCard({ applicant }) {
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
 
-  const profileImageSrc = applicant?.profileImageUrl || applicant?.profileImage || "/placeholder.svg";
+  const profileImageSrc = applicant?.profilePhoto || applicant?.profileImageUrl || applicant?.profileImage || "/placeholder.svg";
 
   const profileImageUrl = getOptimizedImageUrl(
     typeof profileImageSrc === "string" ? profileImageSrc : profileImageSrc.url,
@@ -96,9 +96,11 @@ export default function ApplicantCard({ applicant }) {
             <div className="flex items-center text-gray-600 text-sm">
               <DollarSign className="w-4 h-4 mr-2 text-primary-500" />
               <span className="font-semibold">
-                {applicant?.expectedSalary !== undefined &&
-                  applicant?.expectedSalary !== null &&
-                  applicant?.expectedSalary !== ""
+                {applicant?.monthlySalary
+                  ? applicant.monthlySalary
+                  : applicant?.expectedSalary !== undefined &&
+                    applicant?.expectedSalary !== null &&
+                    applicant?.expectedSalary !== ""
                   ? `$${Number(applicant.expectedSalary).toLocaleString()}`
                   : "Not disclosed"}
               </span>

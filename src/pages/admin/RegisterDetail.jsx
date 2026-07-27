@@ -70,7 +70,10 @@ const RegisterDetail = () => {
   const [sortBy, setSortBy] = useState("newest")
   const [showUpdateStatusModal, setShowUpdateStatusModal] = useState(false)
   const [newStatus, setNewStatus] = useState("")
+  const [editSalary, setEditSalary] = useState("")
+  const [editCountries, setEditCountries] = useState([])
   const [updatingStatus, setUpdatingStatus] = useState(false)
+  const [confirmStep, setConfirmStep] = useState(false)
 
   // Real-time data fetching
   useEffect(() => {
@@ -176,12 +179,18 @@ const RegisterDetail = () => {
     if (!selectedRegistration || !newStatus) return
     setUpdatingStatus(true)
     try {
-      await updateDoc(doc(db, "users", selectedRegistration.id), { status: newStatus })
-      setSelectedRegistration(prev => ({ ...prev, status: newStatus }))
+      const updatePayload = { 
+        status: newStatus,
+        ...(editSalary ? { monthlySalary: editSalary } : {}),
+        ...(editCountries.length > 0 ? { selectedCountries: editCountries } : {})
+      }
+      await updateDoc(doc(db, "users", selectedRegistration.id), updatePayload)
+      setSelectedRegistration(prev => ({ ...prev, ...updatePayload }))
       setShowUpdateStatusModal(false)
+      setConfirmStep(false)
     } catch (error) {
       console.error("Error updating status:", error)
-      alert("Error updating status.")
+      alert("Error updating.")
     } finally {
       setUpdatingStatus(false)
     }
@@ -337,6 +346,9 @@ const RegisterDetail = () => {
                   <button
                     onClick={() => {
                       setNewStatus(selectedRegistration.status || "Pending")
+                      setEditSalary(selectedRegistration.monthlySalary || "")
+                      setEditCountries(selectedRegistration.selectedCountries || [])
+                      setConfirmStep(false)
                       setShowUpdateStatusModal(true)
                     }}
                     className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl font-bold text-gray-700 hover:bg-gray-50 transition-all shadow-sm"
@@ -505,31 +517,132 @@ const RegisterDetail = () => {
           </div>
         )}
 
-        {/* Update Status Modal */}
+        {/* Update Modal */}
         {showUpdateStatusModal && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl animate-in fade-in zoom-in duration-200">
-              <div className="p-8">
-                <h3 className="text-xl font-bold text-gray-900 mb-6">Update Application Status</h3>
-                <div className="space-y-4">
-                  {["Pending", "Under Review", "Accepted", "Rejected"].map(status => (
-                    <button
-                      key={status}
-                      onClick={() => setNewStatus(status)}
-                      className={`w-full p-4 rounded-2xl border-2 text-left font-bold transition-all flex justify-between items-center ${newStatus === status ? "border-blue-600 bg-blue-50 text-blue-700" : "border-gray-100 hover:border-gray-200"}`}
-                    >
-                      {status}
-                      {newStatus === status && <CheckCircle size={20} />}
-                    </button>
-                  ))}
-                </div>
-                <div className="flex gap-4 mt-8">
-                  <button onClick={() => setShowUpdateStatusModal(false)} className="flex-1 py-3 bg-gray-100 rounded-xl font-bold text-gray-600">Cancel</button>
-                  <button onClick={handleStatusUpdate} disabled={updatingStatus} className="flex-1 py-3 bg-blue-600 rounded-xl font-bold text-white shadow-lg shadow-blue-200 flex items-center justify-center">
-                    {updatingStatus ? <Loader2 className="animate-spin text-white" /> : "Save Changes"}
-                  </button>
-                </div>
+            <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl animate-in fade-in zoom-in duration-200 overflow-hidden">
+              <div className="p-6 border-b bg-gray-50/50">
+                <h3 className="text-xl font-black text-gray-900">
+                  {confirmStep ? "Confirm Changes" : "Update Application"}
+                </h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  {confirmStep ? "Review your changes before saving" : "Edit status, salary and/or countries"}
+                </p>
               </div>
+
+              {!confirmStep ? (
+                <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
+                  {/* Status */}
+                  <div>
+                    <p className="text-xs font-black text-gray-500 uppercase mb-3">Application Status</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {["Pending", "Under Review", "Accepted", "Rejected"].map(s => (
+                        <button
+                          key={s}
+                          onClick={() => setNewStatus(s)}
+                          className={`p-3 rounded-xl border-2 text-sm font-bold transition-all flex justify-between items-center ${
+                            newStatus === s ? "border-blue-600 bg-blue-50 text-blue-700" : "border-gray-100 hover:border-gray-300"
+                          }`}
+                        >
+                          {s}
+                          {newStatus === s && <CheckCircle size={16} className="text-blue-500" />}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Salary */}
+                  <div>
+                    <p className="text-xs font-black text-gray-500 uppercase mb-2">Monthly Salary Amount</p>
+                    <input
+                      type="text"
+                      value={editSalary}
+                      onChange={e => setEditSalary(e.target.value)}
+                      placeholder={`Current: ${selectedRegistration?.monthlySalary || "Not set"}`}
+                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-0 font-medium text-sm outline-none transition-all"
+                    />
+                  </div>
+
+                  {/* Countries */}
+                  <div>
+                    <p className="text-xs font-black text-gray-500 uppercase mb-2">Target Countries (select up to 5)</p>
+                    <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                      {Object.keys(flagMapping).map(country => {
+                        const selected = editCountries.includes(country)
+                        return (
+                          <button
+                            key={country}
+                            onClick={() => {
+                              if (selected) {
+                                setEditCountries(editCountries.filter(c => c !== country))
+                              } else if (editCountries.length < 5) {
+                                setEditCountries([...editCountries, country])
+                              }
+                            }}
+                            className={`w-full flex items-center gap-3 p-2.5 rounded-xl border-2 text-sm font-semibold transition-all ${
+                              selected ? "border-blue-500 bg-blue-50" : "border-gray-100 hover:border-gray-200"
+                            }`}
+                          >
+                            <div className="w-8 h-5 rounded overflow-hidden border shadow-sm bg-white flex-shrink-0">
+                              <img src={`/images/${flagMapping[country]}`} alt="" className="w-full h-full object-cover" />
+                            </div>
+                            <span className="flex-1 text-left">{country}</span>
+                            {selected && <CheckCircle size={16} className="text-blue-500 flex-shrink-0" />}
+                          </button>
+                        )
+                      })}
+                    </div>
+                    {editCountries.length > 0 && (
+                      <p className="text-xs text-blue-600 font-bold mt-2">{editCountries.length}/5 selected</p>
+                    )}
+                  </div>
+
+                  <div className="flex gap-3 pt-2">
+                    <button onClick={() => { setShowUpdateStatusModal(false); setConfirmStep(false) }} className="flex-1 py-3 bg-gray-100 rounded-xl font-bold text-gray-600 hover:bg-gray-200 transition">Cancel</button>
+                    <button onClick={() => setConfirmStep(true)} className="flex-1 py-3 bg-blue-600 rounded-xl font-bold text-white shadow-lg shadow-blue-200 hover:bg-blue-700 transition">Review Changes</button>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-6 space-y-4">
+                  <div className="bg-gray-50 rounded-2xl p-4 space-y-3 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500 font-medium">New Status</span>
+                      <span className={`font-black px-3 py-1 rounded-full text-xs ${
+                        newStatus === "Accepted" ? "bg-green-100 text-green-700" :
+                        newStatus === "Rejected" ? "bg-red-100 text-red-700" :
+                        newStatus === "Under Review" ? "bg-blue-100 text-blue-700" :
+                        "bg-yellow-100 text-yellow-700"
+                      }`}>{newStatus}</span>
+                    </div>
+                    {editSalary && (
+                      <div className="flex justify-between border-t pt-3">
+                        <span className="text-gray-500 font-medium">Monthly Salary</span>
+                        <span className="font-black text-green-600">{editSalary}</span>
+                      </div>
+                    )}
+                    {editCountries.length > 0 && (
+                      <div className="border-t pt-3">
+                        <p className="text-gray-500 font-medium mb-2">Target Countries</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {editCountries.map(c => (
+                            <span key={c} className="text-xs font-bold bg-blue-50 text-blue-700 px-2 py-1 rounded-lg border border-blue-100">{c}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex gap-3">
+                    <button onClick={() => setConfirmStep(false)} className="flex-1 py-3 bg-gray-100 rounded-xl font-bold text-gray-600 hover:bg-gray-200 transition">← Back</button>
+                    <button
+                      onClick={handleStatusUpdate}
+                      disabled={updatingStatus}
+                      className="flex-1 py-3 bg-blue-600 rounded-xl font-bold text-white shadow-lg shadow-blue-200 disabled:opacity-60 flex items-center justify-center gap-2 hover:bg-blue-700 transition"
+                    >
+                      {updatingStatus ? <><Loader2 className="animate-spin w-4 h-4" /> Saving...</> : "Confirm & Save"}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
