@@ -496,9 +496,9 @@ const RegisterDetail = () => {
                                 </div>
                               ) : (
                                 <>
-                                  <img src={doc.url} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
-                                  <a href={doc.url} target="_blank" className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity z-10">
-                                    <Eye className="text-white" />
+                                  <img src={doc.url} className="w-full h-full object-contain p-2 transition-transform group-hover:scale-105" alt={doc.label} />
+                                  <a href={doc.url} target="_blank" className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity z-10 rounded-xl">
+                                    <Eye className="text-white" size={32} />
                                   </a>
                                 </>
                               )
