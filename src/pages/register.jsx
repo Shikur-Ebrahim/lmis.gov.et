@@ -253,6 +253,16 @@ const TRANSLATIONS = {
     "Agriculture Worker": "የእርሻ ሰራተኛ",
     "Gardener": "አትክልተኛ",
     "Tailor": "ልብስ ሰፊ",
+    "1 Year": "1 ዓመት",
+    "2 Years": "2 ዓመታት",
+    "3 Years": "3 ዓመታት",
+    "4 Years": "4 ዓመታት",
+    "5 Years": "5 ዓመታት",
+    "My Confirmation": "የእኔ ማረጋገጫ",
+    "I agree that all my information is true and correct. I officially accept all the terms of this work agreement.": "ሁሉም መረጃዎቼ እውነተኛ እና ትክክለኛ መሆናቸውን እስማማለሁ። የዚህን የስራ ስምምነት ሁሉንም ውሎች በይፋ እቀበላለሁ።",
+    "I Agree *": "እስማማለሁ *",
+    "Sign with your finger": "በጣትዎ ይፈርሙ",
+    "Please use your finger to sign here": "እባክዎ እዚህ ለመፈረም ጣትዎን ይጠቀሙ",
   },
   en: {
     title: "Employment Agreement",
@@ -1011,11 +1021,11 @@ export default function Register() {
               value={formData.contractLength}
               onChange={handleInputChange}
               options={[
-                { value: '1 Year', label: '1 Year' },
-                { value: '2 Years', label: '2 Years' },
-                { value: '3 Years', label: '3 Years' },
-                { value: '4 Years', label: '4 Years' },
-                { value: '5 Years', label: '5 Years' }
+                { value: '1 Year', label: t('1 Year') },
+                { value: '2 Years', label: t('2 Years') },
+                { value: '3 Years', label: t('3 Years') },
+                { value: '4 Years', label: t('4 Years') },
+                { value: '5 Years', label: t('5 Years') }
               ]}
               placeholder={t('selectContractLength')}
               error={errors.contractLength}
@@ -1209,19 +1219,22 @@ export default function Register() {
         </div>
 
         <div className="space-y-3">
-          <label className="block text-xs font-bold text-gray-700">Flight Ticket *</label>
+          <label className="block text-xs font-bold text-gray-700">{t('flightTicket')}</label>
           <div className="flex gap-8">
-            {["Company", "Employee"].map(option => (
-              <label key={option} className="flex items-center gap-2 cursor-pointer group">
+            {[
+              { value: "Company", label: t('byCompany') },
+              { value: "Employee", label: t('byEmployee') }
+            ].map(opt => (
+              <label key={opt.value} className="flex items-center gap-2 cursor-pointer group">
                 <input
                   type="radio"
                   name="flightTicket"
-                  value={option}
-                  checked={formData.flightTicket === option}
+                  value={opt.value}
+                  checked={formData.flightTicket === opt.value}
                   onChange={handleInputChange}
                   className="w-4 h-4 text-blue-600 focus:ring-blue-500"
                 />
-                <span className="text-sm font-bold group-hover:text-blue-600">{option}</span>
+                <span className="text-sm font-bold group-hover:text-blue-600">{opt.label}</span>
               </label>
             ))}
           </div>
@@ -1335,13 +1348,13 @@ export default function Register() {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex items-center gap-3 mb-4 pb-2 border-b">
         <ClipboardCheck className="w-6 h-6 text-blue-600" />
-        <h2 className="text-lg font-bold text-gray-800">My Confirmation</h2>
+        <h2 className="text-lg font-bold text-gray-800">{t('My Confirmation')}</h2>
       </div>
 
       <div className="bg-gray-50 border-2 border-gray-200 rounded-2xl p-8 space-y-8">
         <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100 shadow-sm">
           <p className="text-gray-700 leading-relaxed text-sm font-semibold text-center italic">
-            “I agree that all my information is true and correct. I officially accept all the terms of this work agreement.”
+            “{t('I agree that all my information is true and correct. I officially accept all the terms of this work agreement.')}”
           </p>
         </div>
 
@@ -1356,7 +1369,7 @@ export default function Register() {
             onChange={handleInputChange}
             className="hidden"
           />
-          <span className="text-sm font-bold text-gray-800 group-hover:text-blue-600">I Agree *</span>
+          <span className="text-sm font-bold text-gray-800 group-hover:text-blue-600">{t('I Agree *')}</span>
         </label>
         {errors.declarationAgreed && <p className="text-red-500 text-sm mt-1 font-bold text-center">{errors.declarationAgreed}</p>}
       </div>
@@ -1419,7 +1432,7 @@ export default function Register() {
       <div className="space-y-6">
         <div className="flex items-center gap-3 mb-4 pb-2 border-b">
           <PenTool className="w-6 h-6 text-blue-600" />
-          <h2 className="text-lg font-bold text-gray-800">Sign with your finger</h2>
+          <h2 className="text-lg font-bold text-gray-800">{t('Sign with your finger')}</h2>
         </div>
         
         <div className="bg-white border-2 border-dashed border-blue-200 rounded-2xl p-2 sm:p-4 flex flex-col items-center gap-3 shadow-sm">
@@ -1437,13 +1450,13 @@ export default function Register() {
             onTouchEnd={stopDrawing}
           />
           <div className="flex justify-between w-full max-w-[600px] items-center">
-            <p className="text-xs text-gray-500 font-medium italic">Please use your finger to sign here</p>
+            <p className="text-xs text-gray-500 font-medium italic">{t('Please use your finger to sign here')}</p>
             <button
               type="button"
               onClick={clearCanvas}
               className="text-xs font-bold text-red-500 hover:text-red-700 flex items-center gap-1"
             >
-              <X size={14} /> Clear Signature
+              <X size={14} /> {t('clearSig')}
             </button>
           </div>
         </div>
