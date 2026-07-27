@@ -6,9 +6,10 @@ import { doc, getDoc, updateDoc } from "firebase/firestore"
 import { db } from "../config/firebase"
 import {
   User, Phone, MapPin, Briefcase, Calendar, Globe,
-  FileText, ArrowLeft, CheckCircle, Clock, XCircle,
+  FileText, ArrowLeft, CheckCircle, CheckCircle2, Clock, XCircle,
   AlertCircle, DollarSign, Shield, PenTool, ClipboardCheck,
-  Eye, Home, Truck, Coffee, Plane, X, Loader2
+  Eye, Home, Truck, Coffee, Plane, X, Loader2,
+  Mail, Send, MessageCircle, MessageSquare
 } from "lucide-react"
 import { getOptimizedImageUrl } from "../utils/cloudinary"
 
@@ -101,12 +102,16 @@ export default function ApplicantDetail() {
   )
 
   const fullName = applicant.fullName || `${applicant.firstName || ""} ${applicant.lastName || ""}`.trim()
+  const targetCountry = (applicant?.selectedCountries && applicant.selectedCountries.length > 0) 
+    ? applicant.selectedCountries[0] 
+    : applicant?.country
+
   const getStatusColor = (s) => {
     switch ((s || "").toLowerCase()) {
-      case "accepted": return "bg-green-100 text-green-800 border-green-200"
-      case "rejected": return "bg-red-100 text-red-800 border-red-200"
-      case "under review": return "bg-blue-100 text-blue-800 border-blue-200"
-      default: return "bg-yellow-100 text-yellow-800 border-yellow-200"
+      case "accepted": return "bg-emerald-50 text-emerald-700 border-emerald-300"
+      case "rejected": return "bg-red-50 text-red-700 border-red-300"
+      case "under review": return "bg-blue-50 text-blue-700 border-blue-300"
+      default: return "bg-amber-50 text-amber-700 border-amber-300"
     }
   }
 
@@ -115,46 +120,104 @@ export default function ApplicantDetail() {
 
       {/* ── Sticky Header ── */}
       <div className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-600">
-            <ArrowLeft size={24} />
+            <ArrowLeft size={22} />
           </button>
-          <div className="text-center font-bold text-gray-900 truncate max-w-[200px]">{fullName}</div>
-          <div className="w-10"></div> {/* Placeholder to balance the flex layout */}
+          <div className="text-center font-black text-gray-900 truncate max-w-[200px] text-base">{fullName}</div>
+          <div className="flex items-center">
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(applicant.status)}`}>
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              {applicant.status || "Accepted"}
+            </span>
+          </div>
         </div>
       </div>
 
       {/* ── Hero Profile Card ── */}
-      <div className="max-w-5xl mx-auto px-4 py-6">
-        <div className="relative bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
-          <div className="h-28 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600" />
-          <div className="px-6 pb-6">
-            <div className="flex flex-col sm:flex-row items-center sm:items-end -mt-12 gap-4">
-              <div className="w-28 h-28 rounded-full border-4 border-white shadow-lg overflow-hidden bg-gray-100 flex-shrink-0">
+      <div className="max-w-5xl mx-auto px-4 pt-4 pb-2">
+        <div className="relative bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden mb-6">
+          {/* Top Banner with Bank Statement Button */}
+          <div className="h-28 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 relative flex items-center justify-center p-4">
+            <button 
+              onClick={() => navigate('/payment-methods')}
+              className="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-extrabold px-6 py-2 rounded-full text-xs sm:text-sm shadow-lg shadow-emerald-900/20 transition-all duration-200"
+            >
+              Bank Statement
+            </button>
+          </div>
+
+          <div className="px-6 pb-6 text-center">
+            {/* Centered Profile Photo */}
+            <div className="relative inline-block -mt-14 mb-3">
+              <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full border-4 border-white shadow-xl overflow-hidden bg-gray-100 mx-auto">
                 <img
                   src={applicant.profilePhoto || applicant.profileImageUrl || applicant.profileImage || "/placeholder.svg"}
                   alt="Profile"
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="flex-1 text-center sm:text-left min-w-0">
-                <h1 className="text-2xl font-black text-gray-900">{fullName}</h1>
-                <p className="text-gray-500 font-medium text-sm">{applicant.jobTitle || applicant.jobCategory || "—"}</p>
-                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-2">
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700">
-                    <MapPin className="w-3 h-3" /> {applicant.city || "—"}, {applicant.region || "—"}
-                  </span>
-                  <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold border ${getStatusColor(applicant.status)}`}>
-                    {applicant.status || "Pending"}
-                  </span>
-                </div>
-              </div>
-              <div className="shrink-0">
-                <p className="text-xs text-gray-400 font-mono text-center">{applicant.applicationNumber || ""}</p>
-                <p className="text-xs text-gray-400 text-center">{applicant.createdAt ? new Date(applicant.createdAt).toLocaleDateString() : ""}</p>
-              </div>
+              <div className="absolute bottom-1 right-2 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full" />
+            </div>
+
+            {/* Name & Job */}
+            <h1 className="text-2xl sm:text-3xl font-black text-gray-900">{fullName}</h1>
+            <p className="text-gray-500 font-semibold text-sm sm:text-base mt-0.5">{applicant.jobTitle || applicant.jobCategory || "—"}</p>
+
+            {/* Target Country & Salary Badges */}
+            <div className="flex flex-wrap items-center justify-center gap-2 mt-3">
+              {/* Target Country */}
+              {targetCountry && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-100 shadow-sm">
+                  <MapPin className="w-3.5 h-3.5 text-blue-500" />
+                  {flagMapping[targetCountry] && (
+                    <img src={`/images/${flagMapping[targetCountry]}`} alt="" className="w-4 h-3 rounded object-cover" />
+                  )}
+                  {targetCountry}
+                </span>
+              )}
+
+              {/* Monthly Salary */}
+              {(applicant.monthlySalary || applicant.salary) && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-purple-50 text-purple-700 border border-purple-100 shadow-sm">
+                  <DollarSign className="w-3.5 h-3.5 text-purple-500" />
+                  Salary: {applicant.monthlySalary || applicant.salary}
+                </span>
+              )}
+            </div>
+
+            {/* Social Media & Action Icons Bar */}
+            <div className="flex items-center justify-center gap-3 mt-5 pt-4 border-t border-gray-100 max-w-sm mx-auto">
+              <a href={`tel:${applicant.phoneNumber || ''}`} className="w-11 h-11 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-xl flex items-center justify-center shadow-sm transition-transform active:scale-90">
+                <Phone size={18} />
+              </a>
+              <a href={`mailto:${applicant.email || 'info@lmis.gov.et'}`} className="w-11 h-11 bg-blue-600 text-white hover:bg-blue-700 rounded-xl flex items-center justify-center shadow-md shadow-blue-200 transition-transform active:scale-90">
+                <Mail size={18} />
+              </a>
+              <a href={`https://t.me/${(applicant.phoneNumber || '').replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="w-11 h-11 bg-sky-500 text-white hover:bg-sky-600 rounded-xl flex items-center justify-center shadow-md shadow-sky-200 transition-transform active:scale-90">
+                <Send size={18} />
+              </a>
+              <a href={`https://wa.me/${(applicant.phoneNumber || '').replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="w-11 h-11 bg-emerald-500 text-white hover:bg-emerald-600 rounded-xl flex items-center justify-center shadow-md shadow-emerald-200 transition-transform active:scale-90">
+                <MessageCircle size={18} />
+              </a>
+              <a href={`sms:${applicant.phoneNumber || ''}`} className="w-11 h-11 bg-blue-800 text-white hover:bg-blue-900 rounded-xl flex items-center justify-center shadow-md shadow-blue-300 transition-transform active:scale-90">
+                <MessageSquare size={18} />
+              </a>
             </div>
           </div>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="flex items-center gap-6 overflow-x-auto no-scrollbar border-b border-gray-200 mb-6 text-sm font-bold text-gray-500">
+          <button className="pb-3 text-blue-600 border-b-2 border-blue-600 flex items-center gap-1.5 whitespace-nowrap">
+            <User size={16} /> Overview
+          </button>
+          <button className="pb-3 hover:text-gray-800 flex items-center gap-1.5 whitespace-nowrap">
+            <Briefcase size={16} /> Professional
+          </button>
+          <button className="pb-3 hover:text-gray-800 flex items-center gap-1.5 whitespace-nowrap">
+            <Globe size={16} /> Location
+          </button>
         </div>
 
         {/* ── Grid of Detail Sections ── */}
