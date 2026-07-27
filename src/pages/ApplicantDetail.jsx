@@ -42,6 +42,7 @@ export default function ApplicantDetail() {
   const [applicant, setApplicant] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [showCongratsModal, setShowCongratsModal] = useState(false)
 
   const fetchApplicant = useCallback(async () => {
     if (!id) return
@@ -64,20 +65,18 @@ export default function ApplicantDetail() {
 
   useEffect(() => { fetchApplicant() }, [fetchApplicant])
 
-  const handleStatusUpdate = async () => {
-    if (!applicant || !newStatus) return
-    setUpdatingStatus(true)
-    try {
-      await updateDoc(doc(db, "users", applicant.id), { status: newStatus })
-      setApplicant(prev => ({ ...prev, status: newStatus }))
-      setShowUpdateStatusModal(false)
-    } catch (err) {
-      console.error("Error updating status:", err)
-      alert("Error updating status.")
-    } finally {
-      setUpdatingStatus(false)
+  useEffect(() => {
+    if (applicant) {
+      const storageKey = `notification_count_${applicant.id}`
+      const currentCount = parseInt(localStorage.getItem(storageKey) || "0", 10)
+      const maxCount = applicant.notificationLimit ? parseInt(applicant.notificationLimit, 10) : 10
+
+      if (currentCount < maxCount) {
+        setShowCongratsModal(true)
+        localStorage.setItem(storageKey, (currentCount + 1).toString())
+      }
     }
-  }
+  }, [applicant])
 
   if (loading) return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -352,6 +351,71 @@ export default function ApplicantDetail() {
 
         </div>
       </div>
+
+      {/* ── Congratulations Notification Modal ── */}
+      {showCongratsModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300" onClick={() => setShowCongratsModal(false)}>
+          <div 
+            className="bg-white rounded-3xl overflow-hidden shadow-2xl max-w-sm w-full animate-in zoom-in-95 duration-300 relative border border-gray-100"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Top Green Header Banner */}
+            <div className="h-28 bg-gradient-to-r from-emerald-500 to-green-500 relative flex items-center justify-center">
+              <button 
+                onClick={() => setShowCongratsModal(false)}
+                className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors"
+              >
+                <X size={20} />
+              </button>
+              
+              {/* Floating Checkmark Icon */}
+              <div className="absolute -bottom-8 w-16 h-16 rounded-full bg-white p-1 shadow-lg flex items-center justify-center">
+                <div className="w-full h-full rounded-full bg-emerald-500 flex items-center justify-center text-white">
+                  <CheckCircle size={38} className="text-white fill-emerald-500 stroke-white" />
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Body Content */}
+            <div className="p-6 pt-11 text-center space-y-4">
+              {/* English Section */}
+              <div className="space-y-1">
+                <p className="text-base text-gray-800 font-semibold">
+                  Dear <span className="text-emerald-600 font-extrabold">{applicant?.firstName || (applicant?.fullName ? applicant.fullName.split(" ")[0] : "Applicant")}</span>,
+                </p>
+                <h3 className="text-2xl font-black text-gray-900 tracking-tight">Congratulations!</h3>
+                <p className="text-xs sm:text-sm text-gray-600 font-medium px-2 leading-relaxed">
+                  You are accepted for the job. Please finish the bank statement process.
+                </p>
+              </div>
+
+              {/* Subtle Divider */}
+              <div className="w-2/3 mx-auto border-t border-gray-100 my-2" />
+
+              {/* Amharic Section */}
+              <div className="space-y-1">
+                <p className="text-base text-gray-800 font-semibold">
+                  ውድ <span className="text-emerald-600 font-extrabold">{applicant?.firstName || (applicant?.fullName ? applicant.fullName.split(" ")[0] : "Applicant")}</span>,
+                </p>
+                <h3 className="text-xl font-black text-gray-900 tracking-tight">እንኳን ደስ አለዎት!</h3>
+                <p className="text-xs sm:text-sm text-gray-600 font-medium px-2 leading-relaxed">
+                  ለስራው ተቀባይነት አግኝተዋል። እባክዎ የባንክ መግለጫ ሂደቱን ያጠናቅቁ።
+                </p>
+              </div>
+
+              {/* Action Button */}
+              <div className="pt-2">
+                <button
+                  onClick={() => setShowCongratsModal(false)}
+                  className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-black text-base rounded-2xl shadow-lg shadow-emerald-200 transition-all duration-200"
+                >
+                  OK / እሺ
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
