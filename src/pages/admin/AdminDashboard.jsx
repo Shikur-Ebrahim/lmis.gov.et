@@ -316,28 +316,35 @@ export default function AdminDashboard() {
                 {recentRegistrations.length === 0 ? (
                   <p className="text-gray-500 text-center py-8">No registrations yet</p>
                 ) : (
-                  recentRegistrations.map((reg) => (
-                    <div key={reg.id} className="flex items-center space-x-4 bg-gray-800/50 rounded-xl p-4">
-                      <img
-                        src={reg.profileImageUrl || "/placeholder.svg"}
-                        alt={reg.firstName}
-                        className="w-12 h-12 rounded-full object-cover border-2 border-gray-700"
-                      />
-                      <div className="flex-1">
-                        <p className="font-medium">{reg.firstName} {reg.lastName}</p>
-                        <p className="text-sm text-gray-400">{reg.jobCategory} • {reg.country}</p>
+                  recentRegistrations.map((reg) => {
+                    const profilePic = reg.profilePhoto || reg.profileImageUrl || reg.profileImage || "/placeholder.svg"
+                    const displayName = reg.fullName || `${reg.firstName || ""} ${reg.lastName || ""}`.trim() || "Applicant"
+                    const displayJob = reg.jobTitle || reg.jobCategory || "—"
+                    const displayCountry = (reg.selectedCountries && reg.selectedCountries.length > 0) ? reg.selectedCountries[0] : (reg.country || "—")
+
+                    return (
+                      <div key={reg.id} className="flex items-center space-x-4 bg-gray-800/50 rounded-xl p-4">
+                        <img
+                          src={profilePic}
+                          alt={displayName}
+                          className="w-12 h-12 rounded-full object-cover border-2 border-gray-700 bg-gray-800"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium truncate">{displayName}</p>
+                          <p className="text-sm text-gray-400 truncate">{displayJob} • {displayCountry}</p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <span className={`text-xs px-2 py-1 rounded-full ${reg.status === "Approved" || reg.status === "Accepted" ? "bg-green-900/50 text-green-400" :
+                            reg.status === "Rejected" ? "bg-red-900/50 text-red-400" :
+                              "bg-yellow-900/50 text-yellow-400"
+                            }`}>
+                            {reg.status || "Pending"}
+                          </span>
+                          {!reg.isRead && <div className="w-2 h-2 bg-red-500 rounded-full mt-2 mx-auto animate-pulse" />}
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <span className={`text-xs px-2 py-1 rounded-full ${reg.status === "Approved" || reg.status === "Accepted" ? "bg-green-900/50 text-green-400" :
-                          reg.status === "Rejected" ? "bg-red-900/50 text-red-400" :
-                            "bg-yellow-900/50 text-yellow-400"
-                          }`}>
-                          {reg.status || "Pending"}
-                        </span>
-                        {!reg.isRead && <div className="w-2 h-2 bg-red-500 rounded-full mt-2 mx-auto animate-pulse" />}
-                      </div>
-                    </div>
-                  ))
+                    )
+                  })
                 )}
               </div>
             </div>

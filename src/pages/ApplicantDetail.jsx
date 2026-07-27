@@ -106,6 +106,18 @@ export default function ApplicantDetail() {
     ? applicant.selectedCountries[0] 
     : applicant?.country
 
+  const formatPhone = (phone) => {
+    if (!phone) return "—"
+    let clean = phone.toString().trim().replace(/[\s\+]/g, "")
+    if (clean.startsWith("251")) {
+      return `+${clean}`
+    }
+    if (clean.startsWith("0")) {
+      clean = clean.substring(1)
+    }
+    return `+251${clean}`
+  }
+
   const getStatusColor = (s) => {
     switch ((s || "").toLowerCase()) {
       case "accepted": return "bg-emerald-50 text-emerald-700 border-emerald-300"
@@ -219,7 +231,7 @@ export default function ApplicantDetail() {
               <Field label="Full Name" value={fullName} />
               <Field label="Date of Birth" value={applicant.dateOfBirth} />
               <Field label="Gender" value={applicant.gender} />
-              <Field label="Phone" value={applicant.phoneNumber} />
+              <Field label="Phone" value={formatPhone(applicant.phoneNumber)} />
               <Field label="Region" value={applicant.region} />
               <Field label="City" value={applicant.city} />
             </div>
