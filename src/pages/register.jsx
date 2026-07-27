@@ -105,8 +105,234 @@ const flagMapping = {
   "Oman": "Oman flag.png"
 }
 
+// ─── Bilingual Translations ───────────────────────────────────────────────
+const TRANSLATIONS = {
+  am: {
+    // Header
+    title: "የቅጥር ስምምነት",
+    langToggle: "English",
+    // Progress
+    sectionOf: "ክፍል",
+    of: "ከ",
+    complete: "% ተጠናቋል",
+    // Navigation
+    back: "ወደ ኋላ",
+    next: "ቀጣይ ክፍል",
+    proceed: "ቀጥሉ",
+    sendAgreement: "ስምምነቱን ይላኩ",
+    // Section 1
+    sec1Title: "የግል መረጃ",
+    fullName: "ሙሉ ስም *",
+    dateOfBirth: "የትውልድ ቀን *",
+    gender: "ጾታ *",
+    selectGender: "ጾታ ይምረጡ",
+    male: "ወንድ",
+    female: "ሴት",
+    phoneNumber: "ስልክ ቁጥር *",
+    region: "ክልል *",
+    city: "ከተማ *",
+    hasPassport: "ፓስፖርት አለዎት? *",
+    passportNumber: "የፓስፖርት ቁጥር *",
+    yes: "አዎ",
+    no: "አይ",
+    // Section 2
+    sec2Title: "የስራ መረጃ",
+    jobTitle: "የስራ ርዕስ *",
+    selectJob: "ስራ ይምረጡ",
+    targetCountries: "የሚፈልጉት አገር (5 ያህሉ) *",
+    selectCity: "-- ከተማ ይምረጡ --",
+    contractType: "የኮንትራት አይነት *",
+    selectContractType: "ኮንትራት አይነት ይምረጡ",
+    fullTime: "ሙሉ ጊዜ",
+    partTime: "ከፊል ጊዜ",
+    contractLength: "የኮንትራት ርዝማኔ *",
+    selectContractLength: "ርዝማኔ ይምረጡ",
+    // Section 3
+    sec3Title: "ግላዊ ሰነዶች",
+    profilePhoto: "የፕሮፋይል ፎቶ *",
+    idCardFront: "መታወቂያ (ፊት) *",
+    idCardBack: "መታወቂያ (ጀርባ) *",
+    educationalCert: "የትምህርት ምስክር ወረቀት",
+    uploadPhoto: "ፎቶ ይስቀሉ",
+    uploadDoc: "ሰነድ ይስቀሉ",
+    changePhoto: "ፎቶ ይቀይሩ",
+    // Section 4
+    sec4Title: "ደሞዝ እና ጥቅማጥቅሞች",
+    monthlySalary: "ወርሃዊ ደሞዝ *",
+    selectSalary: "ደሞዝ ይምረጡ",
+    workingHours: "የስራ ሰዓት *",
+    selectHours: "ሰዓቶች ይምረጡ",
+    accommodation: "መኖሪያ ቤት *",
+    transport: "ትራንስፖርት *",
+    food: "ምግብ *",
+    // Section 5
+    sec5Title: "ዓለም አቀፍ ሂደት",
+    visaByCompany: "ቪዛ በኩባንያ *",
+    workPermit: "የስራ ፈቃድ *",
+    flightTicket: "የበረራ ቲኬት *",
+    byCompany: "በኩባንያ",
+    byEmployee: "በሰራተኛ",
+    // Section 6 - Declaration
+    sec6Title: "ማስታወቂያ እና ፊርማ",
+    declarationText: "ከላይ የተዘረዘሩት መረጃዎች ትክክለኛ መሆናቸውን አረጋግጣለሁ።",
+    iAgree: "ተስማምቻለሁ",
+    signHere: "እዚህ ይፈርሙ",
+    clearSig: "ፊርማ ሰርዝ",
+    faceVerify: "ፊት ማረጋገጫ",
+    verified: "ተረጋግጧል ✓",
+    // Section 7 - Summary
+    sec7Title: "ማጠቃለያ",
+    // Section 8 - Code
+    sec8Title: "የማቅረቢያ ኮድ",
+    submissionCode: "የማቅረቢያ ኮድ *",
+    enterCode: "ኮድ ያስገቡ",
+    confirmCode: "ኮዱን አረጋግጣለሁ",
+    // Errors
+    errFullName: "ሙሉ ስም ያስፈልጋል",
+    errDOB: "የትውልድ ቀን ያስፈልጋል",
+    errGender: "ጾታ ያስፈልጋል",
+    errPhone: "ትክክለኛ 9 አሃዝ ቁጥር ያስፈልጋል (7 ወይም 9 ይጀምሩ)",
+    errRegion: "ክልል ያስፈልጋል",
+    errCity: "ከተማ ያስፈልጋል",
+    errPassport: "ፓስፖርት ያዎት/አላዎት ይምረጡ",
+    errPassportNum: "የፓስፖርት ቁጥር ያስፈልጋል",
+    errJobTitle: "የስራ ርዕስ ያስፈልጋል",
+    errCountries: "5 አገሮች ማስፈለጉ ።",
+    errCities: "ለሁሉም አገሮች ከተሞችን ይምረጡ",
+    errContractType: "የኮንትራት አይነት ያስፈልጋል",
+    errContractLen: "የኮንትራት ርዝማኔ ያስፈልጋል",
+    errProfilePhoto: "የፕሮፋይል ፎቶ ያስፈልጋል",
+    errIDFront: "መታወቂያ (ፊት) ያስፈልጋል",
+    errIDBack: "መታወቂያ (ጀርባ) ያስፈልጋል",
+    errSalary: "ወርሃዊ ደሞዝ ያስፈልጋል",
+    errHours: "የስራ ሰዓት ያስፈልጋል",
+    errAccom: "የመኖሪያ ቤት ምርጫ ያስፈልጋል",
+    errTransport: "ትራንስፖርት ምርጫ ያስፈልጋል",
+    errFood: "ምግብ ምርጫ ያስፈልጋል",
+    errVisa: "የቪዛ መረጃ ያስፈልጋል",
+    errWorkPermit: "የስራ ፈቃድ መረጃ ያስፈልጋል",
+    errFlight: "የበረራ ቲኬት ምርጫ ያስፈልጋል",
+    errDeclaration: "ማስታወቂያን ማረጋገጥ ያስፈልጋል",
+    errSignature: "የጣት ፊርማ ያስፈልጋል",
+    errFace: "ፊት ማረጋገጫ ያስፈልጋል",
+    errCode: "የማቅረቢያ ኮድ ያስፈልጋል",
+    errCodeConfirm: "ኮዱን ማረጋገጥ ያስፈልጋል",
+    errPassword: "የይለፍ ቃል ያስፈልጋል",
+    errPasswordLen: "የይለፍ ቃል ቢያንስ 6 ቁምፊዎች መሆን አለበት",
+    errPasswordMatch: "የይለፍ ቃሎች አይዛመዱም",
+    // Footer
+    footer: "የስራ ስምምነት መድረክ",
+  },
+  en: {
+    title: "Employment Agreement",
+    langToggle: "አማርኛ",
+    sectionOf: "Section",
+    of: "of",
+    complete: "% Complete",
+    back: "Back",
+    next: "Next Section",
+    proceed: "Proceed",
+    sendAgreement: "Send the Agreement",
+    sec1Title: "Personal Information",
+    fullName: "Full Name *",
+    dateOfBirth: "Date of Birth *",
+    gender: "Gender *",
+    selectGender: "Select Gender",
+    male: "Male",
+    female: "Female",
+    phoneNumber: "Phone Number *",
+    region: "Region *",
+    city: "City *",
+    hasPassport: "Do you have a Passport? *",
+    passportNumber: "Passport Number *",
+    yes: "Yes",
+    no: "No",
+    sec2Title: "Job Information",
+    jobTitle: "Job Title *",
+    selectJob: "Select Job",
+    targetCountries: "Target Countries (Select 5) *",
+    selectCity: "-- Select City --",
+    contractType: "Contract Type *",
+    selectContractType: "Select Contract Type",
+    fullTime: "Full Time",
+    partTime: "Part Time",
+    contractLength: "Contract Length *",
+    selectContractLength: "Select Length",
+    sec3Title: "Personal Documents",
+    profilePhoto: "Profile Photo *",
+    idCardFront: "ID Card Front *",
+    idCardBack: "ID Card Back *",
+    educationalCert: "Educational Certificate",
+    uploadPhoto: "Upload Photo",
+    uploadDoc: "Upload Document",
+    changePhoto: "Change Photo",
+    sec4Title: "Salary & Benefits",
+    monthlySalary: "Monthly Salary *",
+    selectSalary: "Select Salary",
+    workingHours: "Working Hours *",
+    selectHours: "Select Hours",
+    accommodation: "Accommodation *",
+    transport: "Transport *",
+    food: "Food *",
+    sec5Title: "International Process",
+    visaByCompany: "Visa by Company *",
+    workPermit: "Work Permit *",
+    flightTicket: "Flight Ticket *",
+    byCompany: "Company",
+    byEmployee: "Employee",
+    sec6Title: "Declaration & Signature",
+    declarationText: "I confirm that the information provided above is true and accurate.",
+    iAgree: "I Agree",
+    signHere: "Sign Here",
+    clearSig: "Clear Signature",
+    faceVerify: "Face Verification",
+    verified: "Verified ✓",
+    sec7Title: "Summary",
+    sec8Title: "Submission Code",
+    submissionCode: "Submission Code *",
+    enterCode: "Enter Code",
+    confirmCode: "I confirm the code",
+    errFullName: "Full Name is required",
+    errDOB: "Date of Birth is required",
+    errGender: "Gender is required",
+    errPhone: "Please enter a valid 9-digit number starting with 7 or 9",
+    errRegion: "Region is required",
+    errCity: "City is required",
+    errPassport: "Please specify if you have a passport",
+    errPassportNum: "Passport Number is required",
+    errJobTitle: "Job Title is required",
+    errCountries: "You must select exactly 5 countries",
+    errCities: "Please select a city for all countries",
+    errContractType: "Contract Type is required",
+    errContractLen: "Contract Length is required",
+    errProfilePhoto: "Profile Photo is required",
+    errIDFront: "ID Card Front is required",
+    errIDBack: "ID Card Back is required",
+    errSalary: "Monthly Salary is required",
+    errHours: "Working Hours is required",
+    errAccom: "Accommodation preference is required",
+    errTransport: "Transport preference is required",
+    errFood: "Food preference is required",
+    errVisa: "Visa info is required",
+    errWorkPermit: "Work permit info is required",
+    errFlight: "Flight ticket preference is required",
+    errDeclaration: "You must agree to the declaration",
+    errSignature: "Finger signature is required",
+    errFace: "Face verification is required to proceed",
+    errCode: "Submission Code is required",
+    errCodeConfirm: "You must confirm the code",
+    errPassword: "Password is required",
+    errPasswordLen: "Password must be at least 6 characters",
+    errPasswordMatch: "Passwords do not match",
+    footer: "Official Employment Agreement Platform",
+  }
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 export default function Register() {
   const navigate = useNavigate()
+  const [lang, setLang] = useState('am')
+  const t = (key) => TRANSLATIONS[lang]?.[key] ?? TRANSLATIONS['en'][key] ?? key
   const [currentSection, setCurrentSection] = useState(1) // 1-8
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -260,74 +486,66 @@ export default function Register() {
     const newErrors = {}
 
     if (section === 1) {
-      if (!formData.fullName) newErrors.fullName = "Full Name is required"
-      if (!formData.dateOfBirth) newErrors.dateOfBirth = "Date of Birth is required"
-      if (!formData.gender) newErrors.gender = "Gender is required"
-      if (!formData.phoneNumber) newErrors.phoneNumber = "Phone Number is required"
+      if (!formData.fullName) newErrors.fullName = t('errFullName')
+      if (!formData.dateOfBirth) newErrors.dateOfBirth = t('errDOB')
+      if (!formData.gender) newErrors.gender = t('errGender')
+      if (!formData.phoneNumber) newErrors.phoneNumber = t('errPhone')
       else if (!/^[79]\d{8}$/.test(formData.phoneNumber)) {
-        newErrors.phoneNumber = "Please enter a valid 9-digit number starting with 7 or 9"
+        newErrors.phoneNumber = t('errPhone')
       }
-      if (!formData.region) newErrors.region = "Region is required"
-      if (!formData.city) newErrors.city = "City is required"
-      if (!formData.hasPassport) newErrors.hasPassport = "Please specify if you have a passport"
-      if (formData.hasPassport === "Yes" && !formData.passportNumber) newErrors.passportNumber = "Passport Number is required"
+      if (!formData.region) newErrors.region = t('errRegion')
+      if (!formData.city) newErrors.city = t('errCity')
+      if (!formData.hasPassport) newErrors.hasPassport = t('errPassport')
+      if (formData.hasPassport === "Yes" && !formData.passportNumber) newErrors.passportNumber = t('errPassportNum')
     }
 
     if (section === 2) {
-      if (!formData.jobTitle) newErrors.jobTitle = "Job Title is required"
-      if (formData.selectedCountries.length !== 5) newErrors.selectedCountries = "You must select exactly 5 countries"
-      
-      // Validate that each selected country has a city selected
+      if (!formData.jobTitle) newErrors.jobTitle = t('errJobTitle')
+      if (formData.selectedCountries.length !== 5) newErrors.selectedCountries = t('errCountries')
       formData.selectedCountries.forEach(country => {
-        if (!formData.selectedCities[country]) {
-          newErrors.selectedCities = `Please select a city for all countries`
-        }
+        if (!formData.selectedCities[country]) newErrors.selectedCities = t('errCities')
       })
-      
-      if (!formData.contractType) newErrors.contractType = "Contract Type is required"
-      if (!formData.contractLength) newErrors.contractLength = "Contract Length is required"
+      if (!formData.contractType) newErrors.contractType = t('errContractType')
+      if (!formData.contractLength) newErrors.contractLength = t('errContractLen')
     }
 
     if (section === 3) {
-      if (!formData.profilePhoto) newErrors.profilePhoto = "Profile Photo is required"
-      if (!formData.idCardFront) newErrors.idCardFront = "ID Card Front is required"
-      if (!formData.idCardBack) newErrors.idCardBack = "ID Card Back is required"
+      if (!formData.profilePhoto) newErrors.profilePhoto = t('errProfilePhoto')
+      if (!formData.idCardFront) newErrors.idCardFront = t('errIDFront')
+      if (!formData.idCardBack) newErrors.idCardBack = t('errIDBack')
     }
 
     if (section === 4) {
-      if (!formData.monthlySalary) newErrors.monthlySalary = "Monthly Salary is required"
-      if (!formData.workingHours) newErrors.workingHours = "Working Hours is required"
-      if (!formData.accommodation) newErrors.accommodation = "Accommodation preference is required"
-      if (!formData.transport) newErrors.transport = "Transport preference is required"
-      if (!formData.food) newErrors.food = "Food preference is required"
+      if (!formData.monthlySalary) newErrors.monthlySalary = t('errSalary')
+      if (!formData.workingHours) newErrors.workingHours = t('errHours')
+      if (!formData.accommodation) newErrors.accommodation = t('errAccom')
+      if (!formData.transport) newErrors.transport = t('errTransport')
+      if (!formData.food) newErrors.food = t('errFood')
     }
 
     if (section === 5) {
-      if (!formData.visaProvidedByCompany) newErrors.visaProvidedByCompany = "Visa info is required"
-      if (!formData.workPermit) newErrors.workPermit = "Work permit info is required"
-      if (!formData.flightTicket) newErrors.flightTicket = "Flight ticket preference is required"
+      if (!formData.visaProvidedByCompany) newErrors.visaProvidedByCompany = t('errVisa')
+      if (!formData.workPermit) newErrors.workPermit = t('errWorkPermit')
+      if (!formData.flightTicket) newErrors.flightTicket = t('errFlight')
     }
 
     if (section === 6) {
-      if (!formData.declarationAgreed) newErrors.declarationAgreed = "You must agree to the declaration"
-      if (formData.declarationAgreed && !formData.signatureData) newErrors.signatureData = "Finger signature is required"
-      if (formData.signatureData && !formData.faceVerified) newErrors.faceVerified = "Face verification is required to proceed"
+      if (!formData.declarationAgreed) newErrors.declarationAgreed = t('errDeclaration')
+      if (formData.declarationAgreed && !formData.signatureData) newErrors.signatureData = t('errSignature')
+      if (formData.signatureData && !formData.faceVerified) newErrors.faceVerified = t('errFace')
     }
 
-    if (section === 7) {
-      // Summary page, no validation needed
-      return true
-    }
+    if (section === 7) { return true }
 
     if (section === 8) {
-      if (!formData.submissionCode) newErrors.submissionCode = "Submission Code is required"
-      if (!formData.codeConfirmed) newErrors.codeConfirmed = "You must confirm the code"
+      if (!formData.submissionCode) newErrors.submissionCode = t('errCode')
+      if (!formData.codeConfirmed) newErrors.codeConfirmed = t('errCodeConfirm')
     }
 
     if (section === 9) {
-      if (!formData.password) newErrors.password = "Password is required"
-      if (formData.password.length < 6) newErrors.password = "Password must be at least 6 characters"
-      if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = "Passwords do not match"
+      if (!formData.password) newErrors.password = t('errPassword')
+      if (formData.password.length < 6) newErrors.password = t('errPasswordLen')
+      if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = t('errPasswordMatch')
     }
 
     setErrors(newErrors)
@@ -491,9 +709,9 @@ export default function Register() {
   const renderProgressBar = () => (
     <div className="mb-10 animate-in fade-in slide-in-from-top-4 duration-500">
       <div className="flex justify-between items-center mb-2">
-        <span className="text-xs font-bold text-gray-600">Section {currentSection} of 8</span>
+        <span className="text-xs font-bold text-gray-600">{t('sectionOf')} {currentSection} {t('of')} 8</span>
         <span className="text-xs font-medium text-blue-600">
-          {Math.round((currentSection / 8) * 100)}% Complete
+          {Math.round((currentSection / 8) * 100)}{t('complete')}
         </span>
       </div>
       <div className="w-full bg-gray-200 rounded-full h-1.5">
@@ -509,12 +727,12 @@ export default function Register() {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex items-center gap-3 mb-4 pb-2 border-b">
         <User className="w-6 h-6 text-blue-600" />
-        <h2 className="text-lg font-bold text-gray-800">Personal Information</h2>
+        <h2 className="text-lg font-bold text-gray-800">{t('sec1Title')}</h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-xs font-bold text-gray-700 mb-1">Full Name *</label>
+          <label className="block text-xs font-bold text-gray-700 mb-1">{t('fullName')}</label>
           <input
             type="text"
             name="fullName"
@@ -527,7 +745,7 @@ export default function Register() {
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-gray-700 mb-1">Date of Birth *</label>
+          <label className="block text-xs font-bold text-gray-700 mb-1">{t('dateOfBirth')}</label>
           <input
             type="date"
             name="dateOfBirth"
@@ -539,23 +757,23 @@ export default function Register() {
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-gray-700 mb-1">Gender *</label>
+          <label className="block text-xs font-bold text-gray-700 mb-1">{t('gender')}</label>
           <CustomSelect
             name="gender"
             value={formData.gender}
             onChange={handleInputChange}
             options={[
-              { value: 'Male', label: 'Male' },
-              { value: 'Female', label: 'Female' }
+              { value: 'Male', label: t('male') },
+              { value: 'Female', label: t('female') }
             ]}
-            placeholder="Select Gender"
+            placeholder={t('selectGender')}
             error={errors.gender}
           />
           {errors.gender && <p className="text-red-500 text-xs mt-1">{errors.gender}</p>}
         </div>
 
         <div className="space-y-1">
-          <label className="block text-xs font-bold text-gray-700">Phone Number *</label>
+          <label className="block text-xs font-bold text-gray-700">{t('phoneNumber')}</label>
           <div className="relative">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold border-r pr-3">+251</span>
             <input
@@ -571,7 +789,7 @@ export default function Register() {
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-gray-700 mb-1">Region *</label>
+          <label className="block text-xs font-bold text-gray-700 mb-1">{t('region')}</label>
           <input
             type="text"
             name="region"
@@ -584,7 +802,7 @@ export default function Register() {
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-gray-700 mb-1">City *</label>
+          <label className="block text-xs font-bold text-gray-700 mb-1">{t('city')}</label>
           <input
             type="text"
             name="city"
@@ -598,7 +816,7 @@ export default function Register() {
 
         <div className="md:col-span-2 space-y-4">
           <div>
-            <label className="block text-xs font-bold text-gray-700 mb-2">Do you have a Passport? *</label>
+            <label className="block text-xs font-bold text-gray-700 mb-2">{t('hasPassport')}</label>
             <div className="flex gap-6">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
@@ -609,7 +827,7 @@ export default function Register() {
                   onChange={handleInputChange}
                   className="w-4 h-4 text-blue-600"
                 />
-                <span className="text-sm font-medium">Yes</span>
+                <span className="text-sm font-medium">{t('yes')}</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
@@ -620,7 +838,7 @@ export default function Register() {
                   onChange={handleInputChange}
                   className="w-4 h-4 text-blue-600"
                 />
-                <span className="text-sm font-medium">No</span>
+                <span className="text-sm font-medium">{t('no')}</span>
               </label>
             </div>
             {errors.hasPassport && <p className="text-red-500 text-xs mt-1">{errors.hasPassport}</p>}
@@ -628,7 +846,7 @@ export default function Register() {
 
           {formData.hasPassport === "Yes" && (
             <div className="animate-in slide-in-from-top-2 duration-300">
-              <label className="block text-xs font-bold text-gray-700 mb-1">Passport Number *</label>
+              <label className="block text-xs font-bold text-gray-700 mb-1">{t('passportNumber')}</label>
               <input
                 type="text"
                 name="passportNumber"
@@ -650,18 +868,18 @@ export default function Register() {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex items-center gap-3 mb-4 pb-2 border-b">
         <Briefcase className="w-6 h-6 text-blue-600" />
-        <h2 className="text-lg font-bold text-gray-800">Job Information</h2>
+        <h2 className="text-lg font-bold text-gray-800">{t('sec2Title')}</h2>
       </div>
 
       <div className="space-y-8">
         <div>
-          <label className="block text-xs font-bold text-gray-700 mb-1">Job Type *</label>
+          <label className="block text-xs font-bold text-gray-700 mb-1">{t('jobTitle')}</label>
           <CustomSelect
             name="jobTitle"
             value={formData.jobTitle}
             onChange={handleInputChange}
             options={jobOptions.map(job => ({ value: job, label: job }))}
-            placeholder="Select Job Type"
+            placeholder={t('selectJob')}
             error={errors.jobTitle}
           />
           {errors.jobTitle && <p className="text-red-500 text-xs mt-1">{errors.jobTitle}</p>}
@@ -669,7 +887,7 @@ export default function Register() {
 
         <div>
           <label className="block text-xs font-bold text-gray-700 mb-2">
-            Select Exactly 5 Countries * 
+            {t('targetCountries')}
             <span className="text-xs font-normal text-gray-500 ml-2">({formData.selectedCountries.length} selected)</span>
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-gray-50 p-6 rounded-2xl border-2 border-gray-100">
@@ -728,7 +946,7 @@ export default function Register() {
                       setFormData(prev => ({ ...prev, selectedCities: newCities }))
                     }}
                     options={(cityMapping[country] || []).map(city => ({ value: city, label: city }))}
-                    placeholder={`Select City in ${country}`}
+                    placeholder={t('selectCity')}
                     error={!formData.selectedCities[country] && errors.selectedCities}
                   />
                 </div>
@@ -740,23 +958,23 @@ export default function Register() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t">
           <div>
-            <label className="block text-xs font-bold text-gray-700 mb-1">Contract Type *</label>
+            <label className="block text-xs font-bold text-gray-700 mb-1">{t('contractType')}</label>
             <CustomSelect
               name="contractType"
               value={formData.contractType}
               onChange={handleInputChange}
               options={[
-                { value: 'Full-time', label: 'Full-time' },
-                { value: 'Part-time', label: 'Part-time' }
+                { value: 'Full-time', label: t('fullTime') },
+                { value: 'Part-time', label: t('partTime') }
               ]}
-              placeholder="Select Type"
+              placeholder={t('selectContractType')}
               error={errors.contractType}
             />
             {errors.contractType && <p className="text-red-500 text-xs mt-1">{errors.contractType}</p>}
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-700 mb-1">Contract Length *</label>
+            <label className="block text-xs font-bold text-gray-700 mb-1">{t('contractLength')}</label>
             <CustomSelect
               name="contractLength"
               value={formData.contractLength}
@@ -768,7 +986,7 @@ export default function Register() {
                 { value: '4 Years', label: '4 Years' },
                 { value: '5 Years', label: '5 Years' }
               ]}
-              placeholder="Select Duration"
+              placeholder={t('selectContractLength')}
               error={errors.contractLength}
             />
             {errors.contractLength && <p className="text-red-500 text-xs mt-1">{errors.contractLength}</p>}
@@ -782,15 +1000,15 @@ export default function Register() {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex items-center gap-3 mb-4 pb-2 border-b">
         <Upload className="w-6 h-6 text-blue-600" />
-        <h2 className="text-lg font-bold text-gray-800">Personal Documents</h2>
+        <h2 className="text-lg font-bold text-gray-800">{t('sec3Title')}</h2>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
         {[
-          { id: "profilePhoto", label: "Profile Photo *", icon: <Camera size={20} /> },
-          { id: "idCardFront", label: "ID Card Front *", icon: <FileText size={20} /> },
-          { id: "idCardBack", label: "ID Card Back *", icon: <FileText size={20} /> },
-          { id: "educationalCertificate", label: "Educational Certificate (Optional)", icon: <Globe size={20} /> }
+          { id: "profilePhoto", label: t('profilePhoto'), icon: <Camera size={20} /> },
+          { id: "idCardFront", label: t('idCardFront'), icon: <FileText size={20} /> },
+          { id: "idCardBack", label: t('idCardBack'), icon: <FileText size={20} /> },
+          { id: "educationalCertificate", label: t('educationalCert'), icon: <Globe size={20} /> }
         ].map(doc => (
           <div key={doc.id} className="space-y-2">
             <label className="block text-xs font-bold text-gray-700">{doc.label}</label>
@@ -848,12 +1066,12 @@ export default function Register() {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex items-center gap-3 mb-4 pb-2 border-b">
         <DollarSign className="w-6 h-6 text-blue-600" />
-        <h2 className="text-lg font-bold text-gray-800">Salary & Benefits</h2>
+        <h2 className="text-lg font-bold text-gray-800">{t('sec4Title')}</h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
-          <label className="block text-xs font-bold text-gray-700 mb-1">Monthly Salary *</label>
+          <label className="block text-xs font-bold text-gray-700 mb-1">{t('monthlySalary')}</label>
           <div className="relative">
             <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
@@ -869,7 +1087,7 @@ export default function Register() {
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-gray-700 mb-1">Hours per week *</label>
+          <label className="block text-xs font-bold text-gray-700 mb-1">{t('workingHours')}</label>
           <div className="relative">
             <Clock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
@@ -887,7 +1105,7 @@ export default function Register() {
         {["accommodation", "transport", "food"].map(benefit => (
           <div key={benefit} className="space-y-2">
             <label className="block text-xs font-bold text-gray-700 capitalize">
-              {benefit === "accommodation" ? "Accommodation / House for living" : benefit} *
+              {benefit === "accommodation" ? t('accommodation') : benefit === "transport" ? t('transport') : t('food')}
             </label>
             <div className="flex gap-6">
               {["Yes", "No"].map(option => (
@@ -900,7 +1118,7 @@ export default function Register() {
                     onChange={handleInputChange}
                     className="w-4 h-4 text-blue-600 focus:ring-blue-500"
                   />
-                  <span className="text-sm font-medium group-hover:text-blue-600 transition-colors">{option}</span>
+                  <span className="text-sm font-medium group-hover:text-blue-600 transition-colors">{option === "Yes" ? t('yes') : t('no')}</span>
                 </label>
               ))}
             </div>
@@ -915,12 +1133,12 @@ export default function Register() {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex items-center gap-3 mb-4 pb-2 border-b">
         <Globe className="w-6 h-6 text-blue-600" />
-        <h2 className="text-lg font-bold text-gray-800">International Process</h2>
+        <h2 className="text-lg font-bold text-gray-800">{t('sec5Title')}</h2>
       </div>
 
       <div className="space-y-8">
         <div className="space-y-3">
-          <label className="block text-xs font-bold text-gray-700">Visa Provided by Company? *</label>
+          <label className="block text-xs font-bold text-gray-700">{t('visaByCompany')}</label>
           <div className="flex gap-8">
             {["Yes", "No"].map(option => (
               <label key={option} className="flex items-center gap-2 cursor-pointer group">
@@ -932,7 +1150,7 @@ export default function Register() {
                   onChange={handleInputChange}
                   className="w-4 h-4 text-blue-600 focus:ring-blue-500"
                 />
-                <span className="text-sm font-bold group-hover:text-blue-600">{option}</span>
+                <span className="text-sm font-bold group-hover:text-blue-600">{option === "Yes" ? t('yes') : t('no')}</span>
               </label>
             ))}
           </div>
@@ -940,7 +1158,7 @@ export default function Register() {
         </div>
 
         <div className="space-y-3">
-          <label className="block text-xs font-bold text-gray-700">Work Permit *</label>
+          <label className="block text-xs font-bold text-gray-700">{t('workPermit')}</label>
           <div className="flex gap-8">
             {["Yes", "No"].map(option => (
               <label key={option} className="flex items-center gap-2 cursor-pointer group">
@@ -952,7 +1170,7 @@ export default function Register() {
                   onChange={handleInputChange}
                   className="w-4 h-4 text-blue-600 focus:ring-blue-500"
                 />
-                <span className="text-sm font-bold group-hover:text-blue-600">{option}</span>
+                <span className="text-sm font-bold group-hover:text-blue-600">{option === "Yes" ? t('yes') : t('no')}</span>
               </label>
             ))}
           </div>
@@ -1316,10 +1534,20 @@ export default function Register() {
       <div className="max-w-4xl mx-auto">
         
         {/* Header */}
-        <div className="text-center mb-6">
+        <div className="relative text-center mb-6">
           <h1 className="text-lg sm:text-xl font-extrabold text-gray-900 tracking-tight mb-2">
-            Employment Agreement
+            {t('title')}
           </h1>
+          {/* Language Toggle */}
+          <button
+            type="button"
+            onClick={() => setLang(l => l === 'am' ? 'en' : 'am')}
+            className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-3 py-1.5 rounded-full border-2 border-blue-500 bg-white hover:bg-blue-50 transition-all active:scale-95 shadow-sm"
+          >
+            <span className={`text-xs font-black ${lang === 'am' ? 'text-blue-600' : 'text-gray-400'}`}>አማርኛ</span>
+            <span className="text-gray-300 text-xs">|</span>
+            <span className={`text-xs font-black ${lang === 'en' ? 'text-blue-600' : 'text-gray-400'}`}>English</span>
+          </button>
         </div>
 
         {/* Form Container */}
@@ -1357,7 +1585,7 @@ export default function Register() {
                     onClick={handleBack}
                     className="w-full sm:w-auto px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 text-sm"
                   >
-                    <ArrowLeft size={20} /> Back
+                    <ArrowLeft size={20} /> {t('back')}
                   </button>
                 )}
                 
@@ -1368,7 +1596,7 @@ export default function Register() {
                       onClick={handleNext}
                       className="w-full sm:w-auto px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-blue-200 transition-all active:scale-95 group text-sm"
                     >
-                      {currentSection === 6 ? "Proceed" : currentSection === 7 ? "Send the Agreement" : "Next Section"} <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                      {currentSection === 6 ? t('proceed') : currentSection === 7 ? t('sendAgreement') : t('next')} <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                     </button>
                   )}
                 </div>
@@ -1379,7 +1607,7 @@ export default function Register() {
 
         {/* Footer Info */}
         <p className="mt-8 text-center text-gray-500 text-sm font-medium">
-          Official Employment Agreement Platform &copy; {new Date().getFullYear()}
+          {t('footer')} &copy; {new Date().getFullYear()}
         </p>
       </div>
     </div>
