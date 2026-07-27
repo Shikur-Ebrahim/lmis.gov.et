@@ -16,7 +16,8 @@ import {
   AlertCircle,
   CreditCard,
   UserCheck,
-  Loader2
+  Loader2,
+  MessageSquare
 } from "lucide-react"
 
 export default function SocialMediaSettings() {
@@ -27,7 +28,8 @@ export default function SocialMediaSettings() {
     phone: "+251900000000",
     email: "info@lmis.gov.et",
     telegram: "lmis_support",
-    whatsapp: "+251900000000"
+    whatsapp: "+251900000000",
+    sms: "+251900000000"
   })
 
   const [loading, setLoading] = useState(true)
@@ -268,6 +270,24 @@ export default function SocialMediaSettings() {
                       type="text"
                       name="whatsapp"
                       value={formData.whatsapp}
+                      onChange={handleChange}
+                      placeholder="+251900000000"
+                      className="w-full pl-11 pr-4 py-3.5 bg-gray-950 border border-gray-800 rounded-xl text-gray-100 placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-500 font-semibold text-sm"
+                    />
+                  </div>
+                </div>
+
+                {/* SMS / Message Phone */}
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-400">
+                    SMS / Message Phone Number
+                  </label>
+                  <div className="relative">
+                    <MessageSquare className="absolute left-3.5 top-1/2 -translate-y-1/2 text-blue-400" size={18} />
+                    <input
+                      type="text"
+                      name="sms"
+                      value={formData.sms}
                       onChange={handleChange}
                       placeholder="+251900000000"
                       className="w-full pl-11 pr-4 py-3.5 bg-gray-950 border border-gray-800 rounded-xl text-gray-100 placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-500 font-semibold text-sm"

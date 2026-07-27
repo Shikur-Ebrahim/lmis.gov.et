@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { doc, getDoc, updateDoc } from "firebase/firestore"
+import { doc, getDoc } from "firebase/firestore"
 import { db } from "../config/firebase"
 import {
   User, Phone, MapPin, Briefcase, Calendar, Globe,
@@ -44,6 +44,13 @@ export default function ApplicantDetail() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [showCongratsModal, setShowCongratsModal] = useState(false)
+  const [supportSettings, setSupportSettings] = useState({
+    phone: "+251900000000",
+    email: "info@lmis.gov.et",
+    telegram: "lmis_support",
+    whatsapp: "+251900000000",
+    sms: "+251900000000"
+  })
 
   const fetchApplicant = useCallback(async () => {
     if (!id) return
@@ -65,6 +72,21 @@ export default function ApplicantDetail() {
   }, [id])
 
   useEffect(() => { fetchApplicant() }, [fetchApplicant])
+
+  useEffect(() => {
+    const fetchSupportSettings = async () => {
+      try {
+        const docRef = doc(db, "settings", "support")
+        const docSnap = await getDoc(docRef)
+        if (docSnap.exists()) {
+          setSupportSettings(prev => ({ ...prev, ...docSnap.data() }))
+        }
+      } catch (err) {
+        console.error("Error fetching support settings:", err)
+      }
+    }
+    fetchSupportSettings()
+  }, [])
 
   useEffect(() => {
     if (applicant) {
@@ -198,21 +220,54 @@ export default function ApplicantDetail() {
               )}
             </div>
 
-            {/* Social Media & Action Icons Bar */}
+            {/* Social Media & Action Icons Bar — uses admin support settings */}
             <div className="flex items-center justify-center gap-3 mt-5 pt-4 border-t border-gray-100 max-w-sm mx-auto">
-              <a href={`tel:${applicant.phoneNumber || ''}`} className="w-11 h-11 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-xl flex items-center justify-center shadow-sm transition-transform active:scale-90">
+              {/* Call — uses support phone */}
+              <a
+                href={`tel:${supportSettings.phone}`}
+                title={`Call ${supportSettings.phone}`}
+                className="w-11 h-11 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-xl flex items-center justify-center shadow-sm transition-transform active:scale-90"
+              >
                 <Phone size={18} />
               </a>
-              <a href={`mailto:${applicant.email || 'info@lmis.gov.et'}`} className="w-11 h-11 bg-blue-600 text-white hover:bg-blue-700 rounded-xl flex items-center justify-center shadow-md shadow-blue-200 transition-transform active:scale-90">
+              {/* Email — uses support email */}
+              <a
+                href={`mailto:${supportSettings.email}`}
+                title={supportSettings.email}
+                className="w-11 h-11 bg-blue-600 text-white hover:bg-blue-700 rounded-xl flex items-center justify-center shadow-md shadow-blue-200 transition-transform active:scale-90"
+              >
                 <Mail size={18} />
               </a>
-              <a href={`https://t.me/${(applicant.phoneNumber || '').replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="w-11 h-11 bg-sky-500 text-white hover:bg-sky-600 rounded-xl flex items-center justify-center shadow-md shadow-sky-200 transition-transform active:scale-90">
+              {/* Telegram — uses support telegram username or phone */}
+              <a
+                href={supportSettings.telegram
+                  ? (supportSettings.telegram.startsWith('+') || /^\d/.test(supportSettings.telegram)
+                      ? `https://t.me/+${supportSettings.telegram.replace(/[^0-9]/g, '')}`
+                      : `https://t.me/${supportSettings.telegram.replace('@', '')}`)
+                  : '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={`Telegram: ${supportSettings.telegram}`}
+                className="w-11 h-11 bg-sky-500 text-white hover:bg-sky-600 rounded-xl flex items-center justify-center shadow-md shadow-sky-200 transition-transform active:scale-90"
+              >
                 <Send size={18} />
               </a>
-              <a href={`https://wa.me/${(applicant.phoneNumber || '').replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="w-11 h-11 bg-emerald-500 text-white hover:bg-emerald-600 rounded-xl flex items-center justify-center shadow-md shadow-emerald-200 transition-transform active:scale-90">
+              {/* WhatsApp — uses support whatsapp number */}
+              <a
+                href={`https://wa.me/${supportSettings.whatsapp.replace(/[^0-9]/g, '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={`WhatsApp: ${supportSettings.whatsapp}`}
+                className="w-11 h-11 bg-emerald-500 text-white hover:bg-emerald-600 rounded-xl flex items-center justify-center shadow-md shadow-emerald-200 transition-transform active:scale-90"
+              >
                 <MessageCircle size={18} />
               </a>
-              <a href={`sms:${applicant.phoneNumber || ''}`} className="w-11 h-11 bg-blue-800 text-white hover:bg-blue-900 rounded-xl flex items-center justify-center shadow-md shadow-blue-300 transition-transform active:scale-90">
+              {/* SMS/Message — uses support sms number */}
+              <a
+                href={`sms:${supportSettings.sms}`}
+                title={`Message: ${supportSettings.sms}`}
+                className="w-11 h-11 bg-blue-800 text-white hover:bg-blue-900 rounded-xl flex items-center justify-center shadow-md shadow-blue-300 transition-transform active:scale-90"
+              >
                 <MessageSquare size={18} />
               </a>
             </div>
