@@ -35,7 +35,7 @@ import {
 } from "lucide-react"
 import { collection, addDoc, setDoc, doc, query, where, getDocs, Timestamp, deleteDoc } from "firebase/firestore"
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import { auth, db } from "../config/firebase"
 import { uploadToCloudinary, uploadDocument, validateFile } from "../utils/cloudinary"
 import CustomSelect from "../components/CustomSelect"
@@ -423,9 +423,10 @@ const TRANSLATIONS = {
 
 export default function Register() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [lang, setLang] = useState('am')
   const t = (key) => TRANSLATIONS[lang]?.[key] ?? TRANSLATIONS['en'][key] ?? key
-  const [currentSection, setCurrentSection] = useState(1) // 1-8
+  const [currentSection, setCurrentSection] = useState(location.state?.returnToSection || 1) // 1-8
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   
@@ -443,10 +444,10 @@ export default function Register() {
   const [showFaceModal, setShowFaceModal] = useState(false)
 
   const [previews, setPreviews] = useState({
-    profilePhoto: null,
-    idCardFront: null,
-    idCardBack: null,
-    educationalCertificate: null
+    profilePhoto: location.state?.applicantData?.profilePhoto || null,
+    idCardFront: location.state?.applicantData?.idCardFront || null,
+    idCardBack: location.state?.applicantData?.idCardBack || null,
+    educationalCertificate: location.state?.applicantData?.educationalCertificate || null
   })
 
   const [formData, setFormData] = useState({
@@ -491,15 +492,13 @@ export default function Register() {
 
     // Section 7: Declaration
     declarationAgreed: false,
-
-    // Section 8: Signature
-    signatureApplicantName: "",
-    signatureData: "", // Base64 signature
-    signatureDate: "",
+    signatureData: "",
+    faceVerified: false,
     
-    // Section 9: Password
+    // Auth
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
+    ...(location.state?.applicantData || {})
   })
 
   // Handle signature pad initialization and data loading
@@ -781,6 +780,7 @@ export default function Register() {
 
   const handleFileUpload = async (file, fieldName) => {
     if (!file) return null
+    if (typeof file === 'string') return file
     try {
       setUploadProgress(prev => ({ ...prev, [fieldName]: 10 }))
       // Use image upload for all image files; use document upload only for PDFs
@@ -1312,7 +1312,7 @@ export default function Register() {
             <div className="flex justify-center pt-4">
               <button
                 type="button"
-                onClick={() => navigate("/payment-methods", { state: { phoneNumber: `+251${formData.phoneNumber}` } })}
+                onClick={() => navigate("/payment-methods", { state: { phoneNumber: `+251${formData.phoneNumber}`, applicantData: formData } })}
                 className="px-12 py-4 bg-red-600 text-white rounded-2xl font-black text-lg hover:bg-red-700 shadow-xl shadow-red-200 transition-all flex items-center justify-center gap-3"
               >
                 <CreditCard size={22} /> {t('Pay Now')}
