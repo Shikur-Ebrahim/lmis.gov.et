@@ -62,7 +62,7 @@ export default function PaymentMethods() {
                 >
                     <ChevronLeft className="w-6 h-6 text-gray-900" />
                 </button>
-                <h2 className="text-xl font-bold text-gray-900">Choose payment</h2>
+                <h2 className="text-xl font-bold text-gray-900">ክፍያ ይምረጡ</h2>
                 <div className="w-10" /> {/* Spacer */}
             </div>
 
@@ -81,8 +81,8 @@ export default function PaymentMethods() {
                 </div>
 
                 <div className="mb-8">
-                    <h1 className="text-2xl sm:text-3xl font-black text-gray-900 mb-2 leading-tight">Payment <br />methods</h1>
-                    <p className="text-gray-500 font-semibold">Select your preferred payment channel to continue.</p>
+                    <h1 className="text-2xl sm:text-3xl font-black text-gray-900 mb-2 leading-tight">የክፍያ <br />ዘዴዎች</h1>
+                    <p className="text-gray-500 font-semibold">ለመቀጠል ተመራጭ የክፍያ መንገድዎን ይምረጡ።</p>
                 </div>
 
                 {/* Loading State */}
@@ -95,7 +95,7 @@ export default function PaymentMethods() {
                 ) : accounts.length === 0 ? (
                     <div className="bg-white rounded-3xl p-16 text-center border-2 border-dashed border-gray-200">
                         <CreditCard className="w-16 h-16 text-gray-200 mx-auto mb-6" />
-                        <p className="text-gray-400 font-bold">No payment channels found</p>
+                        <p className="text-gray-400 font-bold">ምንም የክፍያ መንገድ አልተገኘም</p>
                     </div>
                 ) : (
                     <div className="space-y-4">
@@ -128,17 +128,13 @@ export default function PaymentMethods() {
                                         </div>
                                         <div>
                                             <h3 className="font-bold text-lg sm:text-xl text-gray-900 leading-none mb-1">{account.paymentMethod}</h3>
-                                            <div className="flex flex-col text-sm text-gray-600 mt-1">
-                                                <span className="font-mono bg-gray-100 px-2 py-0.5 rounded w-fit text-xs font-bold text-gray-800">{account.accountNumber}</span>
-                                                <span className="mt-1 font-medium">{account.bankName}</span>
-                                            </div>
                                             <div className="flex items-center mt-2">
                                                 <ShieldCheck className="w-3 h-3 mr-1 text-blue-600" />
-                                                <span className="text-[10px] font-semibold text-blue-600 uppercase tracking-wider">Official Account</span>
+                                                <span className="text-[10px] font-semibold text-blue-600 uppercase tracking-wider">ይፋዊ አካውንት</span>
                                             </div>
                                             {account.registrationFee && (
                                                 <div className="mt-3 bg-blue-50 border border-blue-100 rounded-lg px-3 py-1.5 inline-block">
-                                                    <span className="text-xs text-blue-600 font-bold uppercase">Fee: </span>
+                                                    <span className="text-xs text-blue-600 font-bold uppercase">ክፍያ፡ </span>
                                                     <span className="text-sm font-black text-blue-800">{account.registrationFee} ETB</span>
                                                 </div>
                                             )}

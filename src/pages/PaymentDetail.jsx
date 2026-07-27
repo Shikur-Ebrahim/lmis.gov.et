@@ -62,8 +62,8 @@ export default function PaymentDetail() {
         return (
             <div className="min-h-screen flex items-center justify-center p-6 text-center">
                 <div>
-                    <p className="text-gray-500 mb-4 font-bold">No payment method selected.</p>
-                    <button onClick={() => navigate("/payment-methods")} className="text-blue-600 font-black underline tracking-widest text-xs">Return to Methods</button>
+                    <p className="text-gray-500 mb-4 font-bold">ምንም የክፍያ ዘዴ አልተመረጠም።</p>
+                    <button onClick={() => navigate("/payment-methods")} className="text-blue-600 font-black underline tracking-widest text-xs">ወደ ክፍያ ዘዴዎች ይመለሱ</button>
                 </div>
             </div>
         )
@@ -72,7 +72,7 @@ export default function PaymentDetail() {
     const handleCopy = (text, field) => {
         navigator.clipboard.writeText(text)
         setCopiedField(field)
-        showToast("Copied to clipboard", "success")
+        showToast("ወደ ክሊፕቦርድ ተቀድቷል", "success")
         setTimeout(() => setCopiedField(null), 2000)
     }
 
@@ -91,7 +91,7 @@ export default function PaymentDetail() {
 
     const handleFinish = async () => {
         if (!screenshot) {
-            setError("Please upload a payment screenshot.")
+            setError("እባክዎ የክፍያ ቅጽበታዊ ገጽ እይታ (ስክሪንሾት) ይስቀሉ።")
             return
         }
 
@@ -117,8 +117,8 @@ export default function PaymentDetail() {
             setIsSuccess(true)
         } catch (err) {
             console.error("Payment submission error:", err)
-            setError("Failed to submit payment details. Please try again.")
-            showToast("Failed to submit payment details.", "error")
+            setError("የክፍያ ዝርዝሮችን ማቅረብ አልተሳካም። እባክዎ እንደገና ይሞክሩ።")
+            showToast("የክፍያ ዝርዝሮችን ማቅረብ አልተሳካም።", "error")
         } finally {
             setUploading(false)
         }
@@ -132,23 +132,23 @@ export default function PaymentDetail() {
                         <CheckCircle2 className="w-10 h-10 text-green-600" />
                     </div>
                     <div>
-                        <h2 className="text-2xl font-black text-gray-900 mb-2">Submission Successful!</h2>
+                        <h2 className="text-2xl font-black text-gray-900 mb-2">ማቅረቡ ተሳክቷል!</h2>
                         <p className="text-gray-500 font-medium text-sm leading-relaxed">
-                            Your payment screenshot and applicant data have been securely submitted. 
-                            You are now in the <strong>Pending Admin Verification</strong> stage. 
+                            የክፍያዎ ቅጽበታዊ ገጽ እይታ እና የአመልካች መረጃዎ ደህንነቱ በተጠበቀ ሁኔታ ገብተዋል።
+                            አሁን <strong>በአስተዳዳሪ ማረጋገጫ በመጠባበቅ ላይ</strong> ደረጃ ላይ ነዎት። 
                         </p>
                     </div>
                     <div className="bg-blue-50 border-2 border-blue-100 p-4 rounded-2xl text-left">
-                        <h4 className="font-black text-blue-900 text-sm mb-1">What's next?</h4>
+                        <h4 className="font-black text-blue-900 text-sm mb-1">ቀጣዩ ምንድን ነው?</h4>
                         <p className="text-xs text-blue-700 leading-relaxed font-semibold">
-                            An administrator will review your payment. Once verified, your official profile will be automatically created and you will be notified.
+                            አስተዳዳሪ ክፍያዎን ይገመግማል። አንዴ ከተረጋገጠ፣ የእርስዎ ይፋዊ መገለጫ በራስ ሰር ይፈጠራል እናም ያሳውቆታል።
                         </p>
                     </div>
                     <button
                         onClick={() => navigate("/")}
                         className="w-full py-4 bg-gray-900 text-white font-black rounded-2xl shadow-xl hover:bg-black transition-all active:scale-95 text-sm"
                     >
-                        Return to Home
+                        ወደ መነሻ ይመለሱ
                     </button>
                 </div>
             </div>
@@ -165,7 +165,7 @@ export default function PaymentDetail() {
                 >
                     <ChevronLeft className="w-6 h-6 text-gray-900" />
                 </button>
-                <h2 className="text-xl font-black text-gray-900 tracking-tight">{account.paymentMethod} Payment</h2>
+                <h2 className="text-xl font-black text-gray-900 tracking-tight">የ {account.paymentMethod} ክፍያ</h2>
                 <div className="w-10" />
             </div>
 
@@ -179,10 +179,10 @@ export default function PaymentDetail() {
                             <CreditCard className="w-10 h-10 text-blue-600" />
                         )}
                     </div>
-                    <h1 className="text-xl sm:text-2xl font-black text-gray-900 leading-tight">Complete Your Payment</h1>
+                    <h1 className="text-xl sm:text-2xl font-black text-gray-900 leading-tight">ክፍያዎን ያጠናቅቁ</h1>
                     <div className="bg-blue-50/50 p-4 rounded-3xl border border-blue-100/50">
                         <p className="text-sm font-bold text-blue-900 leading-relaxed">
-                            Copy the {account.paymentMethod?.toLowerCase() === 'telebirr' ? 'phone' : 'account'} number and pay using this {account.paymentMethod?.toLowerCase() === 'telebirr' ? 'phone' : 'account'} number. After finished using this account, send the payment screenshot.
+                            ይህን የ{account.paymentMethod?.toLowerCase() === 'telebirr' ? 'ስልክ' : 'አካውንት'} ቁጥር ኮፒ አድርገው ይክፈሉ። ክፍያውን ከፈጸሙ በኋላ፣ የክፍያውን ቅጽበታዊ ገጽ እይታ (ስክሪንሾት) ይላኩ።
                         </p>
                     </div>
                 </div>
@@ -191,14 +191,14 @@ export default function PaymentDetail() {
                 <div className="bg-white rounded-[2.5rem] overflow-hidden shadow-2xl shadow-blue-100/50 border border-white">
                     <div className="bg-blue-600 p-8 text-white">
                         <div className="flex items-center justify-between mb-8">
-                            <span className="text-xs font-semibold opacity-90">Official payment channel</span>
+                            <span className="text-xs font-semibold opacity-90">ይፋዊ የክፍያ መንገድ</span>
                             <ShieldCheck className="w-5 h-5 text-blue-200" />
                         </div>
 
                         <div className="space-y-6">
                             {/* Combine Holder and Number in Same View */}
                             <div className="space-y-1">
-                                <p className="text-xs font-semibold opacity-80">Account holder name</p>
+                                <p className="text-xs font-semibold opacity-80">የአካውንት ባለቤት ስም</p>
                                 <div className="flex items-center justify-between">
                                     <p className="text-xl font-black truncate">{account.bankName}</p>
                                     <button
@@ -214,7 +214,7 @@ export default function PaymentDetail() {
 
                             <div className="space-y-1">
                                 <p className="text-xs font-semibold opacity-80">
-                                    {account.paymentMethod?.toLowerCase() === 'telebirr' ? 'Phone Number' : 'Account Number'}
+                                    {account.paymentMethod?.toLowerCase() === 'telebirr' ? 'ስልክ ቁጥር' : 'አካውንት ቁጥር'}
                                 </p>
                                 <div className="flex items-center justify-between">
                                     <p className="text-2xl sm:text-3xl font-black font-mono tracking-tighter">{account.accountNumber}</p>
@@ -231,7 +231,7 @@ export default function PaymentDetail() {
                                 <>
                                     <div className="h-px bg-white/20" />
                                     <div className="space-y-1 bg-blue-700/50 p-4 rounded-2xl border border-blue-500/30">
-                                        <p className="text-xs font-semibold opacity-90 uppercase tracking-wider text-blue-200">Amount to pay</p>
+                                        <p className="text-xs font-semibold opacity-90 uppercase tracking-wider text-blue-200">የሚከፈል መጠን</p>
                                         <p className="text-3xl font-black">{account.registrationFee} <span className="text-lg opacity-80">ETB</span></p>
                                     </div>
                                 </>
@@ -241,7 +241,7 @@ export default function PaymentDetail() {
 
                     <div className="px-8 py-4 bg-gray-50 flex items-center justify-center space-x-2">
                         <Info className="w-4 h-4 text-gray-400" />
-                        <span className="text-xs font-semibold text-gray-500">Tap to copy details immediately</span>
+                        <span className="text-xs font-semibold text-gray-500">ዝርዝሮችን ወዲያውኑ ኮፒ ለማድረግ ይጫኑ</span>
                     </div>
                 </div>
 
@@ -262,7 +262,7 @@ export default function PaymentDetail() {
                         </div>
                         {screenshot && (
                             <span className="text-xs font-semibold text-green-500 flex items-center">
-                                <CheckCircle2 className="w-3 h-3 mr-1" /> Ready to finish
+                                <CheckCircle2 className="w-3 h-3 mr-1" /> ለማጠናቀቅ ዝግጁ ነው
                             </span>
                         )}
                     </div>
@@ -276,7 +276,7 @@ export default function PaymentDetail() {
                                     <div className="bg-white/20 backdrop-blur-md p-4 rounded-full mb-2">
                                         <ImageIcon className="w-8 h-8 text-white" />
                                     </div>
-                                    <span className="text-white font-bold text-sm">Click to change receipt</span>
+                                    <span className="text-white font-bold text-sm">ደረሰኙን ለመቀየር ይጫኑ</span>
                                 </div>
                             </>
                         ) : (
@@ -284,9 +284,9 @@ export default function PaymentDetail() {
                                 <div className="w-16 h-16 bg-blue-50 rounded-3xl flex items-center justify-center mb-4">
                                     <ImageIcon className="w-8 h-8 text-blue-500" />
                                 </div>
-                                <p className="text-sm font-black text-gray-800 tracking-tight">Upload screenshot</p>
+                                <p className="text-sm font-black text-gray-800 tracking-tight">ቅጽበታዊ ገጽ እይታ (ስክሪንሾት) ይስቀሉ</p>
                                 <p className="text-xs text-gray-500 font-medium mt-2 leading-relaxed">
-                                    Select the transaction success <br /> screen from your gallery
+                                    የክፍያውን ማረጋገጫ ምስል <br /> ከጋለሪዎ ይምረጡ
                                 </p>
                             </div>
                         )}
@@ -306,7 +306,7 @@ export default function PaymentDetail() {
                         <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
                     ) : (
                         <>
-                            <span>Submit payment</span>
+                            <span>ክፍያውን ያስገቡ</span>
                             <ArrowRight className="w-6 h-6" />
                         </>
                     )}
