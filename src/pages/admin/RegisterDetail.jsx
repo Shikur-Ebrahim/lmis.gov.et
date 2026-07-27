@@ -31,6 +31,7 @@ import {
   ClipboardCheck,
   Loader2
 } from "lucide-react"
+import { getOptimizedImageUrl } from "../../utils/cloudinary"
 
 const flagMapping = {
   "Canada": "canada flag.png",
@@ -496,7 +497,12 @@ const RegisterDetail = () => {
                                 </div>
                               ) : (
                                 <>
-                                  <img src={doc.url} className="w-full h-full object-contain p-2 transition-transform group-hover:scale-105" alt={doc.label} />
+                                  <img 
+                                    src={getOptimizedImageUrl(doc.url, { width: 800, height: 800, crop: 'fit', quality: 'auto' })} 
+                                    className="w-full h-full object-contain p-2 transition-transform group-hover:scale-105" 
+                                    alt={doc.label} 
+                                    loading="lazy"
+                                  />
                                   <a href={doc.url} target="_blank" className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity z-10 rounded-xl">
                                     <Eye className="text-white" size={32} />
                                   </a>

@@ -10,6 +10,7 @@ import {
   AlertCircle, DollarSign, Shield, PenTool, ClipboardCheck,
   Eye, Home, Truck, Coffee, Plane, X, Loader2
 } from "lucide-react"
+import { getOptimizedImageUrl } from "../utils/cloudinary"
 
 const flagMapping = {
   "Canada": "canada flag.png",
@@ -327,7 +328,12 @@ export default function ApplicantDetail() {
                         </div>
                       ) : (
                         <>
-                          <img src={d.url} className="w-full h-full object-contain p-2 transition-transform group-hover:scale-105" alt={d.label} />
+                          <img 
+                            src={getOptimizedImageUrl(d.url, { width: 800, height: 800, crop: 'fit', quality: 'auto' })} 
+                            className="w-full h-full object-contain p-2 transition-transform group-hover:scale-105" 
+                            alt={d.label} 
+                            loading="lazy"
+                          />
                           <a href={d.url} target="_blank" rel="noopener noreferrer" className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity z-10 rounded-xl">
                             <Eye className="text-white" size={32} />
                           </a>
