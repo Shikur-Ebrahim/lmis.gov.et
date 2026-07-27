@@ -5,186 +5,255 @@ import { Camera, CheckCircle, AlertCircle, Loader2, Volume2, XCircle } from 'luc
 
 export default function FaceVerification({ profilePhoto, onVerified, onClose }) {
   const webcamRef = useRef(null);
-  const [modelsLoaded, setModelsLoaded] = useState(false);
-  const [verifying, setVerifying] = useState(false);
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(false);
-  const [referenceDescriptor, setReferenceDescriptor] = useState(null);
+  const [cameraReady, setCameraReady] = useState(false);
+  const [scanning, setScanning] = useState(false);
+  const [result, setResult] = useState(null); // null | 'verified' | 'declined'
+  const [statusText, setStatusText] = useState('Preparing camera...');
+  const readyRef = useRef({ models: false, descriptor: null });
+  const scanningRef = useRef(false);
+  const resultRef = useRef(null);
 
-  // Load models from CDN
+  const speak = useCallback((text) => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.rate = 0.95;
+      window.speechSynthesis.speak(utter);
+    }
+  }, []);
+
+  // Load models + profile photo analysis silently in background
   useEffect(() => {
-    const loadModels = async () => {
+    const init = async () => {
       try {
+        // Step 1: load models
         const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
         await Promise.all([
           faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
           faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
           faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
         ]);
-        setModelsLoaded(true);
-      } catch (err) {
-        console.error("Failed to load face-api models", err);
-        setError("Failed to load AI models. Please check your internet connection.");
-      }
-    };
-    loadModels();
-  }, []);
+        readyRef.current.models = true;
 
-  // Process reference photo
-  useEffect(() => {
-    if (!modelsLoaded || !profilePhoto) return;
-
-    const processReferencePhoto = async () => {
-      try {
-        const imageUrl = URL.createObjectURL(profilePhoto);
-        const img = await faceapi.fetchImage(imageUrl);
-        const detection = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
-        
-        if (detection) {
-          setReferenceDescriptor(detection.descriptor);
-        } else {
-          setError("No face detected in your uploaded profile photo. Verification cannot proceed.");
-        }
-      } catch (err) {
-        console.error("Error processing profile photo", err);
-        setError("Failed to analyze the profile photo.");
-      }
-    };
-
-    processReferencePhoto();
-  }, [modelsLoaded, profilePhoto]);
-
-  // Handle TTS
-  const speak = useCallback((text) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.9;
-      window.speechSynthesis.speak(utterance);
-    }
-  }, []);
-
-  // Trigger initial TTS
-  useEffect(() => {
-    if (modelsLoaded && referenceDescriptor && !success && !error) {
-      speak("Please close your face to the camera");
-    }
-  }, [modelsLoaded, referenceDescriptor, success, error, speak]);
-
-  // Auto-scan logic
-  useEffect(() => {
-    if (!modelsLoaded || !referenceDescriptor || success || error || verifying) return;
-
-    const verifyFace = async () => {
-      if (!webcamRef.current) return;
-      setVerifying(true);
-
-      try {
-        const imageSrc = webcamRef.current.getScreenshot();
-        if (!imageSrc) {
-          setVerifying(false);
-          return;
-        }
-
-        const img = new Image();
-        img.src = imageSrc;
-        await new Promise((resolve) => { img.onload = resolve; });
-
-        const detection = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
-
-        if (detection) {
-          const distance = faceapi.euclideanDistance(referenceDescriptor, detection.descriptor);
-          
-          if (distance < 0.6) {
-            setSuccess(true);
-            speak("Verification successful.");
-            setTimeout(() => {
-              onVerified();
-            }, 2000);
-            return;
-          } else {
-            // Keep scanning, but notify occasionally or just let the loop continue
-            // To prevent spamming voice, we just silently fail and try again next tick
-            console.log("Face not matching, distance:", distance);
+        // Step 2: extract reference descriptor from profile photo
+        if (profilePhoto) {
+          const imageUrl = URL.createObjectURL(profilePhoto);
+          const img = await faceapi.fetchImage(imageUrl);
+          const det = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
+          if (det) {
+            readyRef.current.descriptor = det.descriptor;
           }
         }
       } catch (err) {
-        console.error(err);
+        console.error('FaceVerification init error:', err);
       }
-      
-      setVerifying(false);
     };
+    init();
+  }, [profilePhoto]);
 
-    const interval = setInterval(() => {
-      verifyFace();
-    }, 1500);
+  // Speak instruction when camera is ready
+  useEffect(() => {
+    if (cameraReady) {
+      setStatusText('Please look directly at the camera');
+      speak('Please close your face to the camera');
+    }
+  }, [cameraReady, speak]);
 
-    return () => clearInterval(interval);
-  }, [modelsLoaded, referenceDescriptor, success, error, verifying, speak, onVerified]);
+  // Auto-scan loop — runs every 1.2s once camera is ready
+  useEffect(() => {
+    if (!cameraReady) return;
+
+    const loop = setInterval(async () => {
+      if (scanningRef.current || resultRef.current) return;
+      if (!webcamRef.current) return;
+
+      // Must have models to detect face at all
+      if (!readyRef.current.models) return;
+
+      scanningRef.current = true;
+      setScanning(true);
+
+      try {
+        const imgSrc = webcamRef.current.getScreenshot();
+        if (!imgSrc) { scanningRef.current = false; setScanning(false); return; }
+
+        const img = new Image();
+        img.src = imgSrc;
+        await new Promise(r => { img.onload = r; });
+
+        // Detect face in webcam frame
+        const liveDetection = await faceapi
+          .detectSingleFace(img)
+          .withFaceLandmarks()
+          .withFaceDescriptor();
+
+        if (!liveDetection) {
+          setStatusText('No face detected — please look at the camera');
+          scanningRef.current = false;
+          setScanning(false);
+          return;
+        }
+
+        setStatusText('Face detected — verifying...');
+
+        // If profile descriptor is ready, compare
+        if (readyRef.current.descriptor) {
+          const distance = faceapi.euclideanDistance(readyRef.current.descriptor, liveDetection.descriptor);
+          if (distance < 0.6) {
+            resultRef.current = 'verified';
+            setResult('verified');
+            speak('Verification successful. Identity confirmed.');
+            setTimeout(() => { onVerified(); }, 2200);
+          } else {
+            resultRef.current = 'declined';
+            setResult('declined');
+            speak('Verification declined. Your face does not match the profile photo.');
+          }
+        } else {
+          // Profile photo analysis not done yet — just confirm face was scanned
+          // Use a simple liveness check (just that a face is present) and accept
+          // Actually wait a tiny bit more for the descriptor
+          setStatusText('Checking identity...');
+          // retry in next tick
+        }
+      } catch (err) {
+        console.error('Scan error:', err);
+      }
+
+      scanningRef.current = false;
+      setScanning(false);
+    }, 1200);
+
+    return () => clearInterval(loop);
+  }, [cameraReady, speak, onVerified]);
+
+  const handleRetry = () => {
+    resultRef.current = null;
+    setResult(null);
+    setStatusText('Please look directly at the camera');
+    speak('Please close your face to the camera');
+  };
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="relative w-full max-w-md bg-white rounded-[32px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-500">
+    <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center bg-black/85 backdrop-blur-sm animate-in fade-in duration-300">
+      <div className="relative w-full max-w-md bg-white rounded-t-[32px] sm:rounded-[32px] overflow-hidden shadow-2xl animate-in slide-in-from-bottom-8 sm:zoom-in-95 duration-500">
         
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gray-50/50">
+        <div className="flex items-center justify-between px-6 py-5 bg-gradient-to-r from-blue-600 to-blue-500">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-              <Camera className="w-5 h-5 text-blue-600" />
+            <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
+              <Camera className="w-5 h-5 text-white" />
             </div>
-            <h2 className="text-xl font-bold text-gray-800">Face Verification</h2>
+            <div>
+              <h2 className="text-lg font-black text-white">Face Verification</h2>
+              <p className="text-xs text-blue-100 font-medium">Identity Check</p>
+            </div>
           </div>
-          <button onClick={onClose} className="p-2 text-gray-400 hover:text-red-500 transition-colors bg-white rounded-full shadow-sm">
-            <XCircle size={24} />
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-white hover:bg-white/30 transition-colors"
+          >
+            <XCircle size={20} />
           </button>
         </div>
 
-        {/* Content */}
-        <div className="p-6 flex flex-col items-center gap-6">
-          {success ? (
-            <div className="py-8 flex flex-col items-center gap-4 w-full animate-in zoom-in duration-500">
-              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-2">
-                <CheckCircle className="w-10 h-10 text-green-600" />
+        {/* Camera + Result */}
+        <div className="p-6 flex flex-col items-center gap-5">
+
+          {/* Camera Feed — always visible */}
+          {result !== 'verified' && (
+            <div className="relative w-full aspect-[3/4] sm:aspect-[4/3] rounded-3xl overflow-hidden bg-black shadow-2xl border-4 border-gray-100">
+              <Webcam
+                audio={false}
+                ref={webcamRef}
+                screenshotFormat="image/jpeg"
+                videoConstraints={{ facingMode: 'user' }}
+                onUserMedia={() => setCameraReady(true)}
+                className="w-full h-full object-cover scale-x-[-1]"
+              />
+
+              {/* Oval face guide overlay */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div
+                  className="border-4 border-dashed border-white/60 rounded-full"
+                  style={{ width: '60%', height: '70%' }}
+                />
               </div>
-              <h3 className="text-2xl font-black text-green-800 uppercase tracking-tight">Verified!</h3>
-              <p className="text-gray-600 font-medium text-center">Your identity has been successfully confirmed.</p>
+
+              {/* Scanning badge */}
+              {cameraReady && (
+                <div className={`absolute top-4 left-0 right-0 flex justify-center`}>
+                  <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest shadow-lg
+                    ${scanning ? 'bg-blue-600 text-white' : 'bg-black/50 backdrop-blur-sm text-white'}`}>
+                    {scanning
+                      ? <><Loader2 size={14} className="animate-spin" /> Scanning...</>
+                      : <><div className="w-2 h-2 rounded-full bg-red-400 animate-pulse" /> Live</>
+                    }
+                  </div>
+                </div>
+              )}
+
+              {/* Not ready overlay */}
+              {!cameraReady && (
+                <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center gap-3">
+                  <Loader2 className="w-8 h-8 text-white animate-spin" />
+                  <p className="text-white text-sm font-bold">Starting camera...</p>
+                </div>
+              )}
             </div>
-          ) : !modelsLoaded || !referenceDescriptor ? (
-            <div className="w-full aspect-[4/3] bg-gray-50 rounded-2xl flex flex-col items-center justify-center gap-4 border-2 border-dashed border-gray-200">
-              <Loader2 className="w-10 h-10 text-blue-500 animate-spin" />
-              <p className="text-gray-600 font-bold px-6 text-center">
-                {!modelsLoaded ? "Loading AI models..." : "Analyzing profile photo..."}
-              </p>
+          )}
+
+          {/* Verified State */}
+          {result === 'verified' && (
+            <div className="py-6 flex flex-col items-center gap-4 w-full animate-in zoom-in duration-500">
+              <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center shadow-lg shadow-green-100">
+                <CheckCircle className="w-12 h-12 text-green-500" />
+              </div>
+              <div className="text-center">
+                <h3 className="text-2xl font-black text-green-700 uppercase">Verified!</h3>
+                <p className="text-sm text-gray-500 mt-1 font-medium">Identity confirmed. Proceeding...</p>
+              </div>
             </div>
-          ) : (
-            <div className="w-full flex flex-col items-center gap-4">
-              <div className="relative w-full aspect-[3/4] sm:aspect-square rounded-3xl overflow-hidden border-4 border-blue-100 shadow-lg bg-black">
+          )}
+
+          {/* Declined State */}
+          {result === 'declined' && (
+            <div className="py-4 flex flex-col items-center gap-4 w-full">
+              <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center shadow-lg shadow-red-100 animate-in zoom-in duration-500">
+                <AlertCircle className="w-12 h-12 text-red-500" />
+              </div>
+              <div className="text-center">
+                <h3 className="text-2xl font-black text-red-600 uppercase">Declined</h3>
+                <p className="text-sm text-gray-500 mt-1 font-medium">
+                  Your face does not match the profile photo.
+                </p>
+              </div>
+              {/* Camera visible for retry */}
+              <div className="relative w-full aspect-[3/4] sm:aspect-[4/3] rounded-3xl overflow-hidden bg-black shadow-xl border-4 border-red-100">
                 <Webcam
                   audio={false}
                   ref={webcamRef}
                   screenshotFormat="image/jpeg"
-                  videoConstraints={{ facingMode: "user" }}
-                  className="w-full h-full object-cover transform scale-x-[-1]"
+                  videoConstraints={{ facingMode: 'user' }}
+                  className="w-full h-full object-cover scale-x-[-1]"
                 />
-                <div className="absolute inset-0 border-[4px] border-dashed border-white/40 rounded-3xl m-6 pointer-events-none transition-all duration-1000 animate-pulse"></div>
-                
-                {verifying && (
-                  <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-md rounded-full px-3 py-1.5 flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 text-white animate-spin" />
-                    <span className="text-xs font-bold text-white tracking-widest uppercase">Scanning</span>
-                  </div>
-                )}
               </div>
-              <p className="text-sm font-bold text-gray-600 text-center flex items-center gap-2">
-                <Volume2 size={16} className="text-blue-500 animate-pulse" /> Please look directly at the camera
-              </p>
+              <button
+                type="button"
+                onClick={handleRetry}
+                className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-200 active:scale-95 transition-all"
+              >
+                <Camera size={18} /> Try Again
+              </button>
             </div>
           )}
 
-          {error && (
-            <div className="w-full p-4 bg-red-50 text-red-700 text-sm font-bold rounded-xl flex items-start gap-3 border border-red-200 animate-in slide-in-from-bottom-2">
-              <AlertCircle size={20} className="flex-shrink-0 mt-0.5" />
-              <p>{error}</p>
+          {/* Status text */}
+          {result !== 'verified' && result !== 'declined' && (
+            <div className="flex items-center gap-2 text-gray-500 text-sm font-medium">
+              <Volume2 size={16} className="text-blue-400 animate-pulse flex-shrink-0" />
+              <p>{statusText}</p>
             </div>
           )}
         </div>
