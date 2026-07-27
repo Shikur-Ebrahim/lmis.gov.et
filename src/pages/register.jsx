@@ -288,6 +288,32 @@ const TRANSLATIONS = {
     "Oslo": "ኦስሎ", "Bergen": "በርገን",
     "Copenhagen": "ኮፐንሃገን", "Aarhus": "አርሁስ",
     "Zurich": "ዙሪክ", "Geneva": "ጄኔቫ",
+    // Final Sections (Payment, Summary, Verify)
+    "Work Agreement Summary": "የስራ ስምምነት ማጠቃለያ",
+    "I hereby confirm my readiness to work in any of the following 5 countries and their respective cities as part of this official agreement.": "በዚህ ይፋዊ ስምምነት መሰረት ከዚህ በታች ባሉት 5 አገሮች እና ከተሞቻቸው ውስጥ ለመስራት ፈቃደኛ መሆኔን አረጋግጣለሁ።",
+    "My Signature": "ፊርማዬ",
+    "I confirmed this agreement": "ይህን ስምምነት አረጋግጫለሁ",
+    "Please proceed to finalize submission": "እባክዎ ማቅረቡን ለማጠናቀቅ ይቀጥሉ",
+    "Identity Verified": "ማንነት ተረጋግጧል",
+    "Your face matched your profile photo.": "ፊትዎ ከፕሮፋይል ፎቶዎ ጋር ተዛምዷል።",
+    "Start Face Verification": "የፊት ማረጋገጫ ጀምር",
+    "Verification Failed": "ማረጋገጫው አልተሳካም",
+    "No active payment was found for the phone number": "ለስልክ ቁጥሩ ምንም ንቁ ክፍያ አልተገኘም",
+    "Please pay the submission fee to proceed.": "እባክዎ ለመቀጠል የማቅረቢያ ክፍያ ይክፈሉ።",
+    "Pay Now": "አሁን ይክፈሉ",
+    "Official Notification": "ይፋዊ ማሳወቂያ",
+    "Legally required action": "በህግ የሚፈለግ እርምጃ",
+    "Dear": "ውድ",
+    "Sir/Madam": "አመልካች",
+    "You have officially agreed to work in your selected countries. To send your agreement for acceptance, you must pay the": "በመረጧቸው አገሮች ውስጥ ለመስራት በይፋ ተስማምተዋል። ስምምነትዎን ተቀባይነት እንዲያገኝ ለመላክ መክፈል አለብዎት ",
+    "Submission Fee": "የማቅረቢያ ክፍያ",
+    "yourself.": "በራስዎ።",
+    "International Company Benefits": "የዓለም አቀፍ ኩባንያ ጥቅማጥቅሞች",
+    "Visa Process": "የቪዛ ሂደት",
+    "Flight Ticket": "የበረራ ቲኬት",
+    "The hiring company in your selected country covers all subsequent process costs starting from flight tickets and visa fees. You will repay these costs from your monthly salary after you start working there.": "በመረጡት አገር ያለው ቀጣሪ ኩባንያ ከበረራ ቲኬት እና ከቪዛ ክፍያ ጀምሮ ሁሉንም ቀጣይ የሂደት ወጪዎች ይሸፍናል። እዚያ መስራት ከጀመሩ በኋላ እነዚህን ወጪዎች ከወርሃዊ ደሞዝዎ ይመልሳሉ።",
+    "Uploading Documents...": "ሰነዶችን በመጫን ላይ...",
+    "Pay Submission Fee": "የማቅረቢያ ክፍያ ይክፈሉ",
   },
   en: {
     title: "Employment Agreement",
@@ -1277,10 +1303,10 @@ export default function Register() {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-2">
               <AlertCircle className="w-8 h-8 text-red-600" />
             </div>
-            <h3 className="text-2xl font-black text-red-900">Verification Failed</h3>
+            <h3 className="text-2xl font-black text-red-900">{t('Verification Failed')}</h3>
             <p className="text-red-700 font-medium leading-relaxed max-w-md mx-auto">
-              No active payment was found for the phone number <span className="font-bold underline">+251{formData.phoneNumber}</span>. 
-              Please pay the submission fee to proceed.
+              {t('No active payment was found for the phone number')} <span className="font-bold underline">+251{formData.phoneNumber}</span>. 
+              {t('Please pay the submission fee to proceed.')}
             </p>
             
             <div className="flex justify-center pt-4">
@@ -1289,7 +1315,7 @@ export default function Register() {
                 onClick={() => navigate("/payment-methods", { state: { phoneNumber: `+251${formData.phoneNumber}` } })}
                 className="px-12 py-4 bg-red-600 text-white rounded-2xl font-black text-lg hover:bg-red-700 shadow-xl shadow-red-200 transition-all flex items-center justify-center gap-3"
               >
-                <CreditCard size={22} /> Pay Now
+                <CreditCard size={22} /> {t('Pay Now')}
               </button>
             </div>
           </div>
@@ -1305,38 +1331,36 @@ export default function Register() {
             <div className="inline-flex items-center justify-center w-14 h-14 bg-blue-50 rounded-2xl mb-4">
               <Bell className="w-7 h-7 text-blue-600 animate-bounce" />
             </div>
-            <h3 className="text-lg font-black text-gray-900">Official Notification</h3>
-            <p className="text-gray-400 font-medium text-xs mt-1">Legally required action</p>
+            <h3 className="text-lg font-black text-gray-900">{t('Official Notification')}</h3>
+            <p className="text-gray-400 font-medium text-xs mt-1">{t('Legally required action')}</p>
           </div>
 
           <div className="p-8 sm:p-12 space-y-10 text-center">
             <div className="space-y-6">
               <p className="text-lg font-bold text-gray-800">
-                Dear <span className="text-blue-600">{formData.fullName || "Sir/Madam"}</span>,
+                {t('Dear')} <span className="text-blue-600">{formData.fullName || t('Sir/Madam')}</span>,
               </p>
               <p className="text-gray-600 leading-relaxed font-medium">
-                You have officially agreed to work in your selected countries. To send your agreement for acceptance, 
-                you must pay the <span className="font-black text-blue-700">Submission Fee</span> yourself.
+                {t('You have officially agreed to work in your selected countries. To send your agreement for acceptance, you must pay the')} <span className="font-black text-blue-700">{t('Submission Fee')}</span> {t('yourself.')}
               </p>
               
               <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6 space-y-4">
                 <div className="flex items-center gap-3 text-blue-800 font-bold text-sm justify-center">
                   <ShieldCheck size={20} className="text-blue-600" />
-                  International Company Benefits
+                  {t('International Company Benefits')}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-white p-4 rounded-xl shadow-sm border border-blue-100">
                     <Truck className="w-6 h-6 text-blue-600 mx-auto mb-2" />
-                    <span className="text-[10px] font-semibold text-gray-500 block">Visa Process</span>
+                    <span className="text-[10px] font-semibold text-gray-500 block">{t('Visa Process')}</span>
                   </div>
                   <div className="bg-white p-4 rounded-xl shadow-sm border border-blue-100">
                     <Ticket className="w-6 h-6 text-blue-600 mx-auto mb-2" />
-                    <span className="text-[10px] font-semibold text-gray-500 block">Flight Ticket</span>
+                    <span className="text-[10px] font-semibold text-gray-500 block">{t('Flight Ticket')}</span>
                   </div>
                 </div>
                 <p className="text-xs text-blue-700 font-bold leading-relaxed px-2">
-                  The hiring company in your selected country covers all subsequent process costs starting from flight tickets and visa fees. 
-                  You will repay these costs from your monthly salary after you start working there.
+                  {t('The hiring company in your selected country covers all subsequent process costs starting from flight tickets and visa fees. You will repay these costs from your monthly salary after you start working there.')}
                 </p>
               </div>
             </div>
@@ -1350,11 +1374,11 @@ export default function Register() {
               {loading ? (
                 <>
                   <div className="animate-spin h-6 w-6 border-2 border-white border-t-transparent rounded-full" />
-                  Uploading Documents...
+                  {t('Uploading Documents...')}
                 </>
               ) : (
                 <>
-                  <CreditCard size={26} /> Pay Submission Fee <ArrowRight className="group-hover:translate-x-1 transition-transform" />
+                  <CreditCard size={26} /> {t('Pay Submission Fee')} <ArrowRight className="group-hover:translate-x-1 transition-transform" />
                 </>
               )}
             </button>
@@ -1511,8 +1535,8 @@ export default function Register() {
                 <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
               </div>
               <div>
-                <p className="font-bold text-green-800 text-sm">Identity Verified</p>
-                <p className="text-xs text-green-600">Your face matched your profile photo.</p>
+                <p className="font-bold text-green-800 text-sm">{t('Identity Verified')}</p>
+                <p className="text-xs text-green-600">{t('Your face matched your profile photo.')}</p>
               </div>
             </div>
           )}
@@ -1523,7 +1547,7 @@ export default function Register() {
               className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold flex items-center justify-center gap-3 shadow-lg shadow-blue-200 transition-all active:scale-95 animate-in slide-in-from-bottom-4 duration-500"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-              Start Face Verification
+              {t('Start Face Verification')}
             </button>
           )}
           {errors.faceVerified && <p className="text-red-500 text-sm font-bold text-center mt-2">{errors.faceVerified}</p>}
@@ -1539,9 +1563,9 @@ export default function Register() {
                 <div className="inline-flex items-center justify-center w-14 h-14 bg-blue-50 rounded-2xl mb-2">
                   <ClipboardCheck className="w-7 h-7 text-blue-600" />
                 </div>
-                <h3 className="text-lg font-black text-gray-900 tracking-tight">Work Agreement Summary</h3>
+                <h3 className="text-lg font-black text-gray-900 tracking-tight">{t('Work Agreement Summary')}</h3>
                 <p className="text-gray-500 font-bold text-sm max-w-md mx-auto leading-relaxed">
-                  I hereby confirm my readiness to work in any of the following 5 countries and their respective cities as part of this official agreement.
+                  {t('I hereby confirm my readiness to work in any of the following 5 countries and their respective cities as part of this official agreement.')}
                 </p>
               </div>
 
@@ -1556,8 +1580,8 @@ export default function Register() {
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-blue-600 mb-1">{country}</p>
-                      <p className="text-lg font-black text-gray-900 truncate">{formData.selectedCities[country]}</p>
+                      <p className="text-xs font-bold text-blue-600 mb-1">{t(country)}</p>
+                      <p className="text-lg font-black text-gray-900 truncate">{t(formData.selectedCities[country])}</p>
                     </div>
                     <div className="bg-green-100 p-2 rounded-full text-green-600">
                       <CheckCircle size={18} />
@@ -1572,11 +1596,11 @@ export default function Register() {
                     <img src={formData.signatureData} className="w-full h-full object-contain" alt="Signature" />
                   </div>
                   <div className="text-left">
-                    <p className="text-[10px] font-semibold text-blue-100">My Signature</p>
-                    <p className="text-sm font-bold">I confirmed this agreement</p>
+                    <p className="text-[10px] font-semibold text-blue-100">{t('My Signature')}</p>
+                    <p className="text-sm font-bold">{t('I confirmed this agreement')}</p>
                   </div>
                 </div>
-                <p className="text-xs font-bold text-blue-100 italic opacity-90">Please proceed to finalize submission</p>
+                <p className="text-xs font-bold text-blue-100 italic opacity-90">{t('Please proceed to finalize submission')}</p>
               </div>
             </div>
           </div>
