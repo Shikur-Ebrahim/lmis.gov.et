@@ -767,7 +767,7 @@ export default function Register() {
                       <div className="w-6 h-4 rounded-sm overflow-hidden border shadow-sm bg-gray-100">
                         <img src={`/images/${flagMapping[country]}`} alt="" className="w-full h-full object-cover" />
                       </div>
-                      <span className="text-xs font-black text-blue-600 uppercase tracking-widest">{country}</span>
+                      <span className="text-xs font-semibold text-blue-600">{country}</span>
                     </div>
                     <Globe size={14} className="text-blue-200" />
                   </div>
@@ -1069,8 +1069,8 @@ export default function Register() {
             <div className="inline-flex items-center justify-center w-14 h-14 bg-blue-50 rounded-2xl mb-4">
               <Bell className="w-7 h-7 text-blue-600 animate-bounce" />
             </div>
-            <h3 className="text-2xl font-black uppercase tracking-tight text-gray-900">Official Notification</h3>
-            <p className="text-gray-400 font-bold text-xs uppercase tracking-widest mt-1">Legally Required Action</p>
+            <h3 className="text-lg font-black text-gray-900">Official Notification</h3>
+            <p className="text-gray-400 font-medium text-xs mt-1">Legally required action</p>
           </div>
 
           <div className="p-8 sm:p-12 space-y-10 text-center">
@@ -1084,18 +1084,18 @@ export default function Register() {
               </p>
               
               <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6 space-y-4">
-                <div className="flex items-center gap-3 text-blue-800 font-black text-sm uppercase tracking-widest justify-center">
+                <div className="flex items-center gap-3 text-blue-800 font-bold text-sm justify-center">
                   <ShieldCheck size={20} className="text-blue-600" />
                   International Company Benefits
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-white p-4 rounded-xl shadow-sm border border-blue-100">
                     <Truck className="w-6 h-6 text-blue-600 mx-auto mb-2" />
-                    <span className="text-[10px] font-black text-gray-500 uppercase block">Visa Process</span>
+                    <span className="text-[10px] font-semibold text-gray-500 block">Visa Process</span>
                   </div>
                   <div className="bg-white p-4 rounded-xl shadow-sm border border-blue-100">
                     <Ticket className="w-6 h-6 text-blue-600 mx-auto mb-2" />
-                    <span className="text-[10px] font-black text-gray-500 uppercase block">Flight Ticket</span>
+                    <span className="text-[10px] font-semibold text-gray-500 block">Flight Ticket</span>
                   </div>
                 </div>
                 <p className="text-xs text-blue-700 font-bold leading-relaxed px-2">
@@ -1339,7 +1339,7 @@ export default function Register() {
                 <div className="inline-flex items-center justify-center w-14 h-14 bg-blue-50 rounded-2xl mb-2">
                   <ClipboardCheck className="w-7 h-7 text-blue-600" />
                 </div>
-                <h3 className="text-2xl font-black text-gray-900 tracking-tight uppercase">Work Agreement Summary</h3>
+                <h3 className="text-lg font-black text-gray-900 tracking-tight">Work Agreement Summary</h3>
                 <p className="text-gray-500 font-bold text-sm max-w-md mx-auto leading-relaxed">
                   I hereby confirm my readiness to work in any of the following 5 countries and their respective cities as part of this official agreement.
                 </p>
@@ -1356,7 +1356,7 @@ export default function Register() {
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-black text-blue-600 uppercase tracking-widest mb-1">{country}</p>
+                      <p className="text-xs font-bold text-blue-600 mb-1">{country}</p>
                       <p className="text-lg font-black text-gray-900 truncate">{formData.selectedCities[country]}</p>
                     </div>
                     <div className="bg-green-100 p-2 rounded-full text-green-600">
@@ -1372,7 +1372,7 @@ export default function Register() {
                     <img src={formData.signatureData} className="w-full h-full object-contain" alt="Signature" />
                   </div>
                   <div className="text-left">
-                    <p className="text-[10px] uppercase font-black text-blue-100 tracking-widest">My Signature</p>
+                    <p className="text-[10px] font-semibold text-blue-100">My Signature</p>
                     <p className="text-sm font-bold">I confirmed this agreement</p>
                   </div>
                 </div>
@@ -1405,7 +1405,7 @@ export default function Register() {
         
         {/* Header */}
         <div className="text-center mb-6">
-          <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight mb-2 uppercase">
+          <h1 className="text-lg sm:text-xl font-extrabold text-gray-900 tracking-tight mb-2">
             Employment Agreement
           </h1>
         </div>
