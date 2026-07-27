@@ -17,7 +17,8 @@ import {
   LogOut,
   Building2,
   Video,
-  Share2
+  Share2,
+  FileCheck
 } from "lucide-react"
 
 export default function Sidebar() {
@@ -32,6 +33,7 @@ export default function Sidebar() {
     pendingBiometric: 0,
     unreadRegistrationFees: 0,
     unreadPayments: 0,
+    pendingBankStatements: 0,
   })
 
   const handleLogout = async () => {
@@ -97,12 +99,22 @@ export default function Sidebar() {
       }))
     })
 
+    // Listen for bank statements
+    const unsubBankStmt = onSnapshot(collection(db, "bank-statements"), (snapshot) => {
+      const pending = snapshot.docs.filter(doc => doc.data().status === "pending").length
+      setStats((prev) => ({
+        ...prev,
+        pendingBankStatements: pending,
+      }))
+    })
+
     return () => {
       unsubUsers()
       unsubBiometric()
       unsubFees()
       unsubMessages()
       unsubPayments()
+      unsubBankStmt()
     }
   }, [])
 
@@ -118,6 +130,7 @@ export default function Sidebar() {
     {to: "/admin/Biometric", icon: Activity, label: "Biometric", badge: stats.pendingBiometric, badgeColor: "bg-red-500" },
     { to: "/admin/account", icon: Building2, label: "Accounts" },
     { to: "/admin/social-media", icon: Share2, label: "Social & Support", extraClass: "text-emerald-400 font-bold" },
+    { to: "/admin/bank-statements", icon: FileCheck, label: "Bank Statements", badge: stats.pendingBankStatements, badgeColor: "bg-amber-500 text-black animate-bounce", extraClass: "text-amber-300 font-bold" },
   ]
 
   return (

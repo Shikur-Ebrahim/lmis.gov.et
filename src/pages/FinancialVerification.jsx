@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
-import { doc, getDoc, collection, addDoc, serverTimestamp } from "firebase/firestore"
+import { doc, getDoc, collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, limit } from "firebase/firestore"
 import { db } from "../config/firebase"
 import {
   ArrowLeft,
@@ -18,7 +18,12 @@ import {
   MessageCircle,
   HelpCircle,
   Loader2,
-  FileCheck
+  FileCheck,
+  Clock,
+  XCircle,
+  CheckCircle,
+  Image as ImageIcon,
+  X
 } from "lucide-react"
 import { CLOUDINARY_CONFIG } from "../utils/cloudinary"
 import { useToast } from "../contexts/ToastContext"
@@ -63,15 +68,30 @@ export default function FinancialVerification() {
   })
 
   const [loading, setLoading] = useState(false)
-  const [statementFile, setStatementFile] = useState(null)
-  const [statementPreview, setStatementPreview] = useState(null)
-  const [uploadingStatement, setUploadingStatement] = useState(false)
 
-  const [receiptFile, setReceiptFile] = useState(null)
-  const [receiptPreview, setReceiptPreview] = useState(null)
+  // Bank Statement upload state
+  const [statementFile, setStatementFile]     = useState(null)
+  const [statementPreview, setStatementPreview] = useState(null)
+  const [uploading, setUploading]             = useState(false)
+  const [submission, setSubmission]           = useState(null) // existing submission from Firestore
+  const [checkingStatus, setCheckingStatus]   = useState(true)
+
+  // Payment receipt upload state
+  const [receiptFile, setReceiptFile]         = useState(null)
+  const [receiptPreview, setReceiptPreview]   = useState(null)
   const [uploadingReceipt, setUploadingReceipt] = useState(false)
 
   const [copied, setCopied] = useState(false)
+
+  // Generate or retrieve a stable anonymous user key
+  const getUserKey = () => {
+    let key = localStorage.getItem("lmis_user_key")
+    if (!key) {
+      key = "anon_" + Math.random().toString(36).slice(2) + Date.now()
+      localStorage.setItem("lmis_user_key", key)
+    }
+    return key
+  }
 
   useEffect(() => {
     // Fetch latest account & support settings from Firestore settings/support
@@ -89,6 +109,30 @@ export default function FinancialVerification() {
     fetchSettings()
   }, [])
 
+  // Check if user already has a bank-statement submission
+  useEffect(() => {
+    const checkExisting = async () => {
+      try {
+        const userKey = getUserKey()
+        const q = query(
+          collection(db, "bank-statements"),
+          where("userKey", "==", userKey),
+          orderBy("createdAt", "desc"),
+          limit(1)
+        )
+        const snap = await getDocs(q)
+        if (!snap.empty) {
+          setSubmission({ id: snap.docs[0].id, ...snap.docs[0].data() })
+        }
+      } catch (err) {
+        console.error("Error checking submission:", err)
+      } finally {
+        setCheckingStatus(false)
+      }
+    }
+    checkExisting()
+  }, [])
+
   const handleCopyAccount = () => {
     navigator.clipboard.writeText(supportData.accountNumber || "1000539193205")
     setCopied(true)
@@ -96,27 +140,38 @@ export default function FinancialVerification() {
     setTimeout(() => setCopied(false), 2500)
   }
 
-  const handleStatementUpload = async (e) => {
+  // Select file (just previews, doesn't upload yet)
+  const handleSelectStatement = (e) => {
     const file = e.target.files[0]
     if (!file) return
     setStatementFile(file)
-    setUploadingStatement(true)
+    setStatementPreview(URL.createObjectURL(file))
+  }
 
+  // Submit = upload to Cloudinary then save to Firestore
+  const handleSubmitStatement = async () => {
+    if (!statementFile) return
+    setUploading(true)
     try {
-      const url = await uploadToCloudinary(file)
-      await addDoc(collection(db, "verified-documents"), {
+      const url = await uploadToCloudinary(statementFile)
+      const userKey = getUserKey()
+      const docRef = await addDoc(collection(db, "bank-statements"), {
         type: "bank_statement",
         fileUrl: url,
         status: "pending",
+        userKey,
         createdAt: serverTimestamp(),
         isRead: false
       })
-      showToast("Bank statement uploaded successfully!", "success")
+      setSubmission({ id: docRef.id, fileUrl: url, status: "pending", userKey })
+      setStatementFile(null)
+      setStatementPreview(null)
+      showToast("Bank statement submitted successfully!", "success")
     } catch (err) {
       console.error("Error uploading statement:", err)
-      showToast("Failed to upload statement. Please try again.", "error")
+      showToast("Failed to submit. Please try again.", "error")
     } finally {
-      setUploadingStatement(false)
+      setUploading(false)
     }
   }
 
@@ -210,26 +265,147 @@ export default function FinancialVerification() {
               Your information will be kept secure and used only for application verification.
             </p>
 
-            {/* Upload Button */}
-            <label className="block">
-              <input
-                type="file"
-                accept="image/*,application/pdf"
-                onChange={handleStatementUpload}
-                disabled={uploadingStatement}
-                className="hidden"
-              />
-              <div className="w-full py-4 bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-black text-sm sm:text-base rounded-2xl shadow-lg shadow-blue-200 flex items-center justify-center gap-2 cursor-pointer transition-all">
-                {uploadingStatement ? (
-                  <Loader2 size={20} className="animate-spin" />
-                ) : (
-                  <>
-                    <Upload size={20} />
-                    <span>Upload Statement / መግለጫ ይስቀሉ</span>
-                  </>
+            {/* ── Status / Upload Section ── */}
+            {checkingStatus ? (
+              <div className="flex items-center justify-center py-6 gap-2 text-gray-400">
+                <Loader2 size={20} className="animate-spin" />
+                <span className="text-sm font-semibold">Checking status…</span>
+              </div>
+            ) : submission ? (
+              /* ── Already submitted: show status card ── */
+              <div className={`rounded-2xl border-2 p-5 space-y-4 ${
+                submission.status === "verified" ? "bg-emerald-50 border-emerald-300" :
+                submission.status === "rejected" ? "bg-red-50 border-red-300" :
+                "bg-amber-50 border-amber-300"
+              }`}>
+                {/* Status Icon + Title */}
+                <div className="flex items-center gap-3">
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
+                    submission.status === "verified" ? "bg-emerald-500" :
+                    submission.status === "rejected" ? "bg-red-500" :
+                    "bg-amber-500"
+                  }`}>
+                    {submission.status === "verified" ? <CheckCircle size={26} className="text-white" /> :
+                     submission.status === "rejected" ? <XCircle size={26} className="text-white" /> :
+                     <Clock size={26} className="text-white" />}
+                  </div>
+                  <div>
+                    <p className={`font-black text-base ${
+                      submission.status === "verified" ? "text-emerald-800" :
+                      submission.status === "rejected" ? "text-red-800" :
+                      "text-amber-800"
+                    }`}>
+                      {submission.status === "verified" ? "✓ Bank Statement Verified!" :
+                       submission.status === "rejected" ? "✗ Bank Statement Rejected" :
+                       "⏳ Under Review"}
+                    </p>
+                    <p className={`text-xs font-semibold mt-0.5 ${
+                      submission.status === "verified" ? "text-emerald-700" :
+                      submission.status === "rejected" ? "text-red-700" :
+                      "text-amber-700"
+                    }`}>
+                      {submission.status === "verified"
+                        ? "Your bank statement has been approved. You're all set!"
+                        : submission.status === "rejected"
+                        ? "Your submission was rejected. Please re-upload a valid document."
+                        : "Your bank statement is being reviewed. Please wait or contact support."}
+                    </p>
+                    <p className={`text-[11px] font-semibold mt-1 ${
+                      submission.status === "verified" ? "text-emerald-600" :
+                      submission.status === "rejected" ? "text-red-600" :
+                      "text-amber-600"
+                    }`}>
+                      {submission.status === "verified"
+                        ? "የባንክ መግለጫዎ ተፈቅዷል።"
+                        : submission.status === "rejected"
+                        ? "ማቅረቢያዎ ውድቅ ተደርጓል። እባክዎ ትክክለኛ ሰነድ ይስቀሉ።"
+                        : "የባንክ መግለጫዎ በግምገማ ላይ ነው። እባክዎ ይጠብቁ ወይም ድጋፍ ያግኙ።"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Submitted image thumbnail */}
+                {submission.fileUrl && (
+                  <div className="rounded-xl overflow-hidden border border-white/60 shadow-sm h-32">
+                    <img src={submission.fileUrl} alt="Submitted" className="w-full h-full object-cover" />
+                  </div>
+                )}
+
+                {/* If rejected: allow re-upload */}
+                {submission.status === "rejected" && (
+                  <label className="block">
+                    <input type="file" accept="image/*,application/pdf"
+                      onChange={(e) => { setSubmission(null); handleSelectStatement(e) }}
+                      className="hidden" />
+                    <div className="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white font-black text-sm rounded-2xl flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95">
+                      <Upload size={18} /> Re-upload Statement
+                    </div>
+                  </label>
+                )}
+
+                {/* If pending: contact support shortcut */}
+                {submission.status === "pending" && (
+                  <div className="flex gap-2">
+                    <a href={`tel:${supportData.phone}`}
+                      className="flex-1 py-2.5 bg-white border border-amber-300 text-amber-700 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-sm active:scale-95">
+                      <Phone size={14} /> Call Support
+                    </a>
+                    <a href={`https://t.me/${(supportData.telegram || "lmis_support").replace('@', '')}`}
+                      target="_blank" rel="noopener noreferrer"
+                      className="flex-1 py-2.5 bg-sky-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-sm active:scale-95">
+                      <Send size={14} /> Telegram
+                    </a>
+                    <a href={`https://wa.me/${(supportData.whatsapp || "").replace(/[^0-9]/g, "")}`}
+                      target="_blank" rel="noopener noreferrer"
+                      className="flex-1 py-2.5 bg-emerald-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-sm active:scale-95">
+                      <MessageCircle size={14} /> WhatsApp
+                    </a>
+                  </div>
                 )}
               </div>
-            </label>
+            ) : statementPreview ? (
+              /* ── Image selected, awaiting submit ── */
+              <div className="space-y-3">
+                {/* Preview */}
+                <div className="relative rounded-2xl overflow-hidden border-2 border-blue-300 shadow-md h-48 bg-gray-100">
+                  <img src={statementPreview} alt="Preview" className="w-full h-full object-cover" />
+                  <button
+                    onClick={() => { setStatementFile(null); setStatementPreview(null) }}
+                    className="absolute top-2 right-2 w-8 h-8 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center transition-colors"
+                  >
+                    <X size={16} className="text-white" />
+                  </button>
+                  <div className="absolute bottom-2 left-2 bg-black/60 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                    {statementFile?.name}
+                  </div>
+                </div>
+                {/* Submit */}
+                <button
+                  onClick={handleSubmitStatement}
+                  disabled={uploading}
+                  className="w-full py-4 bg-blue-600 hover:bg-blue-700 disabled:opacity-70 text-white font-black text-sm sm:text-base rounded-2xl shadow-lg shadow-blue-200 flex items-center justify-center gap-2 transition-all active:scale-95"
+                >
+                  {uploading ? (
+                    <><Loader2 size={20} className="animate-spin" /> Submitting…</>
+                  ) : (
+                    <><FileCheck size={20} /> Submit Statement / ያስገቡ</>
+                  )}
+                </button>
+                <p className="text-xs text-center text-gray-400 font-medium">
+                  Review your image above, then tap Submit to send for review.
+                </p>
+              </div>
+            ) : (
+              /* ── Default: choose file button ── */
+              <label className="block">
+                <input type="file" accept="image/*,application/pdf"
+                  onChange={handleSelectStatement} className="hidden" />
+                <div className="w-full py-4 bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-black text-sm sm:text-base rounded-2xl shadow-lg shadow-blue-200 flex items-center justify-center gap-2 cursor-pointer transition-all">
+                  <Upload size={20} />
+                  <span>Upload Statement / መግለጫ ይስቀሉ</span>
+                </div>
+              </label>
+            )}
           </div>
         </div>
 
