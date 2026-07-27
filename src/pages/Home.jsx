@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { Link } from "react-router-dom"
-import { collection, getDocs, orderBy, query, onSnapshot, limit } from "firebase/firestore"
+import { collection, getDocs, orderBy, query, onSnapshot, limit, doc, getDoc } from "firebase/firestore"
 import { db } from "../config/firebase"
-import { XCircle } from "lucide-react"
+import { XCircle, Mail, Send, MessageCircle, MessageSquare, Phone as PhoneIcon, HeadphonesIcon, X } from "lucide-react"
 import ApplicantCard from "../components/ApplicantCard"
 import QuickStats from "../components/QuickStats"
 import FeaturedDestinations from "../components/FeaturedDestinations"
@@ -53,6 +53,26 @@ export default function Home() {
   // Modals for Register and Login
   const [showRegisterModal, setShowRegisterModal] = useState(false)
   const [showLoginModal, setShowLoginModal] = useState(false)
+
+  // Support Modal
+  const [showSupportModal, setShowSupportModal] = useState(false)
+  const [supportSettings, setSupportSettings] = useState({
+    phone: "+251900000000",
+    email: "info@lmis.gov.et",
+    telegram: "lmis_support",
+    whatsapp: "+251900000000",
+    sms: "+251900000000"
+  })
+
+  useEffect(() => {
+    const fetchSupport = async () => {
+      try {
+        const snap = await getDoc(doc(db, "settings", "support"))
+        if (snap.exists()) setSupportSettings(p => ({ ...p, ...snap.data() }))
+      } catch {}
+    }
+    fetchSupport()
+  }, [])
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
@@ -323,14 +343,13 @@ export default function Home() {
 
 
 
-              {/* Login Button */}
+              {/* Support Button */}
               <button
-                onClick={() => setShowLoginModal(true)}
-                className="bg-white text-black font-semibold rounded-md px-6 py-2 inline-block
-             border border-gray-300 shadow-sm transition-all duration-300
-             hover:bg-gray-50 hover:shadow-lg hover:scale-105 hover:border-gray-400"
+                onClick={() => setShowSupportModal(true)}
+                className="bg-white text-blue-600 font-bold rounded-md px-6 py-2 inline-block border-2 border-blue-500 shadow-sm transition-all duration-300 hover:bg-blue-50 hover:shadow-lg hover:scale-105 flex items-center gap-2"
               >
-                See
+                <HeadphonesIcon size={16} />
+                Support
               </button>
 
               {/* Video Play Button */}
@@ -697,10 +716,11 @@ export default function Home() {
                 initiative. Discover our journey and impact on empowering Ethiopia&apos;s workforce.
               </p>
               <button
-                onClick={() => setShowLoginModal(true)}
-                className="bg-white text-black px-6 py-3 rounded shadow-md hover:shadow-lg transition-shadow duration-300 inline-flex items-center justify-center"
+                onClick={() => setShowSupportModal(true)}
+                className="bg-white text-blue-600 font-bold px-6 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 inline-flex items-center justify-center gap-2 hover:bg-blue-50 border-2 border-blue-300"
               >
-                See
+                <HeadphonesIcon size={16} />
+                Support
               </button>
 
             </div>
@@ -836,6 +856,157 @@ export default function Home() {
               <AdminLogin />
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ── Support / Contact Modal ── */}
+      {showSupportModal && (
+        <div
+          className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-0 sm:p-4"
+          style={{ background: "rgba(0,0,0,0.65)", backdropFilter: "blur(6px)" }}
+          onClick={() => setShowSupportModal(false)}
+        >
+          <div
+            className="w-full sm:max-w-sm bg-white rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl"
+            style={{ animation: "slideUp 0.35s cubic-bezier(.22,1,.36,1)" }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* ── Header gradient ── */}
+            <div className="relative bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-600 px-6 pt-8 pb-14 text-white text-center overflow-hidden">
+              {/* decorative circles */}
+              <div className="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full" />
+              <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-white/10 rounded-full" />
+
+              <button
+                onClick={() => setShowSupportModal(false)}
+                className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center bg-white/20 hover:bg-white/30 rounded-full transition-colors"
+              >
+                <X size={16} className="text-white" />
+              </button>
+
+              {/* Icon ring */}
+              <div className="mx-auto mb-3 w-16 h-16 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center shadow-lg shadow-indigo-900/30">
+                <HeadphonesIcon size={32} className="text-white" />
+              </div>
+              <h2 className="text-2xl font-black tracking-tight">Contact Support</h2>
+              <p className="text-sm text-blue-100 mt-1 font-medium">We're here to help you 24/7</p>
+              <p className="text-xs text-blue-200 mt-0.5">ድጋፍ ለማግኘት ያነጋግሩን</p>
+            </div>
+
+            {/* ── Contact cards ── */}
+            <div className="px-5 pt-4 pb-6 space-y-3 -mt-8">
+
+              {/* Call */}
+              <a
+                href={`tel:${supportSettings.phone}`}
+                className="group flex items-center gap-4 bg-white rounded-2xl px-4 py-3.5 shadow-md shadow-gray-200 border border-gray-100 hover:shadow-lg hover:border-blue-200 transition-all duration-200 active:scale-95"
+              >
+                <div className="w-12 h-12 rounded-xl bg-blue-50 group-hover:bg-blue-100 flex items-center justify-center shrink-0 transition-colors">
+                  <PhoneIcon size={22} className="text-blue-600" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Phone Call</p>
+                  <p className="text-sm font-black text-gray-900 truncate">{supportSettings.phone}</p>
+                </div>
+                <div className="ml-auto shrink-0 w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shadow-sm shadow-blue-400">
+                  <PhoneIcon size={14} className="text-white" />
+                </div>
+              </a>
+
+              {/* Email */}
+              <a
+                href={`mailto:${supportSettings.email}`}
+                className="group flex items-center gap-4 bg-white rounded-2xl px-4 py-3.5 shadow-md shadow-gray-200 border border-gray-100 hover:shadow-lg hover:border-indigo-200 transition-all duration-200 active:scale-95"
+              >
+                <div className="w-12 h-12 rounded-xl bg-indigo-50 group-hover:bg-indigo-100 flex items-center justify-center shrink-0 transition-colors">
+                  <Mail size={22} className="text-indigo-600" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Email</p>
+                  <p className="text-sm font-black text-gray-900 truncate">{supportSettings.email}</p>
+                </div>
+                <div className="ml-auto shrink-0 w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center shadow-sm shadow-indigo-400">
+                  <Mail size={14} className="text-white" />
+                </div>
+              </a>
+
+              {/* Telegram */}
+              <a
+                href={supportSettings.telegram
+                  ? (supportSettings.telegram.startsWith('+') || /^\d/.test(supportSettings.telegram)
+                      ? `https://t.me/+${supportSettings.telegram.replace(/[^0-9]/g, '')}`
+                      : `https://t.me/${supportSettings.telegram.replace('@', '')}`)
+                  : '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-4 bg-white rounded-2xl px-4 py-3.5 shadow-md shadow-gray-200 border border-gray-100 hover:shadow-lg hover:border-sky-200 transition-all duration-200 active:scale-95"
+              >
+                <div className="w-12 h-12 rounded-xl bg-sky-50 group-hover:bg-sky-100 flex items-center justify-center shrink-0 transition-colors">
+                  <Send size={22} className="text-sky-500" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Telegram</p>
+                  <p className="text-sm font-black text-gray-900 truncate">
+                    {supportSettings.telegram.startsWith('@') ? supportSettings.telegram : `@${supportSettings.telegram}`}
+                  </p>
+                </div>
+                <div className="ml-auto shrink-0 w-8 h-8 rounded-full bg-sky-500 flex items-center justify-center shadow-sm shadow-sky-400">
+                  <Send size={14} className="text-white" />
+                </div>
+              </a>
+
+              {/* WhatsApp */}
+              <a
+                href={`https://wa.me/${supportSettings.whatsapp.replace(/[^0-9]/g, '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-4 bg-white rounded-2xl px-4 py-3.5 shadow-md shadow-gray-200 border border-gray-100 hover:shadow-lg hover:border-emerald-200 transition-all duration-200 active:scale-95"
+              >
+                <div className="w-12 h-12 rounded-xl bg-emerald-50 group-hover:bg-emerald-100 flex items-center justify-center shrink-0 transition-colors">
+                  <MessageCircle size={22} className="text-emerald-600" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">WhatsApp</p>
+                  <p className="text-sm font-black text-gray-900 truncate">{supportSettings.whatsapp}</p>
+                </div>
+                <div className="ml-auto shrink-0 w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center shadow-sm shadow-emerald-400">
+                  <MessageCircle size={14} className="text-white" />
+                </div>
+              </a>
+
+              {/* SMS */}
+              <a
+                href={`sms:${supportSettings.sms}`}
+                className="group flex items-center gap-4 bg-white rounded-2xl px-4 py-3.5 shadow-md shadow-gray-200 border border-gray-100 hover:shadow-lg hover:border-violet-200 transition-all duration-200 active:scale-95"
+              >
+                <div className="w-12 h-12 rounded-xl bg-violet-50 group-hover:bg-violet-100 flex items-center justify-center shrink-0 transition-colors">
+                  <MessageSquare size={22} className="text-violet-600" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">SMS / Message</p>
+                  <p className="text-sm font-black text-gray-900 truncate">{supportSettings.sms}</p>
+                </div>
+                <div className="ml-auto shrink-0 w-8 h-8 rounded-full bg-violet-600 flex items-center justify-center shadow-sm shadow-violet-400">
+                  <MessageSquare size={14} className="text-white" />
+                </div>
+              </a>
+
+              {/* Close pill */}
+              <button
+                onClick={() => setShowSupportModal(false)}
+                className="w-full mt-1 py-3 rounded-2xl bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold text-sm transition-colors active:scale-95"
+              >
+                Close / ዝጋ
+              </button>
+            </div>
+          </div>
+
+          <style>{`
+            @keyframes slideUp {
+              from { opacity: 0; transform: translateY(60px) scale(0.97); }
+              to   { opacity: 1; transform: translateY(0)   scale(1);    }
+            }
+          `}</style>
         </div>
       )}
     </div>

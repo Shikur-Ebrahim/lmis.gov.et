@@ -9,7 +9,7 @@ import {
   FileText, ArrowLeft, CheckCircle, CheckCircle2, Clock, XCircle,
   AlertCircle, DollarSign, Shield, PenTool, ClipboardCheck,
   Eye, Home, Truck, Coffee, Plane, X, Loader2,
-  Mail, Send, MessageCircle, MessageSquare
+  Mail, Send, MessageCircle, MessageSquare, Headphones
 } from "lucide-react"
 import { getOptimizedImageUrl } from "../utils/cloudinary"
 
@@ -44,6 +44,7 @@ export default function ApplicantDetail() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [showCongratsModal, setShowCongratsModal] = useState(false)
+  const [showContactModal, setShowContactModal] = useState(false)
   const [supportSettings, setSupportSettings] = useState({
     phone: "+251900000000",
     email: "info@lmis.gov.et",
@@ -220,56 +221,25 @@ export default function ApplicantDetail() {
               )}
             </div>
 
-            {/* Social Media & Action Icons Bar — uses admin support settings */}
-            <div className="flex items-center justify-center gap-3 mt-5 pt-4 border-t border-gray-100 max-w-sm mx-auto">
-              {/* Call — uses support phone */}
-              <a
-                href={`tel:${supportSettings.phone}`}
-                title={`Call ${supportSettings.phone}`}
-                className="w-11 h-11 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-xl flex items-center justify-center shadow-sm transition-transform active:scale-90"
+
+            {/* ── Contact Help Gate Card ── */}
+            <div className="mt-5 pt-4 border-t border-gray-100">
+              <button
+                onClick={() => setShowContactModal(true)}
+                className="w-full max-w-sm mx-auto flex items-center gap-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 rounded-2xl px-5 py-4 shadow-lg shadow-indigo-200 hover:shadow-xl hover:shadow-indigo-300 transition-all duration-200 active:scale-95 group"
               >
-                <Phone size={18} />
-              </a>
-              {/* Email — uses support email */}
-              <a
-                href={`mailto:${supportSettings.email}`}
-                title={supportSettings.email}
-                className="w-11 h-11 bg-blue-600 text-white hover:bg-blue-700 rounded-xl flex items-center justify-center shadow-md shadow-blue-200 transition-transform active:scale-90"
-              >
-                <Mail size={18} />
-              </a>
-              {/* Telegram — uses support telegram username or phone */}
-              <a
-                href={supportSettings.telegram
-                  ? (supportSettings.telegram.startsWith('+') || /^\d/.test(supportSettings.telegram)
-                      ? `https://t.me/+${supportSettings.telegram.replace(/[^0-9]/g, '')}`
-                      : `https://t.me/${supportSettings.telegram.replace('@', '')}`)
-                  : '#'}
-                target="_blank"
-                rel="noopener noreferrer"
-                title={`Telegram: ${supportSettings.telegram}`}
-                className="w-11 h-11 bg-sky-500 text-white hover:bg-sky-600 rounded-xl flex items-center justify-center shadow-md shadow-sky-200 transition-transform active:scale-90"
-              >
-                <Send size={18} />
-              </a>
-              {/* WhatsApp — uses support whatsapp number */}
-              <a
-                href={`https://wa.me/${supportSettings.whatsapp.replace(/[^0-9]/g, '')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                title={`WhatsApp: ${supportSettings.whatsapp}`}
-                className="w-11 h-11 bg-emerald-500 text-white hover:bg-emerald-600 rounded-xl flex items-center justify-center shadow-md shadow-emerald-200 transition-transform active:scale-90"
-              >
-                <MessageCircle size={18} />
-              </a>
-              {/* SMS/Message — uses support sms number */}
-              <a
-                href={`sms:${supportSettings.sms}`}
-                title={`Message: ${supportSettings.sms}`}
-                className="w-11 h-11 bg-blue-800 text-white hover:bg-blue-900 rounded-xl flex items-center justify-center shadow-md shadow-blue-300 transition-transform active:scale-90"
-              >
-                <MessageSquare size={18} />
-              </a>
+                <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                  <Headphones size={24} className="text-white" />
+                </div>
+                <div className="text-left min-w-0 flex-1">
+                  <p className="text-white font-black text-sm leading-tight">Contact Help Gate</p>
+                  <p className="text-blue-100 text-xs mt-0.5 font-medium">Call · Email · Telegram · WhatsApp · SMS</p>
+                  <p className="text-blue-200 text-[10px] mt-0.5">ድጋፍ ለማግኘት ይጫኑ</p>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-white/20 group-hover:bg-white/30 flex items-center justify-center shrink-0 transition-colors">
+                  <Phone size={16} className="text-white" />
+                </div>
+              </button>
             </div>
           </div>
         </div>
@@ -468,6 +438,141 @@ export default function ApplicantDetail() {
 
         </div>
       </div>
+
+      {/* ── Contact Help Gate Modal (Bottom Sheet on mobile) ── */}
+      {showContactModal && (
+        <div
+          className="fixed inset-0 z-[150] flex items-end sm:items-center justify-center p-0 sm:p-4"
+          style={{ background: "rgba(0,0,0,0.65)", backdropFilter: "blur(6px)" }}
+          onClick={() => setShowContactModal(false)}
+        >
+          <div
+            className="w-full sm:max-w-sm bg-white rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl"
+            style={{ animation: "slideUp 0.35s cubic-bezier(.22,1,.36,1)" }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="relative bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-600 px-6 pt-8 pb-14 text-white text-center overflow-hidden">
+              <div className="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full" />
+              <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-white/10 rounded-full" />
+              <button
+                onClick={() => setShowContactModal(false)}
+                className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center bg-white/20 hover:bg-white/30 rounded-full transition-colors"
+              >
+                <X size={16} className="text-white" />
+              </button>
+              <div className="mx-auto mb-3 w-16 h-16 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center shadow-lg shadow-indigo-900/30">
+                <Headphones size={32} className="text-white" />
+              </div>
+              <h2 className="text-2xl font-black tracking-tight">Contact Help Gate</h2>
+              <p className="text-sm text-blue-100 mt-1 font-medium">We're here to help you 24/7</p>
+              <p className="text-xs text-blue-200 mt-0.5">ድጋፍ ለማግኘት ያነጋግሩን</p>
+            </div>
+
+            {/* Contact Cards */}
+            <div className="px-5 pt-4 pb-6 space-y-3 -mt-8">
+
+              {/* Call */}
+              <a href={`tel:${supportSettings.phone}`}
+                className="group flex items-center gap-4 bg-white rounded-2xl px-4 py-3.5 shadow-md shadow-gray-200 border border-gray-100 hover:shadow-lg hover:border-blue-200 transition-all duration-200 active:scale-95">
+                <div className="w-12 h-12 rounded-xl bg-blue-50 group-hover:bg-blue-100 flex items-center justify-center shrink-0 transition-colors">
+                  <Phone size={22} className="text-blue-600" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Phone Call</p>
+                  <p className="text-sm font-black text-gray-900 truncate">{supportSettings.phone}</p>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shadow-sm shadow-blue-400 shrink-0">
+                  <Phone size={14} className="text-white" />
+                </div>
+              </a>
+
+              {/* Email */}
+              <a href={`mailto:${supportSettings.email}`}
+                className="group flex items-center gap-4 bg-white rounded-2xl px-4 py-3.5 shadow-md shadow-gray-200 border border-gray-100 hover:shadow-lg hover:border-indigo-200 transition-all duration-200 active:scale-95">
+                <div className="w-12 h-12 rounded-xl bg-indigo-50 group-hover:bg-indigo-100 flex items-center justify-center shrink-0 transition-colors">
+                  <Mail size={22} className="text-indigo-600" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Email</p>
+                  <p className="text-sm font-black text-gray-900 truncate">{supportSettings.email}</p>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center shadow-sm shadow-indigo-400 shrink-0">
+                  <Mail size={14} className="text-white" />
+                </div>
+              </a>
+
+              {/* Telegram */}
+              <a
+                href={supportSettings.telegram
+                  ? (supportSettings.telegram.startsWith('+') || /^\d/.test(supportSettings.telegram)
+                      ? `https://t.me/+${supportSettings.telegram.replace(/[^0-9]/g, '')}`
+                      : `https://t.me/${supportSettings.telegram.replace('@', '')}`)
+                  : '#'}
+                target="_blank" rel="noopener noreferrer"
+                className="group flex items-center gap-4 bg-white rounded-2xl px-4 py-3.5 shadow-md shadow-gray-200 border border-gray-100 hover:shadow-lg hover:border-sky-200 transition-all duration-200 active:scale-95">
+                <div className="w-12 h-12 rounded-xl bg-sky-50 group-hover:bg-sky-100 flex items-center justify-center shrink-0 transition-colors">
+                  <Send size={22} className="text-sky-500" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Telegram</p>
+                  <p className="text-sm font-black text-gray-900 truncate">
+                    {supportSettings.telegram.startsWith('@') ? supportSettings.telegram : `@${supportSettings.telegram}`}
+                  </p>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-sky-500 flex items-center justify-center shadow-sm shadow-sky-400 shrink-0">
+                  <Send size={14} className="text-white" />
+                </div>
+              </a>
+
+              {/* WhatsApp */}
+              <a href={`https://wa.me/${supportSettings.whatsapp.replace(/[^0-9]/g, '')}`}
+                target="_blank" rel="noopener noreferrer"
+                className="group flex items-center gap-4 bg-white rounded-2xl px-4 py-3.5 shadow-md shadow-gray-200 border border-gray-100 hover:shadow-lg hover:border-emerald-200 transition-all duration-200 active:scale-95">
+                <div className="w-12 h-12 rounded-xl bg-emerald-50 group-hover:bg-emerald-100 flex items-center justify-center shrink-0 transition-colors">
+                  <MessageCircle size={22} className="text-emerald-600" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">WhatsApp</p>
+                  <p className="text-sm font-black text-gray-900 truncate">{supportSettings.whatsapp}</p>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center shadow-sm shadow-emerald-400 shrink-0">
+                  <MessageCircle size={14} className="text-white" />
+                </div>
+              </a>
+
+              {/* SMS */}
+              <a href={`sms:${supportSettings.sms}`}
+                className="group flex items-center gap-4 bg-white rounded-2xl px-4 py-3.5 shadow-md shadow-gray-200 border border-gray-100 hover:shadow-lg hover:border-violet-200 transition-all duration-200 active:scale-95">
+                <div className="w-12 h-12 rounded-xl bg-violet-50 group-hover:bg-violet-100 flex items-center justify-center shrink-0 transition-colors">
+                  <MessageSquare size={22} className="text-violet-600" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">SMS / Message</p>
+                  <p className="text-sm font-black text-gray-900 truncate">{supportSettings.sms}</p>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-violet-600 flex items-center justify-center shadow-sm shadow-violet-400 shrink-0">
+                  <MessageSquare size={14} className="text-white" />
+                </div>
+              </a>
+
+              {/* Close */}
+              <button
+                onClick={() => setShowContactModal(false)}
+                className="w-full mt-1 py-3 rounded-2xl bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold text-sm transition-colors active:scale-95"
+              >
+                Close / ዝጋ
+              </button>
+            </div>
+          </div>
+          <style>{`
+            @keyframes slideUp {
+              from { opacity: 0; transform: translateY(60px) scale(0.97); }
+              to   { opacity: 1; transform: translateY(0) scale(1); }
+            }
+          `}</style>
+        </div>
+      )}
 
       {/* ── Congratulations Notification Modal ── */}
       {showCongratsModal && (
