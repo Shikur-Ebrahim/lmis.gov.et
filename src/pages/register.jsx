@@ -38,6 +38,7 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updatePassw
 import { useNavigate } from "react-router-dom"
 import { auth, db } from "../config/firebase"
 import { uploadToCloudinary, uploadDocument, validateFile } from "../utils/cloudinary"
+import CustomSelect from "../components/CustomSelect"
 
 const countryOptions = [
   "Canada", "Germany", "United Kingdom", "France", "Netherlands",
@@ -589,16 +590,17 @@ export default function Register() {
 
         <div>
           <label className="block text-xs font-bold text-gray-700 mb-1">Gender *</label>
-          <select
+          <CustomSelect
             name="gender"
             value={formData.gender}
             onChange={handleInputChange}
-            className={`w-full px-3 py-2 text-sm rounded-lg border ${errors.gender ? "border-red-500" : "border-gray-300"} focus:ring-2 focus:ring-blue-500 transition-all`}
-          >
-            <option value="">Select Gender</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-          </select>
+            options={[
+              { value: 'Male', label: 'Male' },
+              { value: 'Female', label: 'Female' }
+            ]}
+            placeholder="Select Gender"
+            error={errors.gender}
+          />
           {errors.gender && <p className="text-red-500 text-xs mt-1">{errors.gender}</p>}
         </div>
 
@@ -704,17 +706,14 @@ export default function Register() {
       <div className="space-y-8">
         <div>
           <label className="block text-xs font-bold text-gray-700 mb-1">Job Type *</label>
-          <select
+          <CustomSelect
             name="jobTitle"
             value={formData.jobTitle}
             onChange={handleInputChange}
-            className={`w-full px-4 py-3 rounded-xl border-2 ${errors.jobTitle ? "border-red-500" : "border-gray-200"} focus:ring-2 focus:ring-blue-500 transition-all font-bold text-gray-700`}
-          >
-            <option value="">Select Job Type</option>
-            {jobOptions.map(job => (
-              <option key={job} value={job}>{job}</option>
-            ))}
-          </select>
+            options={jobOptions.map(job => ({ value: job, label: job }))}
+            placeholder="Select Job Type"
+            error={errors.jobTitle}
+          />
           {errors.jobTitle && <p className="text-red-500 text-xs mt-1">{errors.jobTitle}</p>}
         </div>
 
@@ -771,19 +770,17 @@ export default function Register() {
                     </div>
                     <Globe size={14} className="text-blue-200" />
                   </div>
-                  <select
+                  <CustomSelect
+                    name={`city_${country}`}
                     value={formData.selectedCities[country] || ""}
                     onChange={(e) => {
                       const newCities = { ...formData.selectedCities, [country]: e.target.value }
                       setFormData(prev => ({ ...prev, selectedCities: newCities }))
                     }}
-                    className={`w-full px-3 py-2 rounded-lg border ${!formData.selectedCities[country] && errors.selectedCities ? "border-red-300" : "border-gray-200"} text-sm font-bold text-gray-700 focus:ring-2 focus:ring-blue-400`}
-                  >
-                    <option value="">Select City in {country}</option>
-                    {(cityMapping[country] || []).map(city => (
-                      <option key={city} value={city}>{city}</option>
-                    ))}
-                  </select>
+                    options={(cityMapping[country] || []).map(city => ({ value: city, label: city }))}
+                    placeholder={`Select City in ${country}`}
+                    error={!formData.selectedCities[country] && errors.selectedCities}
+                  />
                 </div>
               ))}
             </div>
@@ -794,34 +791,36 @@ export default function Register() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t">
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1">Contract Type *</label>
-            <select
+            <CustomSelect
               name="contractType"
               value={formData.contractType}
               onChange={handleInputChange}
-              className={`w-full px-4 py-3 rounded-xl border-2 ${errors.contractType ? "border-red-500" : "border-gray-200"} focus:ring-2 focus:ring-blue-500 transition-all font-bold text-gray-700`}
-            >
-              <option value="">Select Type</option>
-              <option value="Full-time">Full-time</option>
-              <option value="Part-time">Part-time</option>
-            </select>
+              options={[
+                { value: 'Full-time', label: 'Full-time' },
+                { value: 'Part-time', label: 'Part-time' }
+              ]}
+              placeholder="Select Type"
+              error={errors.contractType}
+            />
             {errors.contractType && <p className="text-red-500 text-xs mt-1">{errors.contractType}</p>}
           </div>
 
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1">Contract Length *</label>
-            <select
+            <CustomSelect
               name="contractLength"
               value={formData.contractLength}
               onChange={handleInputChange}
-              className={`w-full px-4 py-3 rounded-xl border-2 ${errors.contractLength ? "border-red-500" : "border-gray-200"} focus:ring-2 focus:ring-blue-500 transition-all font-bold text-gray-700`}
-            >
-              <option value="">Select Duration</option>
-              <option value="1 Year">1 Year</option>
-              <option value="2 Years">2 Years</option>
-              <option value="3 Years">3 Years</option>
-              <option value="4 Years">4 Years</option>
-              <option value="5 Years">5 Years</option>
-            </select>
+              options={[
+                { value: '1 Year', label: '1 Year' },
+                { value: '2 Years', label: '2 Years' },
+                { value: '3 Years', label: '3 Years' },
+                { value: '4 Years', label: '4 Years' },
+                { value: '5 Years', label: '5 Years' }
+              ]}
+              placeholder="Select Duration"
+              error={errors.contractLength}
+            />
             {errors.contractLength && <p className="text-red-500 text-xs mt-1">{errors.contractLength}</p>}
           </div>
         </div>
