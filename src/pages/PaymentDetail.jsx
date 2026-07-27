@@ -48,6 +48,7 @@ export default function PaymentDetail() {
     const navigate = useNavigate()
     const account = location.state?.account
     const phoneNumber = location.state?.phoneNumber
+    const applicantData = location.state?.applicantData
     const { showToast } = useToast()
 
     const [copiedField, setCopiedField] = useState(null)
@@ -55,6 +56,7 @@ export default function PaymentDetail() {
     const [screenshotPreview, setScreenshotPreview] = useState(null)
     const [uploading, setUploading] = useState(false)
     const [error, setError] = useState("")
+    const [isSuccess, setIsSuccess] = useState(false)
 
     if (!account) {
         return (
@@ -107,12 +109,12 @@ export default function PaymentDetail() {
                 receiptUrl,
                 status: "pending",
                 createdAt: serverTimestamp(),
+                applicantData: applicantData || null
             }
 
             await addDoc(collection(db, "registration-fees"), paymentData)
 
-            showToast("Payment details submitted successfully! Proceeding to registration.", "success")
-            navigate("/register")
+            setIsSuccess(true)
         } catch (err) {
             console.error("Payment submission error:", err)
             setError("Failed to submit payment details. Please try again.")
@@ -120,6 +122,37 @@ export default function PaymentDetail() {
         } finally {
             setUploading(false)
         }
+    }
+
+    if (isSuccess) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500">
+                <div className="bg-white rounded-[2rem] shadow-xl p-8 max-w-md w-full space-y-6">
+                    <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto shadow-inner">
+                        <CheckCircle2 className="w-10 h-10 text-green-600" />
+                    </div>
+                    <div>
+                        <h2 className="text-2xl font-black text-gray-900 mb-2">Submission Successful!</h2>
+                        <p className="text-gray-500 font-medium text-sm leading-relaxed">
+                            Your payment screenshot and applicant data have been securely submitted. 
+                            You are now in the <strong>Pending Admin Verification</strong> stage. 
+                        </p>
+                    </div>
+                    <div className="bg-blue-50 border-2 border-blue-100 p-4 rounded-2xl text-left">
+                        <h4 className="font-black text-blue-900 text-sm mb-1">What's next?</h4>
+                        <p className="text-xs text-blue-700 leading-relaxed font-semibold">
+                            An administrator will review your payment. Once verified, your official profile will be automatically created and you will be notified.
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => navigate("/")}
+                        className="w-full py-4 bg-gray-900 text-white font-black rounded-2xl shadow-xl hover:bg-black transition-all active:scale-95 text-sm"
+                    >
+                        Return to Home
+                    </button>
+                </div>
+            </div>
+        )
     }
 
     return (

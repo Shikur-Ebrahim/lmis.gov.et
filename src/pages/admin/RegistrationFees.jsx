@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { collection, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc } from "firebase/firestore"
+import { collection, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc, setDoc } from "firebase/firestore"
 import { initializeApp, deleteApp } from "firebase/app"
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth"
 import { db, firebaseConfig } from "../../config/firebase"
@@ -96,11 +96,30 @@ export default function RegistrationFees() {
 
                 const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
                 
-                // Instead of deleting, update status to 'approved'
+                // If the fee document contains the full applicant data, register them as a user
+                if (fee.applicantData) {
+                    const registrationData = {
+                        uid: userCredential.user.uid,
+                        ...fee.applicantData,
+                        email: email,
+                        createdAt: new Date().toISOString(),
+                        status: "Pending", // Admin will review their full application later
+                        applicationNumber: `APP-${Date.now()}`,
+                        isRead: false
+                    };
+                    
+                    // Remove sensitive fields
+                    delete registrationData.password;
+                    delete registrationData.confirmPassword;
+                    
+                    await setDoc(doc(db, "users", userCredential.user.uid), registrationData);
+                }
+
+                // Update the fee document to show it's approved
                 await updateDoc(doc(db, "registration-fees", fee.id), {
                     status: 'approved',
                     approvedAt: new Date(),
-                    authUid: userCredential.user.uid // Store the UID for reference
+                    authUid: userCredential.user.uid
                 });
 
                 // Cleanup secondary app

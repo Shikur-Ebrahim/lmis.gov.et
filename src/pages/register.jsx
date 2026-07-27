@@ -401,8 +401,49 @@ export default function Register() {
     }
 
     if (validateSection(currentSection)) {
-      setCurrentSection(prev => prev + 1)
-      window.scrollTo({ top: 0, behavior: "smooth" })
+      if (currentSection === 8) {
+        handleProceedToPayment()
+      } else {
+        setCurrentSection(prev => prev + 1)
+        window.scrollTo({ top: 0, behavior: "smooth" })
+      }
+    }
+  }
+
+  const handleProceedToPayment = async () => {
+    setLoading(true)
+    setSubmitMessage({ type: "info", message: "Preparing your documents..." })
+
+    try {
+      const uploadedUrls = {
+        profilePhotoUrl: await handleFileUpload(formData.profilePhoto, "profilePhoto"),
+        idCardFrontUrl: await handleFileUpload(formData.idCardFront, "idCardFront"),
+        idCardBackUrl: await handleFileUpload(formData.idCardBack, "idCardBack"),
+        educationalCertificateUrl: formData.educationalCertificate ? await handleFileUpload(formData.educationalCertificate, "educationalCertificate") : ""
+      }
+
+      if (!uploadedUrls.profilePhotoUrl || !uploadedUrls.idCardFrontUrl || !uploadedUrls.idCardBackUrl) {
+        throw new Error("Document upload failed. Please check your internet connection.")
+      }
+
+      const finalData = {
+        ...formData,
+        profilePhoto: uploadedUrls.profilePhotoUrl,
+        idCardFront: uploadedUrls.idCardFrontUrl,
+        idCardBack: uploadedUrls.idCardBackUrl,
+        educationalCertificate: uploadedUrls.educationalCertificateUrl,
+      }
+
+      setLoading(false)
+      navigate("/payment-methods", { 
+        state: { 
+          phoneNumber: `+251${formData.phoneNumber}`,
+          applicantData: finalData
+        } 
+      })
+    } catch (err) {
+      setLoading(false)
+      setSubmitMessage({ type: "error", message: err.message || "Failed to prepare documents" })
     }
   }
 
@@ -429,128 +470,20 @@ export default function Register() {
     }
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    if (!validateSection(9)) return
-
-    setLoading(true)
-    setSubmitMessage({ type: "info", message: "Verifying submission code..." })
-
-    try {
-      // 1. Verify Submission Code
-      const fullPhone = `+251${formData.phoneNumber}`
-      const generatedEmail = `251${formData.phoneNumber}@lmis.gov.et`
-      
-      let verifiedUid = ""
-      try {
-        const paymentCred = await signInWithEmailAndPassword(auth, generatedEmail, fullPhone)
-        verifiedUid = paymentCred.user.uid
-        await auth.signOut()
-      } catch (err) {
-        throw new Error("Invalid submission code. Please ensure you have completed the payment.")
-      }
-
-      if (verifiedUid !== formData.submissionCode) {
-        throw new Error("The submission code entered is incorrect for this phone number.")
-      }
-
-      setSubmitMessage({ type: "info", message: "Updating account security..." })
-      
-      // 2. Create/Update Firebase Auth User with NEW password
-      let user;
-      try {
-        // Since the user already exists (from payment), we sign in with payment password and update it
-        const userCredential = await signInWithEmailAndPassword(auth, generatedEmail, fullPhone)
-        user = userCredential.user
-        await updatePassword(user, formData.password)
-      } catch (authError) {
-        throw new Error("Failed to update account security. Please try again.")
-      }
-
-      // 2. Upload Files
-      setSubmitMessage({ type: "info", message: "Uploading your documents..." })
-      const uploadedUrls = {
-        profilePhotoUrl: await handleFileUpload(formData.profilePhoto, "profilePhoto"),
-        idCardFrontUrl: await handleFileUpload(formData.idCardFront, "idCardFront"),
-        idCardBackUrl: await handleFileUpload(formData.idCardBack, "idCardBack"),
-        educationalCertificateUrl: formData.educationalCertificate ? await handleFileUpload(formData.educationalCertificate, "educationalCertificate") : ""
-      }
-
-      if (!uploadedUrls.profilePhotoUrl || !uploadedUrls.idCardFrontUrl || !uploadedUrls.idCardBackUrl) {
-        throw new Error("Required file uploads failed. Please check your internet connection.")
-      }
-
-      // 3. Save to Firestore
-      setSubmitMessage({ type: "info", message: "Saving application details..." })
-      
-      const registrationData = {
-        uid: user.uid,
-        ...formData,
-        email: generatedEmail,
-        // Replace file objects with URLs
-        profilePhoto: uploadedUrls.profilePhotoUrl,
-        idCardFront: uploadedUrls.idCardFrontUrl,
-        idCardBack: uploadedUrls.idCardBackUrl,
-        educationalCertificate: uploadedUrls.educationalCertificateUrl,
-        
-        createdAt: new Date().toISOString(),
-        status: "Pending",
-        applicationNumber: `APP-${Date.now()}`,
-        isRead: false
-      }
-
-      // Remove sensitive fields
-      delete registrationData.password
-      delete registrationData.confirmPassword
-
-      await setDoc(doc(db, "users", user.uid), registrationData)
-
-      // AUTO-CLEANUP
-      try {
-        const feesQuery = query(
-          collection(db, "registration-fees"), 
-          where("phoneNumber", "==", formData.phoneNumber),
-          where("status", "==", "approved")
-        );
-        const feesSnapshot = await getDocs(feesQuery);
-        const deletePromises = feesSnapshot.docs.map(feeDoc => deleteDoc(doc(db, "registration-fees", feeDoc.id)));
-        await Promise.all(deletePromises);
-      } catch (cleanupError) {
-        console.warn("Cleanup of fee records failed:", cleanupError);
-      }
-
-      setSubmitMessage({
-        type: "success",
-        message: "Registration successful! Redirecting to login...",
-        applicationNumber: registrationData.applicationNumber
-      })
-
-      setTimeout(() => {
-        window.location.href = "/login"
-      }, 3000)
-
-    } catch (error) {
-      console.error("Submission error:", error)
-      setSubmitMessage({ type: "error", message: error.message || "An error occurred. Please try again." })
-    } finally {
-      setLoading(false)
-    }
-  }
-
   // --- RENDERERS ---
 
   const renderProgressBar = () => (
-    <div className="mb-6">
+    <div className="mb-10 animate-in fade-in slide-in-from-top-4 duration-500">
       <div className="flex justify-between items-center mb-2">
-        <span className="text-xs font-bold text-gray-600">Section {currentSection} of 9</span>
+        <span className="text-xs font-bold text-gray-600">Section {currentSection} of 8</span>
         <span className="text-xs font-medium text-blue-600">
-          {Math.round((currentSection / 9) * 100)}% Complete
+          {Math.round((currentSection / 8) * 100)}% Complete
         </span>
       </div>
       <div className="w-full bg-gray-200 rounded-full h-1.5">
-        <div
+        <div 
           className="bg-blue-600 h-1.5 rounded-full transition-all duration-500 ease-out shadow-sm"
-          style={{ width: `${(currentSection / 9) * 100}%` }}
+          style={{ width: `${(currentSection / 8) * 100}%` }}
         ></div>
       </div>
     </div>
@@ -1107,11 +1040,26 @@ export default function Register() {
 
             <button
               type="button"
-              onClick={() => navigate("/payment-methods", { state: { phoneNumber: `+251${formData.phoneNumber}` } })}
-              className="w-full py-5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl font-black text-xl shadow-xl shadow-blue-200 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 group"
+              onClick={handleProceedToPayment}
+              disabled={loading}
+              className="w-full py-5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl font-black text-xl shadow-xl shadow-blue-200 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 group disabled:opacity-50"
             >
-              <CreditCard size={26} /> Pay Submission Fee <ArrowRight className="group-hover:translate-x-1 transition-transform" />
+              {loading ? (
+                <>
+                  <div className="animate-spin h-6 w-6 border-2 border-white border-t-transparent rounded-full" />
+                  Uploading Documents...
+                </>
+              ) : (
+                <>
+                  <CreditCard size={26} /> Pay Submission Fee <ArrowRight className="group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
             </button>
+            {submitMessage.message && (
+              <p className={`text-sm font-bold text-center mt-3 ${submitMessage.type === "error" ? "text-red-500" : "text-blue-600"}`}>
+                {submitMessage.message}
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -1150,58 +1098,7 @@ export default function Register() {
     </div>
   )
 
-  const renderSection9 = () => (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="flex items-center gap-3 mb-4 pb-2 border-b">
-        <Shield className="w-6 h-6 text-blue-600" />
-        <h2 className="text-lg font-bold text-gray-800">Account Security</h2>
-      </div>
 
-      <div className="bg-white border-2 border-gray-100 rounded-2xl p-8 space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-xs font-bold text-gray-700 mb-1">Create Password *</label>
-            <div className="relative">
-              <Shield className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                className={`w-full pl-9 pr-10 py-2.5 rounded-lg border ${errors.password ? "border-red-500" : "border-gray-300"} focus:ring-2 focus:ring-blue-500`}
-                placeholder="••••••••"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
-            {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-gray-700 mb-1">Confirm Password *</label>
-            <div className="relative">
-              <Shield className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type={showPassword ? "text" : "password"}
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                className={`w-full pl-9 pr-10 py-2.5 rounded-lg border ${errors.confirmPassword ? "border-red-500" : "border-gray-300"} focus:ring-2 focus:ring-blue-500`}
-                placeholder="••••••••"
-              />
-            </div>
-            {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
-          </div>
-        </div>
-        <p className="text-xs text-gray-500 italic">This password will be used to access your application dashboard later.</p>
-      </div>
-    </div>
-  )
 
   const renderSignaturePad = () => {
     const startDrawing = (e) => {
@@ -1383,7 +1280,6 @@ export default function Register() {
         </div>
       )
       case 8: return renderSection6()
-      case 9: return renderSection9()
       default: return renderSection1()
     }
   }
@@ -1417,7 +1313,7 @@ export default function Register() {
             
             {renderProgressBar()}
 
-            <form onSubmit={handleSubmit}>
+              <div>
               {renderSection()}
 
               {/* Error/Success Messages */}
@@ -1450,7 +1346,7 @@ export default function Register() {
                 )}
                 
                 <div className="w-full sm:w-auto ml-auto">
-                  {currentSection === 8 ? null : currentSection < 9 ? (
+                  {currentSection < 8 && (
                     <button
                       type="button"
                       onClick={handleNext}
@@ -1458,26 +1354,10 @@ export default function Register() {
                     >
                       {currentSection === 6 ? "Proceed" : currentSection === 7 ? "Send the Agreement" : "Next Section"} <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                     </button>
-                  ) : (
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="w-full sm:w-auto px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-green-200 transition-all active:scale-95 disabled:opacity-70 text-sm"
-                    >
-                      {loading ? (
-                        <>
-                          <Loader2 size={20} className="animate-spin" /> Submitting...
-                        </>
-                      ) : (
-                        <>
-                          Register Applicant <CheckCircle size={20} />
-                        </>
-                      )}
-                    </button>
                   )}
                 </div>
               </div>
-            </form>
+            </div>
           </div>
         </div>
 

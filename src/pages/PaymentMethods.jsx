@@ -113,7 +113,8 @@ export default function PaymentMethods() {
                                     onClick={() => navigate("/payment-detail", {
                                         state: {
                                             account,
-                                            phoneNumber: location.state?.phoneNumber
+                                            phoneNumber: location.state?.phoneNumber,
+                                            applicantData: location.state?.applicantData
                                         }
                                     })}
                                 >
