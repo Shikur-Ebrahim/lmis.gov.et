@@ -226,6 +226,16 @@ export default function PaymentDetail() {
                                     </button>
                                 </div>
                             </div>
+                            
+                            {account.registrationFee && (
+                                <>
+                                    <div className="h-px bg-white/20" />
+                                    <div className="space-y-1 bg-blue-700/50 p-4 rounded-2xl border border-blue-500/30">
+                                        <p className="text-xs font-semibold opacity-90 uppercase tracking-wider text-blue-200">Amount to pay</p>
+                                        <p className="text-3xl font-black">{account.registrationFee} <span className="text-lg opacity-80">ETB</span></p>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
 

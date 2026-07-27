@@ -128,10 +128,20 @@ export default function PaymentMethods() {
                                         </div>
                                         <div>
                                             <h3 className="font-bold text-lg sm:text-xl text-gray-900 leading-none mb-1">{account.paymentMethod}</h3>
-                                            <div className="flex items-center">
-                                                <ShieldCheck className="w-3 h-3 mr-1 text-blue-600" />
-                                                <span className="text-[10px] font-semibold text-blue-600">Official</span>
+                                            <div className="flex flex-col text-sm text-gray-600 mt-1">
+                                                <span className="font-mono bg-gray-100 px-2 py-0.5 rounded w-fit text-xs font-bold text-gray-800">{account.accountNumber}</span>
+                                                <span className="mt-1 font-medium">{account.bankName}</span>
                                             </div>
+                                            <div className="flex items-center mt-2">
+                                                <ShieldCheck className="w-3 h-3 mr-1 text-blue-600" />
+                                                <span className="text-[10px] font-semibold text-blue-600 uppercase tracking-wider">Official Account</span>
+                                            </div>
+                                            {account.registrationFee && (
+                                                <div className="mt-3 bg-blue-50 border border-blue-100 rounded-lg px-3 py-1.5 inline-block">
+                                                    <span className="text-xs text-blue-600 font-bold uppercase">Fee: </span>
+                                                    <span className="text-sm font-black text-blue-800">{account.registrationFee} ETB</span>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
 

@@ -41,9 +41,6 @@ export default function ApplicantDetail() {
   const [applicant, setApplicant] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [showUpdateStatusModal, setShowUpdateStatusModal] = useState(false)
-  const [newStatus, setNewStatus] = useState("")
-  const [updatingStatus, setUpdatingStatus] = useState(false)
 
   const fetchApplicant = useCallback(async () => {
     if (!id) return
@@ -118,17 +115,12 @@ export default function ApplicantDetail() {
 
       {/* ── Sticky Header ── */}
       <div className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <button onClick={() => navigate(-1)} className="p-2 rounded-full text-gray-500 hover:bg-gray-100 transition-colors">
-            <ArrowLeft className="w-5 h-5" />
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+          <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-600">
+            <ArrowLeft size={24} />
           </button>
-          <span className="text-sm font-bold text-gray-800 truncate max-w-[200px]">{fullName}</span>
-          <button
-            onClick={() => { setNewStatus(applicant.status || "Pending"); setShowUpdateStatusModal(true) }}
-            className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-xl shadow hover:bg-blue-700 active:scale-95 transition-all"
-          >
-            Update Status
-          </button>
+          <div className="text-center font-bold text-gray-900 truncate max-w-[200px]">{fullName}</div>
+          <div className="w-10"></div> {/* Placeholder to balance the flex layout */}
         </div>
       </div>
 
@@ -354,34 +346,6 @@ export default function ApplicantDetail() {
 
         </div>
       </div>
-
-      {/* ── Update Status Modal ── */}
-      {showUpdateStatusModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowUpdateStatusModal(false)}>
-          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm space-y-4 animate-in zoom-in duration-300" onClick={e => e.stopPropagation()}>
-            <h3 className="text-xl font-black text-gray-900">Update Application Status</h3>
-            {["Pending", "Under Review", "Accepted", "Rejected"].map(s => (
-              <button
-                key={s}
-                onClick={() => setNewStatus(s)}
-                className={`w-full text-left px-4 py-3 rounded-xl border-2 font-bold text-sm transition-all ${newStatus === s ? "border-blue-500 bg-blue-50 text-blue-700" : "border-gray-200 hover:border-gray-300"}`}
-              >
-                {s} {newStatus === s && <CheckCircle className="inline w-4 h-4 ml-1 text-blue-500" />}
-              </button>
-            ))}
-            <div className="flex gap-3 pt-2">
-              <button onClick={() => setShowUpdateStatusModal(false)} className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold text-sm hover:bg-gray-200 transition">Cancel</button>
-              <button
-                onClick={handleStatusUpdate}
-                disabled={updatingStatus}
-                className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold text-sm shadow hover:bg-blue-700 disabled:opacity-60 flex items-center justify-center gap-2 transition"
-              >
-                {updatingStatus ? <><Loader2 className="animate-spin w-4 h-4" /> Saving...</> : "Save Changes"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
