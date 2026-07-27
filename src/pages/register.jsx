@@ -222,6 +222,37 @@ const TRANSLATIONS = {
     errPasswordMatch: "የይለፍ ቃሎች አይዛመዱም",
     // Footer
     footer: "የስራ ስምምነት መድረክ",
+    // Jobs
+    "Cleaner": "ጽዳት",
+    "Security Guard": "የጥበቃ ሰራተኛ",
+    "Security Officer": "የጥበቃ ሃላፊ",
+    "Driver (Heavy)": "አሽከርካሪ (ከባድ መኪና)",
+    "Driver (Light)": "አሽከርካሪ (ቀላል መኪና)",
+    "Domestic Worker": "የቤት ሰራተኛ",
+    "Housemaid": "የቤት ሰራተኛ",
+    "Caregiver": "ተንከባካቢ",
+    "Nurse": "ነርስ",
+    "Waitress": "አስተናጋጅ (ሴት)",
+    "Waiter": "አስተናጋጅ (ወንድ)",
+    "Cook / Chef": "ሼፍ / ምግብ አብሳይ",
+    "Kitchen Helper": "የኩሽና ረዳት",
+    "Dishwasher": "ዕቃ አጣቢ",
+    "Receptionist": "እንግዳ ተቀባይ",
+    "Sales Associate": "የሽያጭ ባለሙያ",
+    "Construction Worker": "የኮንስትራክሽን ሰራተኛ",
+    "Electrician": "ኤሌክትሪሻን",
+    "Plumber": "የቧንቧ ሰራተኛ",
+    "Carpenter": "አናፂ",
+    "Mason": "ግንበኛ",
+    "Painter": "ቀቢ",
+    "AC Technician": "የአየር ማቀዝቀዣ ባለሙያ",
+    "General Labor": "አጠቃላይ የጉልበት ሰራተኛ",
+    "Warehouse Worker": "የመጋዘን ሰራተኛ",
+    "Packer": "አሸጊ",
+    "Factory Worker": "የፋብሪካ ሰራተኛ",
+    "Agriculture Worker": "የእርሻ ሰራተኛ",
+    "Gardener": "አትክልተኛ",
+    "Tailor": "ልብስ ሰፊ",
   },
   en: {
     title: "Employment Agreement",
@@ -878,7 +909,7 @@ export default function Register() {
             name="jobTitle"
             value={formData.jobTitle}
             onChange={handleInputChange}
-            options={jobOptions.map(job => ({ value: job, label: job }))}
+            options={jobOptions.map(job => ({ value: job, label: t(job) }))}
             placeholder={t('selectJob')}
             error={errors.jobTitle}
           />
