@@ -140,8 +140,6 @@ export default function Register() {
     city: "",
     hasPassport: "", // "Yes" or "No"
     passportNumber: "",
-    password: "",
-    confirmPassword: "",
 
     // Section 2: Job Information
     jobTitle: "",
