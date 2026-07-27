@@ -16,7 +16,8 @@ import {
   CreditCard,
   LogOut,
   Building2,
-  Video
+  Video,
+  Share2
 } from "lucide-react"
 
 export default function Sidebar() {
@@ -114,8 +115,9 @@ export default function Sidebar() {
     { to: "/admin/Payment", icon: CreditCard, label: "Payments", badge: stats.unreadPayments, badgeColor: "bg-red-500" },
     { to: "/admin/Notifications", icon: Bell, label: "Notifications", badge: stats.unreadNotifications, badgeColor: "bg-red-500" },
     { to: "/admin/videos", icon: Video, label: "Videos", iconColor: "text-indigo-400" },
-    { to: "/admin/Biometric", icon: Activity, label: "Biometric", badge: stats.pendingBiometric, badgeColor: "bg-red-500" },
+    {to: "/admin/Biometric", icon: Activity, label: "Biometric", badge: stats.pendingBiometric, badgeColor: "bg-red-500" },
     { to: "/admin/account", icon: Building2, label: "Accounts" },
+    { to: "/admin/social-media", icon: Share2, label: "Social & Support", extraClass: "text-emerald-400 font-bold" },
   ]
 
   return (

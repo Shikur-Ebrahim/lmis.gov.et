@@ -21,6 +21,7 @@ import AccountManagement from "./pages/admin/account";
 import AdminBiometric from "./pages/admin/Biometric";
 import RegistrationFees from "./pages/admin/RegistrationFees";
 import AdminVideoUpload from "./pages/admin/AdminVideoUpload";
+import SocialMediaSettings from "./pages/admin/SocialMediaSettings";
 import Biometric from "./pages/Biometric";
 import RegistrationPayment from "./pages/RegistrationPayment";
 import PaymentMethods from "./pages/PaymentMethods";
@@ -144,6 +145,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <AdminVideoUpload />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/social-media"
+              element={
+                <ProtectedRoute>
+                  <SocialMediaSettings />
                 </ProtectedRoute>
               }
             />
