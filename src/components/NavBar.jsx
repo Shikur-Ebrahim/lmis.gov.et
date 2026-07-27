@@ -12,6 +12,16 @@ export default function NavBar() {
   const location = useLocation()
   const isAdminRoute = location.pathname.startsWith("/admin")
 
+  const handleApplicantsClick = (e) => {
+    if (location.pathname === "/") {
+      e.preventDefault()
+      const el = document.getElementById("applicants")
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" })
+      }
+    }
+  }
+
   // Don't render navigation on admin routes
   if (isAdminRoute) {
     return null
@@ -82,6 +92,15 @@ export default function NavBar() {
                 Contact
               </Link>
 
+              {/* Applicants Button */}
+              <a
+                href="/#applicants"
+                onClick={handleApplicantsClick}
+                className="border-2 border-emerald-500 text-emerald-600 hover:bg-emerald-50 font-bold px-4 py-1.5 rounded-full text-sm transition-all duration-200 shadow-sm flex items-center justify-center"
+              >
+                Applicants
+              </a>
+
               {/* Login Button */}
               <Link to="/login">
                 <button className="px-4 py-2 border border-lmis-blue-primary text-lmis-blue-primary bg-white rounded-md text-sm font-semibold">
@@ -98,7 +117,14 @@ export default function NavBar() {
             </div>
 
             {/* Mobile menu button */}
-            <div className="lg:hidden flex items-center">
+            <div className="lg:hidden flex items-center space-x-2">
+              <a
+                href="/#applicants"
+                onClick={handleApplicantsClick}
+                className="border-2 border-emerald-500 text-emerald-600 hover:bg-emerald-50 font-bold px-4 py-1.5 rounded-full text-sm transition-all duration-200 shadow-sm"
+              >
+                Applicants
+              </a>
               <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="text-gray-700 hover:text-primary-600 focus:outline-none focus:text-primary-600 p-2"
