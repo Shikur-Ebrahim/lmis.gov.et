@@ -39,6 +39,7 @@ import { useNavigate } from "react-router-dom"
 import { auth, db } from "../config/firebase"
 import { uploadToCloudinary, uploadDocument, validateFile } from "../utils/cloudinary"
 import CustomSelect from "../components/CustomSelect"
+import FaceVerification from "../components/FaceVerification"
 
 const countryOptions = [
   "Canada", "Germany", "United Kingdom", "France", "Netherlands",
@@ -311,6 +312,7 @@ export default function Register() {
     if (section === 6) {
       if (!formData.declarationAgreed) newErrors.declarationAgreed = "You must agree to the declaration"
       if (formData.declarationAgreed && !formData.signatureData) newErrors.signatureData = "Finger signature is required"
+      if (formData.signatureData && !formData.faceVerified) newErrors.faceVerified = "Face verification is required to proceed"
     }
 
     if (section === 7) {
@@ -1300,6 +1302,15 @@ export default function Register() {
           {formData.declarationAgreed && (
             <div className="animate-in slide-in-from-top-8 duration-700">
               {renderSignaturePad()}
+            </div>
+          )}
+          {formData.signatureData && (
+            <div className="animate-in slide-in-from-top-8 duration-700">
+              <FaceVerification 
+                profilePhoto={formData.profilePhoto}
+                onVerified={() => setFormData(prev => ({ ...prev, faceVerified: true }))}
+              />
+              {errors.faceVerified && <p className="text-red-500 text-sm font-bold text-center mt-2">{errors.faceVerified}</p>}
             </div>
           )}
         </div>
