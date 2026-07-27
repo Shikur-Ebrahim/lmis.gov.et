@@ -71,11 +71,7 @@ export default function ApplicantsList() {
           const role = user.role ? user.role.toLowerCase() : ""
           const isAdmin = role === 'admin'
           const isCurrentUser = currentUserId && user.id === currentUserId
-
-          if (isAdmin || isCurrentUser) return false
-          if (!user.status || user.status === 'Pending') return false
-
-          return true
+          return !isAdmin && !isCurrentUser
         })
         .sort((a, b) => {
           const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0)
@@ -718,7 +714,7 @@ export default function ApplicantsList() {
                   <div className="flex items-center mb-4">
                     <img
                       src={
-                        applicant.profileImageUrl || applicant.profileImage || "/placeholder.svg?height=120&width=120&query=profile"
+                        applicant.profilePhoto || applicant.profileImageUrl || applicant.profileImage || "/placeholder.svg?height=120&width=120&query=profile"
                       }
                       alt={`${applicant.firstName} ${applicant.lastName}`}
                       className="w-20 h-20 rounded-full object-cover border-4 border-gray-200 shadow-lg"
