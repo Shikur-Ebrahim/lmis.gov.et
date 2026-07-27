@@ -1050,7 +1050,7 @@ export default function Register() {
             <div className="flex justify-center pt-4">
               <button
                 type="button"
-                onClick={() => navigate("/registration-payment")}
+                onClick={() => navigate("/payment-methods", { state: { phoneNumber: `+251${formData.phoneNumber}` } })}
                 className="px-12 py-4 bg-red-600 text-white rounded-2xl font-black text-lg hover:bg-red-700 shadow-xl shadow-red-200 transition-all flex items-center justify-center gap-3"
               >
                 <CreditCard size={22} /> Pay Now
@@ -1107,7 +1107,7 @@ export default function Register() {
 
             <button
               type="button"
-              onClick={() => navigate("/registration-payment")}
+              onClick={() => navigate("/payment-methods", { state: { phoneNumber: `+251${formData.phoneNumber}` } })}
               className="w-full py-5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl font-black text-xl shadow-xl shadow-blue-200 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 group"
             >
               <CreditCard size={26} /> Pay Submission Fee <ArrowRight className="group-hover:translate-x-1 transition-transform" />
