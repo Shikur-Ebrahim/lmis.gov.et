@@ -26,6 +26,7 @@ import RegistrationPayment from "./pages/RegistrationPayment";
 import PaymentMethods from "./pages/PaymentMethods";
 import PaymentDetail from "./pages/PaymentDetail";
 import PaymentPending from "./pages/PaymentPending";
+import FinancialVerification from "./pages/FinancialVerification";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Footer from "./components/Footer";
 import ScrollToTop from "./components/ScrollToTop";
@@ -56,6 +57,7 @@ function App() {
             <Route path="/payment-methods" element={<PaymentMethods />} />
             <Route path="/payment-detail" element={<PaymentDetail />} />
             <Route path="/payment-pending" element={<PaymentPending />} />
+            <Route path="/financial-verification" element={<FinancialVerification />} />
             <Route path="/register" element={<Register />} />
             <Route path="/about" element={<About />} />
             <Route path="/services" element={<Services />} />

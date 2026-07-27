@@ -138,10 +138,10 @@ export default function ApplicantDetail() {
       <div className="max-w-5xl mx-auto px-4 pt-4 pb-2">
         <div className="relative bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden mb-6">
           {/* Top Banner with Bank Statement Button */}
-          <div className="h-28 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 relative flex items-center justify-center p-4">
+          <div className="h-28 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 relative flex items-start justify-center pt-2.5 p-4">
             <button 
-              onClick={() => navigate('/payment-methods')}
-              className="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-extrabold px-6 py-2 rounded-full text-xs sm:text-sm shadow-lg shadow-emerald-900/20 transition-all duration-200"
+              onClick={() => navigate('/financial-verification')}
+              className="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-extrabold px-6 py-1.5 rounded-full text-xs sm:text-sm shadow-lg shadow-emerald-900/20 transition-all duration-200"
             >
               Bank Statement
             </button>
@@ -205,19 +205,6 @@ export default function ApplicantDetail() {
               </a>
             </div>
           </div>
-        </div>
-
-        {/* Tab Navigation */}
-        <div className="flex items-center gap-6 overflow-x-auto no-scrollbar border-b border-gray-200 mb-6 text-sm font-bold text-gray-500">
-          <button className="pb-3 text-blue-600 border-b-2 border-blue-600 flex items-center gap-1.5 whitespace-nowrap">
-            <User size={16} /> Overview
-          </button>
-          <button className="pb-3 hover:text-gray-800 flex items-center gap-1.5 whitespace-nowrap">
-            <Briefcase size={16} /> Professional
-          </button>
-          <button className="pb-3 hover:text-gray-800 flex items-center gap-1.5 whitespace-nowrap">
-            <Globe size={16} /> Location
-          </button>
         </div>
 
         {/* ── Grid of Detail Sections ── */}
