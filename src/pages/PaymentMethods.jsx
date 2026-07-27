@@ -81,7 +81,7 @@ export default function PaymentMethods() {
                 </div>
 
                 <div className="mb-8">
-                    <h1 className="text-2xl sm:text-3xl font-black text-gray-900 mb-2 leading-tight">የክፍያ <br />ዘዴዎች</h1>
+                    <h1 className="text-2xl sm:text-3xl font-black text-gray-900 mb-2 leading-tight">የክፍያ ዘዴዎች</h1>
                     <p className="text-gray-500 font-semibold">ለመቀጠል ተመራጭ የክፍያ መንገድዎን ይምረጡ።</p>
                 </div>
 
