@@ -30,10 +30,13 @@ export default function ApplicantCard({ applicant }) {
       return;
     }
 
-    const normalizedInput = phoneInput.trim().replace(/\s/g, "");
-    const normalizedTarget = (applicant?.phoneNumber || "").trim().replace(/\s/g, "");
+    let cleanInput = phoneInput.trim().replace(/[\s\+]/g, "");
+    if (cleanInput.startsWith("251")) cleanInput = cleanInput.substring(3);
 
-    if (normalizedInput !== normalizedTarget) {
+    let cleanTarget = (applicant?.phoneNumber || applicant?.phone || "").trim().replace(/[\s\+]/g, "");
+    if (cleanTarget.startsWith("251")) cleanTarget = cleanTarget.substring(3);
+
+    if (cleanInput !== cleanTarget) {
       setErrorMessage("Phone Number is incorrect.");
       return;
     }
