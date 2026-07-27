@@ -146,7 +146,7 @@ export default function PaymentDetail() {
                             <CreditCard className="w-10 h-10 text-blue-600" />
                         )}
                     </div>
-                    <h1 className="text-2xl font-black text-gray-900 leading-tight">Complete Your Payment</h1>
+                    <h1 className="text-xl sm:text-2xl font-black text-gray-900 leading-tight">Complete Your Payment</h1>
                     <div className="bg-blue-50/50 p-4 rounded-3xl border border-blue-100/50">
                         <p className="text-sm font-bold text-blue-900 leading-relaxed">
                             Copy the {account.paymentMethod?.toLowerCase() === 'telebirr' ? 'phone' : 'account'} number and pay using this {account.paymentMethod?.toLowerCase() === 'telebirr' ? 'phone' : 'account'} number. After finished using this account, send the payment screenshot.
@@ -158,14 +158,14 @@ export default function PaymentDetail() {
                 <div className="bg-white rounded-[2.5rem] overflow-hidden shadow-2xl shadow-blue-100/50 border border-white">
                     <div className="bg-blue-600 p-8 text-white">
                         <div className="flex items-center justify-between mb-8">
-                            <span className="text-[10px] font-black tracking-[0.2em] opacity-80">Official payment channel</span>
+                            <span className="text-xs font-semibold opacity-90">Official payment channel</span>
                             <ShieldCheck className="w-5 h-5 text-blue-200" />
                         </div>
 
                         <div className="space-y-6">
                             {/* Combine Holder and Number in Same View */}
                             <div className="space-y-1">
-                                <p className="text-[10px] font-black tracking-widest opacity-60">Account holder name</p>
+                                <p className="text-xs font-semibold opacity-80">Account holder name</p>
                                 <div className="flex items-center justify-between">
                                     <p className="text-xl font-black truncate">{account.bankName}</p>
                                     <button
@@ -180,11 +180,11 @@ export default function PaymentDetail() {
                             <div className="h-px bg-white/20" />
 
                             <div className="space-y-1">
-                                <p className="text-[10px] font-black tracking-widest opacity-60">
+                                <p className="text-xs font-semibold opacity-80">
                                     {account.paymentMethod?.toLowerCase() === 'telebirr' ? 'Phone Number' : 'Account Number'}
                                 </p>
                                 <div className="flex items-center justify-between">
-                                    <p className="text-3xl font-black font-mono tracking-tighter">{account.accountNumber}</p>
+                                    <p className="text-2xl sm:text-3xl font-black font-mono tracking-tighter">{account.accountNumber}</p>
                                     <button
                                         onClick={() => handleCopy(account.accountNumber, 'account')}
                                         className="p-3 rounded-2xl bg-white text-blue-600 shadow-lg hover:bg-blue-50 transition-all active:scale-90"
@@ -198,7 +198,7 @@ export default function PaymentDetail() {
 
                     <div className="px-8 py-4 bg-gray-50 flex items-center justify-center space-x-2">
                         <Info className="w-4 h-4 text-gray-400" />
-                        <span className="text-[10px] font-bold text-gray-400 tracking-widest">Tap to copy details immediately</span>
+                        <span className="text-xs font-semibold text-gray-500">Tap to copy details immediately</span>
                     </div>
                 </div>
 
@@ -213,12 +213,12 @@ export default function PaymentDetail() {
                 {/* Bottom Section: Upload Screenshot */}
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2 text-gray-900 tracking-widest font-black text-[10px]">
+                        <div className="flex items-center space-x-2 text-gray-900 font-bold text-sm">
                             <Upload className="w-4 h-4" />
                             <span>Payment Receipt</span>
                         </div>
                         {screenshot && (
-                            <span className="text-[10px] font-black text-green-500 tracking-widest flex items-center">
+                            <span className="text-xs font-semibold text-green-500 flex items-center">
                                 <CheckCircle2 className="w-3 h-3 mr-1" /> Ready to finish
                             </span>
                         )}
@@ -233,7 +233,7 @@ export default function PaymentDetail() {
                                     <div className="bg-white/20 backdrop-blur-md p-4 rounded-full mb-2">
                                         <ImageIcon className="w-8 h-8 text-white" />
                                     </div>
-                                    <span className="text-white font-black tracking-widest text-[10px]">Click to change receipt</span>
+                                    <span className="text-white font-bold text-sm">Click to change receipt</span>
                                 </div>
                             </>
                         ) : (
@@ -242,7 +242,7 @@ export default function PaymentDetail() {
                                     <ImageIcon className="w-8 h-8 text-blue-500" />
                                 </div>
                                 <p className="text-sm font-black text-gray-800 tracking-tight">Upload screenshot</p>
-                                <p className="text-[10px] text-gray-400 font-bold mt-2 leading-relaxed">
+                                <p className="text-xs text-gray-500 font-medium mt-2 leading-relaxed">
                                     Select the transaction success <br /> screen from your gallery
                                 </p>
                             </div>
@@ -257,7 +257,7 @@ export default function PaymentDetail() {
                 <button
                     onClick={handleFinish}
                     disabled={!screenshot || uploading}
-                    className="w-full py-5 bg-gray-900 text-white font-black rounded-[2rem] shadow-2xl shadow-gray-200 hover:bg-black transition-all active:scale-95 disabled:opacity-20 flex items-center justify-center space-x-3 tracking-widest text-sm"
+                    className="w-full py-5 bg-gray-900 text-white font-black rounded-[2rem] shadow-2xl shadow-gray-200 hover:bg-black transition-all active:scale-95 disabled:opacity-20 flex items-center justify-center space-x-3 text-sm"
                 >
                     {uploading ? (
                         <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />

@@ -81,7 +81,7 @@ export default function PaymentMethods() {
                 </div>
 
                 <div className="mb-8">
-                    <h1 className="text-3xl font-black text-gray-900 mb-2 leading-tight">Payment <br />methods</h1>
+                    <h1 className="text-2xl sm:text-3xl font-black text-gray-900 mb-2 leading-tight">Payment <br />methods</h1>
                     <p className="text-gray-500 font-semibold">Select your preferred payment channel to continue.</p>
                 </div>
 
@@ -95,7 +95,7 @@ export default function PaymentMethods() {
                 ) : accounts.length === 0 ? (
                     <div className="bg-white rounded-3xl p-16 text-center border-2 border-dashed border-gray-200">
                         <CreditCard className="w-16 h-16 text-gray-200 mx-auto mb-6" />
-                        <p className="text-gray-400 font-black uppercase tracking-wider">No payment channels found</p>
+                        <p className="text-gray-400 font-bold">No payment channels found</p>
                     </div>
                 ) : (
                     <div className="space-y-4">
@@ -126,10 +126,10 @@ export default function PaymentMethods() {
                                             )}
                                         </div>
                                         <div>
-                                            <h3 className="font-black text-xl text-gray-900 leading-none mb-1">{account.paymentMethod}</h3>
+                                            <h3 className="font-bold text-lg sm:text-xl text-gray-900 leading-none mb-1">{account.paymentMethod}</h3>
                                             <div className="flex items-center">
                                                 <ShieldCheck className="w-3 h-3 mr-1 text-blue-600" />
-                                                <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Official</span>
+                                                <span className="text-[10px] font-semibold text-blue-600">Official</span>
                                             </div>
                                         </div>
                                     </div>
