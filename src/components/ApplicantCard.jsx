@@ -85,12 +85,19 @@ export default function ApplicantCard({ applicant }) {
           <div className="space-y-2 mb-4">
             <div className="flex items-center text-gray-600 text-sm">
               <Briefcase className="w-4 h-4 mr-2 text-primary-500" />
-              <span className="font-medium">{applicant?.job || "N/A"}</span>
+              <span className="font-medium">
+                {applicant?.jobTitle || applicant?.job || applicant?.jobCategory || "Not Specified"}
+              </span>
             </div>
 
             <div className="flex items-center text-gray-600 text-sm">
               <MapPin className="w-4 h-4 mr-2 text-primary-500" />
-              <span>{applicant?.country || "Unknown"}</span>
+              <span>
+                {/* Show first selected target country, fall back to home country */}
+                {(applicant?.selectedCountries && applicant.selectedCountries.length > 0)
+                  ? applicant.selectedCountries[0]
+                  : applicant?.country || "Unknown"}
+              </span>
             </div>
 
             <div className="flex items-center text-gray-600 text-sm">
