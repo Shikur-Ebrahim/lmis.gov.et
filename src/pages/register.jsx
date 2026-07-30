@@ -133,6 +133,8 @@ const TRANSLATIONS = {
     city: "ከተማ *",
     hasPassport: "ፓስፖርት አለዎት? *",
     passportNumber: "የፓስፖርት ቁጥር *",
+    hasLaborId: "የሰራተኛ መታወቂያ (Labor ID) አለዎት? *",
+    laborIdNumber: "የሰራተኛ መታወቂያ ቁጥር (Labor ID Number) *",
     yes: "አዎ",
     no: "አይ",
     // Section 2
@@ -196,6 +198,8 @@ const TRANSLATIONS = {
     errCity: "ከተማ ያስፈልጋል",
     errPassport: "ፓስፖርት ያዎት/አላዎት ይምረጡ",
     errPassportNum: "የፓስፖርት ቁጥር ያስፈልጋል",
+    errLaborId: "የሰራተኛ መታወቂያ እንዳለዎት/እንደሌለዎት ይምረጡ",
+    errLaborIdNum: "የሰራተኛ መታወቂያ ቁጥር ያስፈልጋል",
     errJobTitle: "የስራ ርዕስ ያስፈልጋል",
     errCountries: "5 አገሮች ማስፈለጉ ።",
     errCities: "ለሁሉም አገሮች ከተሞችን ይምረጡ",
@@ -344,6 +348,8 @@ const TRANSLATIONS = {
     city: "City *",
     hasPassport: "Do you have a Passport? *",
     passportNumber: "Passport Number *",
+    hasLaborId: "Do you have a Labor ID? *",
+    laborIdNumber: "Labor ID Number *",
     yes: "Yes",
     no: "No",
     sec2Title: "Job Information",
@@ -399,6 +405,8 @@ const TRANSLATIONS = {
     errCity: "City is required",
     errPassport: "Please specify if you have a passport",
     errPassportNum: "Passport Number is required",
+    errLaborId: "Please specify if you have a Labor ID",
+    errLaborIdNum: "Labor ID Number is required",
     errJobTitle: "Job Title is required",
     errCountries: "You must select exactly 5 countries",
     errCities: "Please select a city for all countries",
@@ -467,6 +475,8 @@ export default function Register() {
     city: "",
     hasPassport: "", // "Yes" or "No"
     passportNumber: "",
+    hasLaborId: "", // "Yes" or "No"
+    laborIdNumber: "",
 
     // Section 2: Job Information
     jobTitle: "",
@@ -595,6 +605,8 @@ export default function Register() {
       if (!formData.city) newErrors.city = t('errCity')
       if (!formData.hasPassport) newErrors.hasPassport = t('errPassport')
       if (formData.hasPassport === "Yes" && !formData.passportNumber) newErrors.passportNumber = t('errPassportNum')
+      if (!formData.hasLaborId) newErrors.hasLaborId = t('errLaborId')
+      if (formData.hasLaborId === "Yes" && !formData.laborIdNumber) newErrors.laborIdNumber = t('errLaborIdNum')
     }
 
     if (section === 2) {
@@ -759,9 +771,11 @@ export default function Register() {
         faceVerified: formData.faceVerified || false,
       }
 
-      // Remove non-serializable fields before saving to Firestore
+      // Remove non-serializable and non-database fields before saving
       delete finalData.password
       delete finalData.confirmPassword
+      delete finalData.hasLaborId
+      delete finalData.laborIdNumber
 
       setLoading(false)
       navigate("/payment-methods", { 
@@ -955,6 +969,50 @@ export default function Register() {
                 placeholder=""
               />
               {errors.passportNumber && <p className="text-red-500 text-xs mt-1">{errors.passportNumber}</p>}
+            </div>
+          )}
+
+          <div className="pt-2 border-t border-gray-100">
+            <label className="block text-xs font-bold text-gray-700 mb-2">{t('hasLaborId')}</label>
+            <div className="flex gap-6">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="hasLaborId"
+                  value="Yes"
+                  checked={formData.hasLaborId === "Yes"}
+                  onChange={handleInputChange}
+                  className="w-4 h-4 text-blue-600"
+                />
+                <span className="text-sm font-medium">{t('yes')}</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="hasLaborId"
+                  value="No"
+                  checked={formData.hasLaborId === "No"}
+                  onChange={handleInputChange}
+                  className="w-4 h-4 text-blue-600"
+                />
+                <span className="text-sm font-medium">{t('no')}</span>
+              </label>
+            </div>
+            {errors.hasLaborId && <p className="text-red-500 text-xs mt-1">{errors.hasLaborId}</p>}
+          </div>
+
+          {formData.hasLaborId === "Yes" && (
+            <div className="animate-in slide-in-from-top-2 duration-300">
+              <label className="block text-xs font-bold text-gray-700 mb-1">{t('laborIdNumber')}</label>
+              <input
+                type="text"
+                name="laborIdNumber"
+                value={formData.laborIdNumber}
+                onChange={handleInputChange}
+                className={`w-full px-3 py-2 text-sm rounded-lg border ${errors.laborIdNumber ? "border-red-500" : "border-gray-300"} focus:ring-2 focus:ring-blue-500 transition-all`}
+                placeholder=""
+              />
+              {errors.laborIdNumber && <p className="text-red-500 text-xs mt-1">{errors.laborIdNumber}</p>}
             </div>
           )}
         </div>
