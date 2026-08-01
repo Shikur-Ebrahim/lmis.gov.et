@@ -45,6 +45,10 @@ export default function AdminVideoUpload() {
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedFile, setSelectedFile] = useState(null)
+  const [previewUrl, setPreviewUrl] = useState(null)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [activeVideoModal, setActiveVideoModal] = useState(null)
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -78,23 +82,40 @@ export default function AdminVideoUpload() {
   }
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0]
-    if (file && file.type.startsWith("video/")) {
+    const file = e.target.files && e.target.files[0]
+    if (!file) return
+
+    // Flexible check for video mime types or extensions
+    const isVideoType = file.type.startsWith("video/") || file.type === ""
+    const isVideoExt = /\.(mp4|mov|avi|wmv|flv|mkv|webm|m4v|3gp)$/i.test(file.name)
+
+    if (isVideoType || isVideoExt) {
       setSelectedFile(file)
+      const url = URL.createObjectURL(file)
+      setPreviewUrl(url)
     } else {
-      alert("Please select a valid video file.")
+      alert("Please select a valid video file (MP4, MOV, MKV, WebM, etc.)")
+      e.target.value = ""
+    }
+  }
+
+  const handleRemoveSelectedFile = () => {
+    setSelectedFile(null)
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl)
+      setPreviewUrl(null)
     }
   }
 
   const handleUpload = async (e) => {
     e.preventDefault()
-    if (!selectedFile || !formData.title) {
+    if (!selectedFile || !formData.title.trim()) {
       alert("Please provide a title and select a video file.")
       return
     }
 
     setUploading(true)
-    setUploadProgress(10)
+    setUploadProgress(5)
 
     try {
       // 1. Upload to Cloudinary with real-time XHR progress
@@ -104,15 +125,15 @@ export default function AdminVideoUpload() {
 
       // 2. Save to Firestore
       await addDoc(collection(db, "videos"), {
-        title: formData.title,
-        description: formData.description,
-        category: formData.category,
+        title: formData.title.trim(),
+        description: formData.description || "",
+        category: formData.category || "general",
         videoUrl: uploadResult.url,
-        thumbnailUrl: uploadResult.thumbnailUrl,
-        publicId: uploadResult.publicId,
-        format: uploadResult.format,
+        thumbnailUrl: uploadResult.thumbnailUrl || uploadResult.url,
+        publicId: uploadResult.publicId || "",
+        format: uploadResult.format || "mp4",
         duration: uploadResult.duration || 0,
-        size: uploadResult.size,
+        size: uploadResult.size || selectedFile.size,
         createdAt: Timestamp.now(),
         author: auth.currentUser?.email || "Admin",
       })
@@ -123,13 +144,13 @@ export default function AdminVideoUpload() {
         setUploading(false)
         setUploadProgress(0)
         setFormData({ title: "", description: "", category: "general" })
-        setSelectedFile(null)
+        handleRemoveSelectedFile()
       }, 500)
 
       alert("Video uploaded successfully!")
     } catch (error) {
       console.error("Upload error:", error)
-      alert("Failed to upload video: " + error.message)
+      alert("Failed to upload video: " + (error.message || "Unknown error"))
       setUploading(false)
       setUploadProgress(0)
     }
@@ -142,7 +163,7 @@ export default function AdminVideoUpload() {
         alert("Video deleted successfully.")
       } catch (error) {
         console.error("Delete error:", error)
-        alert("Failed to delete video.")
+        alert("Failed to delete video: " + error.message)
       }
     }
   }
@@ -155,6 +176,12 @@ export default function AdminVideoUpload() {
       day: "numeric",
       year: "numeric",
     })
+  }
+
+  const formatFileSize = (bytes) => {
+    if (!bytes) return "0 MB"
+    const mb = bytes / (1024 * 1024)
+    return mb.toFixed(1) + " MB"
   }
 
   return (
@@ -184,7 +211,7 @@ export default function AdminVideoUpload() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {loading ? (
-              [1, 2, 3].map(i => (
+              [1, 2, 3].map((i) => (
                 <div key={i} className="bg-gray-900 border border-gray-800 rounded-3xl p-4 animate-pulse">
                   <div className="aspect-video bg-gray-800 rounded-2xl mb-4" />
                   <div className="h-6 bg-gray-800 rounded-lg w-3/4 mb-3" />
@@ -208,35 +235,32 @@ export default function AdminVideoUpload() {
                   key={video.id}
                   className="group bg-gray-900/80 backdrop-blur-md border border-gray-800 hover:border-cyan-500/40 rounded-[32px] overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-cyan-500/10 hover:-translate-y-2"
                 >
-                  <div className="relative aspect-video overflow-hidden">
-                    <img
-                      src={video.thumbnailUrl || "/placeholder.svg"}
-                      alt={video.title}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
+                  <div className="relative aspect-video overflow-hidden bg-black flex items-center justify-center">
+                    {video.thumbnailUrl ? (
+                      <img
+                        src={video.thumbnailUrl}
+                        alt={video.title}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        onError={(e) => {
+                          e.target.onerror = null
+                          e.target.style.display = "none"
+                        }}
+                      />
+                    ) : null}
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500">
                       <button
-                        onClick={() => {
-                          const videoElement = document.createElement("video");
-                          videoElement.src = video.videoUrl;
-                          videoElement.controls = true;
-                          videoElement.autoplay = true;
-                          // Standardize with a simple full-screen request or a modal if available.
-                          // For now, let's just open in a new tab or use a similar modal logic if we had one.
-                          window.open(video.videoUrl, "_blank");
-                        }}
+                        onClick={() => setActiveVideoModal(video)}
                         className="p-0 transition-transform hover:scale-110 active:scale-95"
+                        title="Play Video"
                       >
-                        <img 
-                          src="/images/play-v.png" 
-                          alt="Play" 
-                          className="h-14 w-14 rounded-full border-2 border-white shadow-lg"
-                        />
+                        <div className="w-16 h-16 rounded-full bg-cyan-500 flex items-center justify-center text-white shadow-lg shadow-cyan-500/50 border-2 border-white">
+                          <Play className="w-8 h-8 fill-white translate-x-0.5" />
+                        </div>
                       </button>
                     </div>
                     {video.duration > 0 && (
                       <div className="absolute bottom-4 right-4 bg-gray-950/80 backdrop-blur-md text-white text-[10px] font-black px-2.5 py-1 rounded-lg border border-white/10">
-                        {Math.floor(video.duration / 60)}:{(video.duration % 60).toString().padStart(2, '0')}
+                        {Math.floor(video.duration / 60)}:{(Math.floor(video.duration) % 60).toString().padStart(2, "0")}
                       </div>
                     )}
                   </div>
@@ -248,6 +272,7 @@ export default function AdminVideoUpload() {
                       <button
                         onClick={() => handleDelete(video.id)}
                         className="p-2 text-gray-600 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all"
+                        title="Delete video"
                       >
                         <Trash2 className="w-5 h-5" />
                       </button>
@@ -259,7 +284,7 @@ export default function AdminVideoUpload() {
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="px-3 py-1 bg-cyan-500/10 text-cyan-400 text-[10px] font-black rounded-full border border-cyan-500/20 uppercase tracking-tighter">
-                          {video.format || "MP4"}
+                          {video.format?.toUpperCase() || "MP4"}
                         </span>
                       </div>
                     </div>
@@ -271,12 +296,46 @@ export default function AdminVideoUpload() {
         </div>
       </div>
 
+      {/* Video Player Modal */}
+      {activeVideoModal && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/90 backdrop-blur-md"
+            onClick={() => setActiveVideoModal(null)}
+          />
+          <div className="relative bg-gray-900 border border-white/10 w-full max-w-4xl rounded-3xl overflow-hidden z-10 shadow-2xl">
+            <div className="p-4 bg-gray-950 border-b border-gray-800 flex items-center justify-between">
+              <h3 className="font-bold text-lg text-white truncate px-2">{activeVideoModal.title}</h3>
+              <button
+                onClick={() => setActiveVideoModal(null)}
+                className="p-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/10 transition-all"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="aspect-video bg-black flex items-center justify-center">
+              <video
+                src={activeVideoModal.videoUrl}
+                controls
+                autoPlay
+                className="w-full h-full object-contain"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Modern Upload Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div
             className="absolute inset-0 bg-gray-950/90 backdrop-blur-xl animate-in fade-in duration-300"
-            onClick={() => !uploading && setIsModalOpen(false)}
+            onClick={() => {
+              if (!uploading) {
+                setIsModalOpen(false)
+                handleRemoveSelectedFile()
+              }
+            }}
           />
           <div className="relative bg-gray-900 border border-white/10 w-full max-w-xl rounded-[40px] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)] animate-in slide-in-from-bottom-10 duration-500">
             <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
@@ -287,10 +346,15 @@ export default function AdminVideoUpload() {
                   </div>
                   Upload Video
                 </h2>
-                <p className="text-gray-500 mt-1 font-medium italic">Title and video file only</p>
+                <p className="text-gray-500 mt-1 font-medium italic">Select a video file from your device</p>
               </div>
               <button
-                onClick={() => setIsModalOpen(false)}
+                onClick={() => {
+                  if (!uploading) {
+                    setIsModalOpen(false)
+                    handleRemoveSelectedFile()
+                  }
+                }}
                 className="bg-white/5 p-3 rounded-2xl text-gray-400 hover:text-white hover:bg-red-500/20 transition-all active:scale-90"
                 disabled={uploading}
               >
@@ -298,46 +362,82 @@ export default function AdminVideoUpload() {
               </button>
             </div>
 
-            <form onSubmit={handleUpload} className="p-8 space-y-8">
+            <form onSubmit={handleUpload} className="p-8 space-y-6">
               <div className="space-y-6">
                 <div className="group">
-                  <label className="block text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-3 group-focus-within:text-cyan-400 transition-colors">Video Title *</label>
+                  <label className="block text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-3 group-focus-within:text-cyan-400 transition-colors">
+                    Video Title *
+                  </label>
                   <input
                     type="text"
                     required
                     value={formData.title}
-                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                    className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all placeholder:text-gray-700"
+                    onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
+                    className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all placeholder:text-gray-700 font-bold"
                     placeholder="Enter video title..."
                   />
                 </div>
 
                 <div className="group">
-                  <label className="block text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-3 group-focus-within:text-cyan-400 transition-colors">Video File *</label>
-                  <div className="relative">
-                    <input
-                      type="file"
-                      required
-                      accept="video/*"
-                      onChange={handleFileChange}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                    />
-                    <div className="w-full bg-black/40 border border-white/10 group-hover:border-cyan-500/50 rounded-2xl px-6 py-4 flex items-center gap-3 transition-all">
-                      <div className="bg-cyan-500/10 p-1.5 rounded-lg">
-                        <Plus className="w-4 h-4 text-cyan-400" />
+                  <label className="block text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-3 group-focus-within:text-cyan-400 transition-colors">
+                    Video File *
+                  </label>
+
+                  {selectedFile ? (
+                    <div className="bg-black/40 border border-cyan-500/50 rounded-2xl p-4 space-y-3">
+                      {previewUrl && (
+                        <div className="aspect-video bg-black rounded-xl overflow-hidden border border-white/10 relative">
+                          <video src={previewUrl} controls className="w-full h-full object-contain" />
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3 overflow-hidden">
+                          <div className="bg-cyan-500/20 p-2 rounded-xl text-cyan-400">
+                            <Video className="w-5 h-5" />
+                          </div>
+                          <div className="truncate">
+                            <p className="text-white font-bold text-sm truncate">{selectedFile.name}</p>
+                            <p className="text-gray-500 text-xs">{formatFileSize(selectedFile.size)}</p>
+                          </div>
+                        </div>
+                        {!uploading && (
+                          <button
+                            type="button"
+                            onClick={handleRemoveSelectedFile}
+                            className="text-xs font-bold text-red-400 hover:text-red-300 bg-red-500/10 px-3 py-1.5 rounded-xl hover:bg-red-500/20 transition-all"
+                          >
+                            Remove
+                          </button>
+                        )}
                       </div>
-                      <span className="text-gray-400 text-sm font-bold truncate">
-                        {selectedFile ? selectedFile.name : "Select Video File"}
-                      </span>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="relative">
+                      <input
+                        type="file"
+                        required
+                        accept="video/*,video/mp4,video/quicktime,video/x-msvideo,video/x-matroska,.mp4,.mov,.avi,.mkv,.webm,.3gp"
+                        onChange={handleFileChange}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                      />
+                      <div className="w-full bg-black/40 border-2 border-dashed border-white/10 group-hover:border-cyan-500/50 rounded-2xl p-8 flex flex-col items-center justify-center text-center transition-all">
+                        <div className="bg-cyan-500/10 p-4 rounded-2xl mb-3 group-hover:scale-110 transition-transform">
+                          <Plus className="w-8 h-8 text-cyan-400" />
+                        </div>
+                        <p className="text-gray-200 text-base font-bold">Select Video from Gallery / Files</p>
+                        <p className="text-gray-500 text-xs mt-1">Supports MP4, MOV, MKV, WebM, etc.</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
               {uploading && (
-                <div className="space-y-4">
+                <div className="space-y-4 pt-2">
                   <div className="flex justify-between items-end">
-                    <p className="text-cyan-400 text-xs font-black uppercase tracking-widest animate-pulse">Uploading Media...</p>
+                    <p className="text-cyan-400 text-xs font-black uppercase tracking-widest animate-pulse">
+                      Uploading to Cloudinary...
+                    </p>
                     <span className="text-xl font-black text-white italic">{uploadProgress}%</span>
                   </div>
                   <div className="w-full bg-white/5 rounded-full h-3 p-0.5 border border-white/5 overflow-hidden">
@@ -352,10 +452,10 @@ export default function AdminVideoUpload() {
               <div className="pt-4">
                 <button
                   type="submit"
-                  disabled={uploading || !selectedFile || !formData.title}
+                  disabled={uploading || !selectedFile || !formData.title.trim()}
                   className="w-full bg-gradient-to-br from-cyan-500 to-blue-700 hover:from-cyan-400 hover:to-blue-600 text-white font-black py-5 rounded-2xl shadow-[0_10px_30px_rgba(6,182,212,0.3)] disabled:opacity-30 disabled:shadow-none transition-all transform active:scale-[0.98] text-lg uppercase tracking-widest"
                 >
-                  {uploading ? "Uploading..." : "UPLOAD NOW"}
+                  {uploading ? "UPLOADING..." : "UPLOAD NOW"}
                 </button>
               </div>
             </form>
@@ -363,14 +463,18 @@ export default function AdminVideoUpload() {
         </div>
       )}
 
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
         @keyframes progress-stripe {
           from { background-position: 0 0; }
           to { background-position: 20px 0; }
         }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      `}} />
+      `,
+        }}
+      />
     </div>
   )
 }
