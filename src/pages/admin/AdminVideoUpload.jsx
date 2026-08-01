@@ -48,6 +48,7 @@ export default function AdminVideoUpload() {
   const [selectedFile, setSelectedFile] = useState(null)
   const [previewUrl, setPreviewUrl] = useState(null)
   const [uploadProgress, setUploadProgress] = useState(0)
+  const [compressing, setCompressing] = useState(false)
   const [activeVideoModal, setActiveVideoModal] = useState(null)
   const [formData, setFormData] = useState({
     title: "",
@@ -107,6 +108,79 @@ export default function AdminVideoUpload() {
     }
   }
 
+  // Compress video using browser MediaRecorder (canvas re-encode)
+  const compressVideo = (file, onProgress) => {
+    return new Promise((resolve, reject) => {
+      const video = document.createElement("video")
+      video.src = URL.createObjectURL(file)
+      video.muted = true
+      video.crossOrigin = "anonymous"
+
+      video.onloadedmetadata = () => {
+        const canvas = document.createElement("canvas")
+        // Scale down to max 1280x720 for compression
+        let width = video.videoWidth || 1280
+        let height = video.videoHeight || 720
+        const maxW = 1280, maxH = 720
+        if (width > maxW) { height = Math.round(height * maxW / width); width = maxW }
+        if (height > maxH) { width = Math.round(width * maxH / height); height = maxH }
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext("2d")
+
+        const stream = canvas.captureStream(24)
+
+        // Try to add audio track from video
+        try {
+          const vsrc = video.captureStream ? video.captureStream() : null
+          if (vsrc) vsrc.getAudioTracks().forEach(t => stream.addTrack(t))
+        } catch (_) {}
+
+        // Pick supported mime type
+        const mimeType = MediaRecorder.isTypeSupported("video/webm;codecs=vp9")
+          ? "video/webm;codecs=vp9"
+          : "video/webm"
+
+        const chunks = []
+        const recorder = new MediaRecorder(stream, {
+          mimeType,
+          videoBitsPerSecond: 1_200_000, // 1.2 Mbps — keeps under 100MB for ~10 min video
+        })
+
+        recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data) }
+        recorder.onstop = () => {
+          const blob = new Blob(chunks, { type: mimeType })
+          const ext = mimeType.includes("webm") ? ".webm" : ".mp4"
+          const compressedFile = new File(
+            [blob],
+            file.name.replace(/\.[^/.]+$/, ext),
+            { type: mimeType }
+          )
+          URL.revokeObjectURL(video.src)
+          resolve(compressedFile)
+        }
+        recorder.onerror = (e) => reject(new Error("Compression failed: " + e.error))
+
+        const drawFrame = () => {
+          if (!video.paused && !video.ended) {
+            ctx.drawImage(video, 0, 0, width, height)
+            if (onProgress && video.duration > 0) {
+              onProgress(Math.round((video.currentTime / video.duration) * 100))
+            }
+            requestAnimationFrame(drawFrame)
+          }
+        }
+
+        recorder.start(200)
+        video.play()
+        video.onplay = drawFrame
+        video.onended = () => { recorder.stop() }
+      }
+
+      video.onerror = () => reject(new Error("Could not load video for compression."))
+    })
+  }
+
   const handleUpload = async (e) => {
     e.preventDefault()
     if (!selectedFile || !formData.title.trim()) {
@@ -115,15 +189,27 @@ export default function AdminVideoUpload() {
     }
 
     setUploading(true)
-    setUploadProgress(5)
+    setUploadProgress(1)
 
     try {
-      // 1. Upload to Cloudinary with real-time XHR progress
-      const uploadResult = await uploadVideo(selectedFile, (progress) => {
+      let fileToUpload = selectedFile
+      const MAX_CLOUDINARY_SIZE = 90 * 1024 * 1024 // 90MB Cloudinary limit
+
+      // Compress if over 90MB
+      if (selectedFile.size > MAX_CLOUDINARY_SIZE) {
+        setCompressing(true)
+        setUploadProgress(0)
+        fileToUpload = await compressVideo(selectedFile, (pct) => setUploadProgress(pct))
+        setCompressing(false)
+        setUploadProgress(1)
+      }
+
+      // Upload to Cloudinary
+      const uploadResult = await uploadVideo(fileToUpload, (progress) => {
         setUploadProgress(progress)
       })
 
-      // 2. Save to Firestore
+      // Save to Firestore
       await addDoc(collection(db, "videos"), {
         title: formData.title.trim(),
         description: formData.description || "",
@@ -131,9 +217,10 @@ export default function AdminVideoUpload() {
         videoUrl: uploadResult.url,
         thumbnailUrl: uploadResult.thumbnailUrl || uploadResult.url,
         publicId: uploadResult.publicId || "",
-        format: uploadResult.format || "mp4",
+        format: uploadResult.format || "webm",
         duration: uploadResult.duration || 0,
-        size: uploadResult.size || selectedFile.size,
+        size: uploadResult.size || fileToUpload.size,
+        originalSize: selectedFile.size,
         createdAt: Timestamp.now(),
         author: auth.currentUser?.email || "Admin",
       })
@@ -143,6 +230,7 @@ export default function AdminVideoUpload() {
         setIsModalOpen(false)
         setUploading(false)
         setUploadProgress(0)
+        setCompressing(false)
         setFormData({ title: "", description: "", category: "general" })
         handleRemoveSelectedFile()
       }, 500)
@@ -152,6 +240,7 @@ export default function AdminVideoUpload() {
       console.error("Upload error:", error)
       alert("Failed to upload video: " + (error.message || "Unknown error"))
       setUploading(false)
+      setCompressing(false)
       setUploadProgress(0)
     }
   }
@@ -432,30 +521,39 @@ export default function AdminVideoUpload() {
                 </div>
               </div>
 
-              {uploading && (
+              {(uploading || compressing) && (
                 <div className="space-y-4 pt-2">
                   <div className="flex justify-between items-end">
                     <p className="text-cyan-400 text-xs font-black uppercase tracking-widest animate-pulse">
-                      Uploading to Cloudinary...
+                      {compressing ? "⚙️ Compressing Video..." : "☁️ Uploading to Cloudinary..."}
                     </p>
                     <span className="text-xl font-black text-white italic">{uploadProgress}%</span>
                   </div>
                   <div className="w-full bg-white/5 rounded-full h-3 p-0.5 border border-white/5 overflow-hidden">
                     <div
-                      className="bg-gradient-to-r from-cyan-600 to-blue-600 h-full rounded-full transition-all duration-500"
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        compressing
+                          ? "bg-gradient-to-r from-yellow-500 to-orange-500"
+                          : "bg-gradient-to-r from-cyan-600 to-blue-600"
+                      }`}
                       style={{ width: `${uploadProgress}%` }}
                     />
                   </div>
+                  {compressing && (
+                    <p className="text-yellow-400/80 text-xs font-semibold text-center">
+                      Video is being compressed to fit Cloudinary's 100MB limit. This may take a few minutes...
+                    </p>
+                  )}
                 </div>
               )}
 
               <div className="pt-4">
                 <button
                   type="submit"
-                  disabled={uploading || !selectedFile || !formData.title.trim()}
+                  disabled={uploading || compressing || !selectedFile || !formData.title.trim()}
                   className="w-full bg-gradient-to-br from-cyan-500 to-blue-700 hover:from-cyan-400 hover:to-blue-600 text-white font-black py-5 rounded-2xl shadow-[0_10px_30px_rgba(6,182,212,0.3)] disabled:opacity-30 disabled:shadow-none transition-all transform active:scale-[0.98] text-lg uppercase tracking-widest"
                 >
-                  {uploading ? "UPLOADING..." : "UPLOAD NOW"}
+                  {compressing ? "COMPRESSING..." : uploading ? "UPLOADING..." : "UPLOAD NOW"}
                 </button>
               </div>
             </form>
