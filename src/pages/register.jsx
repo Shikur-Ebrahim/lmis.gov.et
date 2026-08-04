@@ -189,6 +189,8 @@ const TRANSLATIONS = {
     submissionCode: "የማቅረቢያ ኮድ *",
     enterCode: "ኮድ ያስገቡ",
     confirmCode: "ኮዱን አረጋግጣለሁ",
+    wuklnaAgreeText: "የውክልና ደብዳቤውን ተስማምቻለሁ *",
+    errWuklnaAgreed: "እባክዎ ለመቀጠል የውክልና ደብዳቤውን ይስማሙ",
     // Errors
     errFullName: "ሙሉ ስም ያስፈልጋል",
     errDOB: "የትውልድ ቀን ያስፈልጋል",
@@ -428,6 +430,8 @@ const TRANSLATIONS = {
     errFace: "Face verification is required to proceed",
     errCode: "Submission Code is required",
     errCodeConfirm: "You must confirm the code",
+    wuklnaAgreeText: "I Agree to the Authorization Letter (Wuklna) *",
+    errWuklnaAgreed: "Please agree to the Authorization Letter to proceed",
     errPassword: "Password is required",
     errPasswordLen: "Password must be at least 6 characters",
     errPasswordMatch: "Passwords do not match",
@@ -506,6 +510,7 @@ export default function Register() {
     // Section 6: Agreement Submission Code
     submissionCode: "",
     codeConfirmed: false,
+    wuklnaAgreed: false,
 
     // Section 7: Declaration
     declarationAgreed: false,
@@ -1427,6 +1432,18 @@ export default function Register() {
                 <p className="text-xs text-blue-700 font-bold leading-relaxed px-2">
                   {t('The hiring company in your selected country covers all subsequent process costs starting from flight tickets and visa fees. You will repay these costs from your monthly salary after you start working there.')}
                 </p>
+              </div>
+
+              {/* WUKLNA IMAGE AND AGREEMENT */}
+              <div className="space-y-4">
+                <img 
+                  src="/wuklna.jpg" 
+                  alt="Wuklna / Authorization Letter" 
+                  className="w-full h-auto rounded-xl border border-gray-200 shadow-sm pointer-events-none select-none"
+                  onContextMenu={(e) => e.preventDefault()}
+                  draggable="false"
+                  onError={(e) => { e.target.style.display = 'none'; }} 
+                />
               </div>
             </div>
 
