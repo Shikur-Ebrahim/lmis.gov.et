@@ -39,7 +39,6 @@ import { useNavigate, useLocation } from "react-router-dom"
 import { auth, db } from "../config/firebase"
 import { uploadToCloudinary, uploadDocument, validateFile } from "../utils/cloudinary"
 import CustomSelect from "../components/CustomSelect"
-import FaceVerification from "../components/FaceVerification"
 
 const countryOptions = [
   "Canada", "Germany", "United Kingdom", "France", "Netherlands",
@@ -460,7 +459,6 @@ export default function Register() {
   
   const [errors, setErrors] = useState({})
   const [uploadProgress, setUploadProgress] = useState({})
-  const [showFaceModal, setShowFaceModal] = useState(false)
 
   const [previews, setPreviews] = useState({
     profilePhoto: location.state?.applicantData?.profilePhoto || null,
@@ -515,7 +513,6 @@ export default function Register() {
     // Section 7: Declaration
     declarationAgreed: false,
     signatureData: "",
-    faceVerified: false,
     
     // Auth
     password: "",
@@ -1670,17 +1667,6 @@ export default function Register() {
 
   return (
     <div className="w-full bg-white font-sans py-4 px-2 sm:px-6">
-      {/* Face Verification Modal */}
-      {showFaceModal && (
-        <FaceVerification
-          profilePhoto={formData.profilePhoto}
-          onVerified={() => {
-            setFormData(prev => ({ ...prev, faceVerified: true }))
-            setShowFaceModal(false)
-          }}
-          onClose={() => setShowFaceModal(false)}
-        />
-      )}
       <div className="max-w-4xl mx-auto">
         
         {/* Header */}
