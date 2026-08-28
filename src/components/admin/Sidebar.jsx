@@ -131,6 +131,7 @@ export default function Sidebar() {
     { to: "/admin/account", icon: Building2, label: "Accounts" },
     { to: "/admin/social-media", icon: Share2, label: "Social & Support", extraClass: "text-emerald-400 font-bold" },
     { to: "/admin/bank-statements", icon: FileCheck, label: "Bank Statements", badge: stats.pendingBankStatements, badgeColor: "bg-amber-500 text-black animate-bounce", extraClass: "text-amber-300 font-bold" },
+    { to: "/admin/settings", icon: Settings, label: "Settings" },
   ]
 
   return (

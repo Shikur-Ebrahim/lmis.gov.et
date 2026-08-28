@@ -23,6 +23,7 @@ import RegistrationFees from "./pages/admin/RegistrationFees";
 import AdminVideoUpload from "./pages/admin/AdminVideoUpload";
 import SocialMediaSettings from "./pages/admin/SocialMediaSettings";
 import BankStatements from "./pages/admin/BankStatements";
+import AdminSettings from "./pages/admin/Settings";
 import Biometric from "./pages/Biometric";
 import RegistrationPayment from "./pages/RegistrationPayment";
 import PaymentMethods from "./pages/PaymentMethods";
@@ -162,6 +163,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <BankStatements />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/settings"
+              element={
+                <ProtectedRoute>
+                  <AdminSettings />
                 </ProtectedRoute>
               }
             />
