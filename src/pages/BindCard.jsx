@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { doc, getDoc, updateDoc, collection, query, where, getDocs } from "firebase/firestore"
+import { doc, getDoc, updateDoc, setDoc, collection, query, where, getDocs } from "firebase/firestore"
 import { db } from "../config/firebase"
 import { korixaDb } from "../config/korixa"
-import { ArrowLeft, CreditCard, ShieldCheck, AlertCircle, Info, Loader2, CheckCircle, Lock, XCircle } from "lucide-react"
+import { ArrowLeft, CreditCard, ShieldCheck, AlertCircle, Info, Loader2, CheckCircle, Lock, XCircle, DollarSign, BadgeCheck } from "lucide-react"
 
 export default function BindCard() {
   const { id } = useParams()
@@ -12,7 +12,6 @@ export default function BindCard() {
   const [lang, setLang] = useState('am')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [verifying, setVerifying] = useState(false)
 
   const [cardData, setCardData] = useState({
     cardNumber: "",
@@ -36,19 +35,22 @@ export default function BindCard() {
       validThru: "Valid Thru",
       cvv: "CVV",
       bind: "Verify & Bind Card",
-      verifying: "Verifying card...",
-      alreadyBound: "Card Already Bound",
-      alreadyBoundDesc: "Your VISA card has been successfully connected. Payments will be sent to this card.",
+      verifying: "Verifying with Korixa...",
+      alreadyBound: "Card Successfully Bound",
+      alreadyBoundDesc: "Your Elite Black Card has been verified and connected. Payments will be sent to this card.",
       cardInUseLmis: "This card is already bound to another applicant in our system.",
-      cardNotFound: "Card not found. Please check your card number and try again.",
-      cardNotBlack: "Only Elite Black Card (tierId: black) is accepted. Your card tier is not eligible.",
+      cardNotFound: "Card not found in Korixa. Please check your card number and try again.",
+      cardNotBlack: "❌ Only Elite Black Card (Black Tier) is accepted. Silver, Gold and other tiers are NOT eligible. Please upgrade your card at korixapay.com",
       cardFrozen: "This card is currently frozen. Please unfreeze it in your Korixa app first.",
       cvvMismatch: "CVV does not match. Please check and try again.",
       expiryMismatch: "Expiry date does not match. Please check and try again.",
       holderMismatch: "Card holder name does not match the registered name on the card.",
       invalidCard: "Please enter a valid 16-digit card number.",
-      success: "Card verified and bound successfully!",
-      noCard: "Don't have a card? Get yours at korixapay.com"
+      success: "✅ Card verified and bound successfully!",
+      noCard: "Don't have a card? Get yours at korixapay.com",
+      balance: "Card Balance",
+      tier: "Card Tier",
+      verifiedBy: "Verified by Korixa"
     },
     am: {
       title: "ቪዛ ካርድዎን ያገናኙ",
@@ -60,19 +62,22 @@ export default function BindCard() {
       validThru: "ያበቃበት ቀን",
       cvv: "CVV",
       bind: "ያረጋግጡ እና ያገናኙ",
-      verifying: "ካርዱን በማረጋገጥ ላይ...",
+      verifying: "በKorixa እያረጋገጡ...",
       alreadyBound: "ካርድ ተያይዟል",
-      alreadyBoundDesc: "የቪዛ ካርድዎ በተሳካ ሁኔታ ተገናኝቷል። ክፍያዎ ወደዚህ ካርድ ይላካል።",
-      cardInUseLmis: "ይህ ካርድ ቀደም ብሎ በሌላ አመልካች ተመዝግቧል።",
-      cardNotFound: "ካርዱ አልተገኘም። የካርድ ቁጥሩን ያረጋግጡ እና እንደገና ይሞክሩ።",
-      cardNotBlack: "ኤሊት ብላክ ካርድ (tierId: black) ብቻ ተቀባይነት አለው። የካርድዎ ደረጃ ብቁ አይደለም።",
+      alreadyBoundDesc: "የኤሊት ብላክ ካርድዎ ተረጋግጦ ተገናኝቷል። ክፍያዎ ወደዚህ ካርድ ይላካል።",
+      cardInUseLmis: "ይህ ካርድ ቀደም ብሎ በሌላ አመልካች ተምዝግቧል።",
+      cardNotFound: "ካርዱ በKorixa አልተገኘም። የካርድ ቁጥሩን ያረጋግጡ እና እንደገና ይሞክሩ።",
+      cardNotBlack: "❌ ኤሊት ብላክ ካርድ (Black Tier) ብቻ ተቀባይነት አለው። ሲልቨር፣ ጎልድ እና ሌሎች ደረጃዎች ብቁ አይደሉም። ካርድዎን በkorixapay.com ያሻሽሉ።",
       cardFrozen: "ይህ ካርድ አሁን ቀዝቅዟል። በKorixa መተግበሪያዎ ውስጥ ቀደም ብለው ያቅሉ።",
       cvvMismatch: "CVV አይዛመድም። እባክዎ ያረጋግጡ እና እንደገና ይሞክሩ።",
       expiryMismatch: "የማብቂያ ቀን አይዛመድም። እባክዎ ያረጋግጡ እና እንደገና ይሞክሩ።",
       holderMismatch: "የካርድ ባለቤት ስም ከካርዱ ላይ ካለው ስም ጋር አይዛመድም።",
       invalidCard: "እባክዎ ትክክለኛ ባለ 16-ዲጂት የካርድ ቁጥር ያስገቡ።",
-      success: "ካርዱ ተረጋግጦ በተሳካ ሁኔታ ተገናኝቷል!",
-      noCard: "ካርድ የለዎትም? korixapay.com ላይ ያግኙ"
+      success: "✅ ካርዱ ተረጋግጦ በተሳካ ሁኔታ ተገናኝቷል!",
+      noCard: "ካርድ የለዎትም? korixapay.com ላይ ያግኙ",
+      balance: "የካርድ ቀሪ ሂሳብ",
+      tier: "የካርድ ደረጃ",
+      verifiedBy: "በKorixa ተረጋግጧል"
     }
   }
 
@@ -131,27 +136,14 @@ export default function BindCard() {
 
     const card = snap.docs[0].data()
 
-    // Must be tierId "black"
+    // STRICTLY only tierId "black" is accepted
     if (card.tierId !== "black") {
-      return { valid: false, error: `${t("cardNotBlack")} (Tier: ${card.tierId})` }
+      return { valid: false, error: t("cardNotBlack") }
     }
 
-    // Must not be frozen
-    if (card.frozen === true) {
-      return { valid: false, error: t("cardFrozen") }
-    }
-
-    // Verify CVV
-    if (card.cvv !== cardData.cvv) {
-      return { valid: false, error: t("cvvMismatch") }
-    }
-
-    // Verify expiry date
-    if (card.expiryDate !== cardData.expiryDate) {
-      return { valid: false, error: t("expiryMismatch") }
-    }
-
-    // Verify holder name (case insensitive)
+    if (card.frozen === true) return { valid: false, error: t("cardFrozen") }
+    if (card.cvv !== cardData.cvv) return { valid: false, error: t("cvvMismatch") }
+    if (card.expiryDate !== cardData.expiryDate) return { valid: false, error: t("expiryMismatch") }
     if (card.holderName.toUpperCase().trim() !== cardData.holderName.toUpperCase().trim()) {
       return { valid: false, error: t("holderMismatch") }
     }
@@ -171,41 +163,46 @@ export default function BindCard() {
     }
 
     setSaving(true)
-    setVerifying(true)
-
     try {
       // Step 1: Check if card already used in LMIS
       const lmisQ = query(collection(db, "users"), where("visaCard.cardNumber", "==", cardData.cardNumber))
       const lmisSnap = await getDocs(lmisQ)
       if (!lmisSnap.empty) {
         setError(t("cardInUseLmis"))
+        setSaving(false)
         return
       }
 
-      // Step 2: Verify card against Korixa
-      setVerifying(true)
+      // Step 2: Verify card in Korixa (must be tierId: "black")
       const result = await verifyWithKorixa()
-      setVerifying(false)
 
       if (!result.valid) {
         setError(result.error)
+        setSaving(false)
         return
       }
 
-      // Step 3: Save verified card to LMIS user
+      // Step 3: Build card payload including balance from Korixa
       const cardPayload = {
+        userId: id,
         cardNumber: cardData.cardNumber,
         holderName: cardData.holderName,
         expiryDate: cardData.expiryDate,
         cvv: cardData.cvv,
-        tierId: result.card.tierId,
+        tierId: result.card.tierId,          // "black"
+        balance: result.card.balance ?? 0,   // from Korixa
         frozen: false,
         displayInAssets: true,
         korixaVerified: true,
-        createdAt: new Date().toISOString()
+        boundAt: new Date().toISOString()
       }
 
+      // Step 4: Save to users.visaCard field
       await updateDoc(doc(db, "users", id), { visaCard: cardPayload })
+
+      // Step 5: Also save to separate "userCard" collection
+      await setDoc(doc(collection(db, "userCard"), id), cardPayload)
+
       setSuccess(t("success"))
       setExistingCard(cardPayload)
     } catch (err) {
@@ -213,7 +210,6 @@ export default function BindCard() {
       setError("Verification failed. Please check your connection and try again.")
     } finally {
       setSaving(false)
-      setVerifying(false)
     }
   }
 
@@ -246,45 +242,82 @@ export default function BindCard() {
       <div className="max-w-lg mx-auto px-4 py-6">
 
         {existingCard ? (
-          /* Already Bound State */
-          <div className="text-center py-10 space-y-4">
-            <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto">
-              <CheckCircle className="w-10 h-10 text-green-500" />
-            </div>
-            <h2 className="text-2xl font-black text-gray-900">{t("alreadyBound")}</h2>
-            <p className="text-sm text-gray-500">{t("alreadyBoundDesc")}</p>
-            <div className="bg-gray-50 rounded-2xl p-5 mt-4 space-y-3 text-sm text-left">
-              <div className="flex justify-between items-center border-b pb-3">
-                <span className="text-gray-400 font-medium">Card</span>
-                <span className="font-mono font-bold text-gray-800">{existingCard.cardNumber}</span>
+          /* ── Already Bound Success State ── */
+          <div className="space-y-6">
+            <div className="text-center pt-4">
+              <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="w-10 h-10 text-green-500" />
               </div>
-              <div className="flex justify-between items-center border-b pb-3">
-                <span className="text-gray-400 font-medium">Holder</span>
+              <h2 className="text-2xl font-black text-gray-900">{t("alreadyBound")}</h2>
+              <p className="text-sm text-gray-500 mt-1">{t("alreadyBoundDesc")}</p>
+            </div>
+
+            {/* Card visual */}
+            <div className="relative rounded-2xl overflow-hidden p-5"
+                 style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 40%, #0f4c75 100%)' }}>
+              <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-10 bg-blue-400"></div>
+              <p className="text-[9px] font-bold text-blue-300 tracking-widest uppercase mb-0.5">KORIXA PAY</p>
+              <p className="text-sm font-black text-white tracking-widest uppercase mb-4">Elite Black Card</p>
+              <p className="font-mono text-lg text-white tracking-[0.18em] mb-4">{existingCard.cardNumber}</p>
+              <div className="flex justify-between items-end">
+                <div>
+                  <p className="text-[8px] text-blue-300 uppercase tracking-wider mb-0.5">Card Holder</p>
+                  <p className="text-xs font-bold text-white uppercase">{existingCard.holderName}</p>
+                </div>
+                <div>
+                  <p className="text-[8px] text-blue-300 uppercase tracking-wider mb-0.5">Valid Thru</p>
+                  <p className="text-xs font-bold text-white">{existingCard.expiryDate}</p>
+                </div>
+                <span className="text-lg font-black italic text-white">VISA</span>
+              </div>
+            </div>
+
+            {/* Card Details */}
+            <div className="bg-gray-50 rounded-2xl p-5 space-y-3 text-sm">
+              {/* Balance */}
+              <div className="flex justify-between items-center pb-3 border-b border-gray-100">
+                <div className="flex items-center gap-2">
+                  <DollarSign className="w-4 h-4 text-green-500" />
+                  <span className="text-gray-500 font-medium">{t("balance")}</span>
+                </div>
+                <span className="font-black text-green-600 text-lg">${existingCard.balance ?? 0}</span>
+              </div>
+
+              {/* Tier */}
+              <div className="flex justify-between items-center pb-3 border-b border-gray-100">
+                <div className="flex items-center gap-2">
+                  <CreditCard className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-500 font-medium">{t("tier")}</span>
+                </div>
+                <span className="font-black text-gray-800 uppercase px-2 py-0.5 bg-gray-800 text-white rounded-full text-xs">{existingCard.tierId}</span>
+              </div>
+
+              {/* Holder */}
+              <div className="flex justify-between items-center pb-3 border-b border-gray-100">
+                <span className="text-gray-500 font-medium">Holder</span>
                 <span className="font-bold text-gray-800">{existingCard.holderName}</span>
               </div>
-              <div className="flex justify-between items-center border-b pb-3">
-                <span className="text-gray-400 font-medium">Expires</span>
+
+              {/* Expires */}
+              <div className="flex justify-between items-center">
+                <span className="text-gray-500 font-medium">Expires</span>
                 <span className="font-mono font-bold text-gray-800">{existingCard.expiryDate}</span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-400 font-medium">Tier</span>
-                <span className="font-bold text-gray-800 uppercase">{existingCard.tierId}</span>
-              </div>
             </div>
+
+            {/* Korixa verified badge */}
             {existingCard.korixaVerified && (
-              <div className="flex items-center justify-center gap-2 text-green-600 text-sm font-bold mt-2">
-                <ShieldCheck className="w-4 h-4" />
-                Verified by Korixa
+              <div className="flex items-center justify-center gap-2 bg-green-50 border border-green-100 rounded-xl p-3">
+                <BadgeCheck className="w-5 h-5 text-green-500" />
+                <p className="text-sm font-bold text-green-600">{t("verifiedBy")}</p>
               </div>
             )}
           </div>
         ) : (
           <>
-            {/* Card Form Section */}
+            {/* ── Card Form Section ── */}
             <div className="relative rounded-3xl overflow-hidden mb-8"
                  style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 40%, #0f4c75 100%)' }}>
-
-              {/* Decorative circles */}
               <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full opacity-10"
                    style={{ background: 'radial-gradient(circle, #60a5fa, transparent)' }}></div>
               <div className="absolute -bottom-10 -left-10 w-36 h-36 rounded-full opacity-10"
@@ -302,16 +335,20 @@ export default function BindCard() {
                   </div>
                 </div>
 
+                {/* Only black tier notice */}
+                <div className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 mb-5 flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                  <p className="text-[11px] text-amber-300 font-semibold">Black Tier only — Silver & other tiers not accepted</p>
+                </div>
+
                 {/* Form */}
                 <form onSubmit={handleBindCard} className="space-y-4">
-
                   {error && (
                     <div className="bg-red-500/20 border border-red-400/30 rounded-xl p-3 flex items-start gap-2 text-red-300 text-sm">
                       <XCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                       <span>{error}</span>
                     </div>
                   )}
-
                   {success && (
                     <div className="bg-green-500/20 border border-green-400/30 rounded-xl p-3 flex items-start gap-2 text-green-300 text-sm">
                       <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
@@ -319,75 +356,38 @@ export default function BindCard() {
                     </div>
                   )}
 
-                  {/* Card Number */}
                   <div>
                     <label className="block text-[10px] font-bold text-blue-300 mb-1.5 uppercase tracking-widest">{t("cardNumber")}</label>
-                    <input
-                      type="text"
-                      name="cardNumber"
-                      value={cardData.cardNumber}
-                      onChange={handleChange}
-                      placeholder="0000 0000 0000 0000"
-                      maxLength={19}
-                      inputMode="numeric"
-                      required
-                      className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white font-mono text-base placeholder:text-white/30 focus:outline-none focus:border-blue-400 focus:bg-white/15 transition-all"
-                    />
+                    <input type="text" name="cardNumber" value={cardData.cardNumber} onChange={handleChange}
+                      placeholder="0000 0000 0000 0000" maxLength={19} inputMode="numeric" required
+                      className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white font-mono text-base placeholder:text-white/30 focus:outline-none focus:border-blue-400 focus:bg-white/15 transition-all" />
                   </div>
 
-                  {/* Card Holder */}
                   <div>
                     <label className="block text-[10px] font-bold text-blue-300 mb-1.5 uppercase tracking-widest">{t("cardHolder")}</label>
-                    <input
-                      type="text"
-                      name="holderName"
-                      value={cardData.holderName}
-                      onChange={handleChange}
-                      placeholder=""
-                      required
-                      className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white font-mono uppercase placeholder:text-white/30 focus:outline-none focus:border-blue-400 focus:bg-white/15 transition-all"
-                    />
+                    <input type="text" name="holderName" value={cardData.holderName} onChange={handleChange}
+                      placeholder="" required
+                      className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white font-mono uppercase placeholder:text-white/30 focus:outline-none focus:border-blue-400 focus:bg-white/15 transition-all" />
                   </div>
 
-                  {/* Expiry + CVV */}
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-[10px] font-bold text-blue-300 mb-1.5 uppercase tracking-widest">{t("validThru")}</label>
-                      <input
-                        type="text"
-                        name="expiryDate"
-                        value={cardData.expiryDate}
-                        onChange={handleChange}
-                        placeholder="MM/YY"
-                        maxLength={5}
-                        inputMode="numeric"
-                        required
-                        className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-blue-400 focus:bg-white/15 transition-all"
-                      />
+                      <input type="text" name="expiryDate" value={cardData.expiryDate} onChange={handleChange}
+                        placeholder="MM/YY" maxLength={5} inputMode="numeric" required
+                        className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-blue-400 focus:bg-white/15 transition-all" />
                     </div>
                     <div>
                       <label className="block text-[10px] font-bold text-blue-300 mb-1.5 uppercase tracking-widest">{t("cvv")}</label>
-                      <input
-                        type="password"
-                        name="cvv"
-                        value={cardData.cvv}
-                        onChange={handleChange}
-                        placeholder="•••"
-                        maxLength={4}
-                        inputMode="numeric"
-                        required
-                        className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-blue-400 focus:bg-white/15 transition-all"
-                      />
+                      <input type="password" name="cvv" value={cardData.cvv} onChange={handleChange}
+                        placeholder="•••" maxLength={4} inputMode="numeric" required
+                        className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-blue-400 focus:bg-white/15 transition-all" />
                     </div>
                   </div>
 
-                  {/* Submit */}
                   <div className="pt-2">
-                    <button
-                      type="submit"
-                      disabled={saving}
-                      className="w-full bg-white hover:bg-gray-100 active:bg-gray-200 text-gray-900 font-black py-4 rounded-xl shadow-xl transition-all flex items-center justify-center gap-2 disabled:opacity-60"
-                    >
+                    <button type="submit" disabled={saving}
+                      className="w-full bg-white hover:bg-gray-100 active:bg-gray-200 text-gray-900 font-black py-4 rounded-xl shadow-xl transition-all flex items-center justify-center gap-2 disabled:opacity-60">
                       {saving
                         ? <><Loader2 className="w-5 h-5 animate-spin" />{t("verifying")}</>
                         : <><Lock className="w-4 h-4" />{t("bind")}</>}
@@ -406,7 +406,6 @@ export default function BindCard() {
                   <p className="text-xs text-blue-500 leading-relaxed">{t("subtitle")}</p>
                 </div>
               </div>
-
               <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 flex gap-3">
                 <AlertCircle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
                 <div>
@@ -414,13 +413,10 @@ export default function BindCard() {
                   <p className="text-xs text-amber-600 leading-relaxed">{t("infoBody")}</p>
                 </div>
               </div>
-
-              {/* Korixa verification badge */}
               <div className="flex items-center justify-center gap-2 bg-gray-50 rounded-xl p-3 border border-gray-100">
                 <ShieldCheck className="w-4 h-4 text-gray-400" />
                 <p className="text-xs text-gray-400 font-medium">Cards are verified against Korixa database</p>
               </div>
-
               <p className="text-center text-xs text-gray-400 mt-2">{t("noCard")}</p>
             </div>
           </>
