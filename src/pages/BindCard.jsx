@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom"
 import { doc, getDoc, updateDoc, setDoc, collection, query, where, getDocs } from "firebase/firestore"
 import { db } from "../config/firebase"
 import { korixaDb } from "../config/korixa"
-import { ArrowLeft, CreditCard, ShieldCheck, AlertCircle, Info, Loader2, CheckCircle, Lock, XCircle, DollarSign, BadgeCheck, Eye, EyeOff } from "lucide-react"
+import { ArrowLeft, CreditCard, ShieldCheck, AlertCircle, Info, Loader2, CheckCircle, Lock, XCircle, DollarSign, BadgeCheck, Eye, EyeOff, ExternalLink } from "lucide-react"
 
 export default function BindCard() {
   const { id } = useParams()
@@ -434,16 +434,10 @@ export default function BindCard() {
             {/* ── Card Form Section ── */}
             <div className="mb-8 mt-4">
               {/* Live Preview */}
-              {renderEliteBlackCard(cardData.cardNumber, cardData.holderName, cardData.expiryDate, cardData.cvv, false)}
+              {renderEliteBlackCard(cardData.cardNumber, cardData.holderName, cardData.expiryDate, cardData.cvv, !showDetails, () => setShowDetails(!showDetails))}
             </div>
 
             <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
-              {/* Only black tier notice */}
-              <div className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 mb-6 flex items-start gap-3">
-                <ShieldCheck className="w-5 h-5 text-gray-900 flex-shrink-0 mt-0.5" />
-                <p className="text-[12px] text-gray-600 font-semibold leading-relaxed">Black Tier only — Silver & other tiers not accepted.</p>
-              </div>
-
               {/* Form */}
               <form onSubmit={handleBindCard} className="space-y-5">
                 {error && (
@@ -463,7 +457,7 @@ export default function BindCard() {
                 <div>
                   <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">{t("cardHolder")}</label>
                   <input type="text" name="holderName" value={cardData.holderName} onChange={handleChange}
-                    placeholder="" required
+                    placeholder="JOHN DOE" required
                     className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 font-mono uppercase placeholder:text-gray-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" />
                 </div>
 
@@ -513,7 +507,11 @@ export default function BindCard() {
                 <ShieldCheck className="w-4 h-4 text-gray-400" />
                 <p className="text-xs text-gray-500 font-medium">Cards are verified against Korixa database</p>
               </div>
-              <p className="text-center text-xs text-gray-400 mt-2">{t("noCard")}</p>
+              <div className="text-center mt-2">
+                <a href="https://www.korixapay.com/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100 shadow-sm">
+                  Get a new Elite Black Card <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              </div>
             </div>
           </>
         )}
