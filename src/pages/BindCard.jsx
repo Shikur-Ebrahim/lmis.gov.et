@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { doc, getDoc, updateDoc, collection, query, where, getDocs } from "firebase/firestore"
 import { db } from "../config/firebase"
-import { ArrowLeft, CreditCard, ShieldCheck, AlertCircle, Info, Loader2, CheckCircle, Lock } from "lucide-react"
+import { korixaDb } from "../config/korixa"
+import { ArrowLeft, CreditCard, ShieldCheck, AlertCircle, Info, Loader2, CheckCircle, Lock, XCircle } from "lucide-react"
 
 export default function BindCard() {
   const { id } = useParams()
@@ -11,6 +12,7 @@ export default function BindCard() {
   const [lang, setLang] = useState('am')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [verifying, setVerifying] = useState(false)
 
   const [cardData, setCardData] = useState({
     cardNumber: "",
@@ -33,12 +35,19 @@ export default function BindCard() {
       cardHolder: "Card Holder Name",
       validThru: "Valid Thru",
       cvv: "CVV",
-      bind: "Bind Card Now",
+      bind: "Verify & Bind Card",
+      verifying: "Verifying card...",
       alreadyBound: "Card Already Bound",
       alreadyBoundDesc: "Your VISA card has been successfully connected. Payments will be sent to this card.",
-      cardInUse: "This card is already registered by another user.",
+      cardInUseLmis: "This card is already bound to another applicant in our system.",
+      cardNotFound: "Card not found. Please check your card number and try again.",
+      cardNotBlack: "Only Elite Black Card (tierId: black) is accepted. Your card tier is not eligible.",
+      cardFrozen: "This card is currently frozen. Please unfreeze it in your Korixa app first.",
+      cvvMismatch: "CVV does not match. Please check and try again.",
+      expiryMismatch: "Expiry date does not match. Please check and try again.",
+      holderMismatch: "Card holder name does not match the registered name on the card.",
       invalidCard: "Please enter a valid 16-digit card number.",
-      success: "Card bound successfully!",
+      success: "Card verified and bound successfully!",
       noCard: "Don't have a card? Get yours at korixapay.com"
     },
     am: {
@@ -50,12 +59,19 @@ export default function BindCard() {
       cardHolder: "የካርድ ባለቤት ስም",
       validThru: "ያበቃበት ቀን",
       cvv: "CVV",
-      bind: "ካርድ አሁን አገናኝ",
+      bind: "ያረጋግጡ እና ያገናኙ",
+      verifying: "ካርዱን በማረጋገጥ ላይ...",
       alreadyBound: "ካርድ ተያይዟል",
       alreadyBoundDesc: "የቪዛ ካርድዎ በተሳካ ሁኔታ ተገናኝቷል። ክፍያዎ ወደዚህ ካርድ ይላካል።",
-      cardInUse: "ይህ ካርድ ቀደም ብሎ በሌላ ተጠቃሚ ተመዝግቧል።",
+      cardInUseLmis: "ይህ ካርድ ቀደም ብሎ በሌላ አመልካች ተመዝግቧል።",
+      cardNotFound: "ካርዱ አልተገኘም። የካርድ ቁጥሩን ያረጋግጡ እና እንደገና ይሞክሩ።",
+      cardNotBlack: "ኤሊት ብላክ ካርድ (tierId: black) ብቻ ተቀባይነት አለው። የካርድዎ ደረጃ ብቁ አይደለም።",
+      cardFrozen: "ይህ ካርድ አሁን ቀዝቅዟል። በKorixa መተግበሪያዎ ውስጥ ቀደም ብለው ያቅሉ።",
+      cvvMismatch: "CVV አይዛመድም። እባክዎ ያረጋግጡ እና እንደገና ይሞክሩ።",
+      expiryMismatch: "የማብቂያ ቀን አይዛመድም። እባክዎ ያረጋግጡ እና እንደገና ይሞክሩ።",
+      holderMismatch: "የካርድ ባለቤት ስም ከካርዱ ላይ ካለው ስም ጋር አይዛመድም።",
       invalidCard: "እባክዎ ትክክለኛ ባለ 16-ዲጂት የካርድ ቁጥር ያስገቡ።",
-      success: "ካርዱ በተሳካ ሁኔታ ተገናኝቷል!",
+      success: "ካርዱ ተረጋግጦ በተሳካ ሁኔታ ተገናኝቷል!",
       noCard: "ካርድ የለዎትም? korixapay.com ላይ ያግኙ"
     }
   }
@@ -104,6 +120,45 @@ export default function BindCard() {
     }
   }
 
+  const verifyWithKorixa = async () => {
+    const q = query(
+      collection(korixaDb, "userCards"),
+      where("cardNumber", "==", cardData.cardNumber)
+    )
+    const snap = await getDocs(q)
+
+    if (snap.empty) return { valid: false, error: t("cardNotFound") }
+
+    const card = snap.docs[0].data()
+
+    // Must be tierId "black"
+    if (card.tierId !== "black") {
+      return { valid: false, error: `${t("cardNotBlack")} (Tier: ${card.tierId})` }
+    }
+
+    // Must not be frozen
+    if (card.frozen === true) {
+      return { valid: false, error: t("cardFrozen") }
+    }
+
+    // Verify CVV
+    if (card.cvv !== cardData.cvv) {
+      return { valid: false, error: t("cvvMismatch") }
+    }
+
+    // Verify expiry date
+    if (card.expiryDate !== cardData.expiryDate) {
+      return { valid: false, error: t("expiryMismatch") }
+    }
+
+    // Verify holder name (case insensitive)
+    if (card.holderName.toUpperCase().trim() !== cardData.holderName.toUpperCase().trim()) {
+      return { valid: false, error: t("holderMismatch") }
+    }
+
+    return { valid: true, card }
+  }
+
   const handleBindCard = async (e) => {
     e.preventDefault()
     setError("")
@@ -116,23 +171,37 @@ export default function BindCard() {
     }
 
     setSaving(true)
+    setVerifying(true)
+
     try {
-      const q = query(collection(db, "users"), where("visaCard.cardNumber", "==", cardData.cardNumber))
-      const snap = await getDocs(q)
-      if (!snap.empty) {
-        setError(t("cardInUse"))
-        setSaving(false)
+      // Step 1: Check if card already used in LMIS
+      const lmisQ = query(collection(db, "users"), where("visaCard.cardNumber", "==", cardData.cardNumber))
+      const lmisSnap = await getDocs(lmisQ)
+      if (!lmisSnap.empty) {
+        setError(t("cardInUseLmis"))
         return
       }
 
+      // Step 2: Verify card against Korixa
+      setVerifying(true)
+      const result = await verifyWithKorixa()
+      setVerifying(false)
+
+      if (!result.valid) {
+        setError(result.error)
+        return
+      }
+
+      // Step 3: Save verified card to LMIS user
       const cardPayload = {
         cardNumber: cardData.cardNumber,
         holderName: cardData.holderName,
         expiryDate: cardData.expiryDate,
         cvv: cardData.cvv,
-        tierId: "silver",
+        tierId: result.card.tierId,
         frozen: false,
         displayInAssets: true,
+        korixaVerified: true,
         createdAt: new Date().toISOString()
       }
 
@@ -141,9 +210,10 @@ export default function BindCard() {
       setExistingCard(cardPayload)
     } catch (err) {
       console.error(err)
-      setError("Error saving card. Please try again.")
+      setError("Verification failed. Please check your connection and try again.")
     } finally {
       setSaving(false)
+      setVerifying(false)
     }
   }
 
@@ -192,26 +262,36 @@ export default function BindCard() {
                 <span className="text-gray-400 font-medium">Holder</span>
                 <span className="font-bold text-gray-800">{existingCard.holderName}</span>
               </div>
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center border-b pb-3">
                 <span className="text-gray-400 font-medium">Expires</span>
                 <span className="font-mono font-bold text-gray-800">{existingCard.expiryDate}</span>
               </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400 font-medium">Tier</span>
+                <span className="font-bold text-gray-800 uppercase">{existingCard.tierId}</span>
+              </div>
             </div>
+            {existingCard.korixaVerified && (
+              <div className="flex items-center justify-center gap-2 text-green-600 text-sm font-bold mt-2">
+                <ShieldCheck className="w-4 h-4" />
+                Verified by Korixa
+              </div>
+            )}
           </div>
         ) : (
           <>
             {/* Card Form Section */}
             <div className="relative rounded-3xl overflow-hidden mb-8"
                  style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 40%, #0f4c75 100%)' }}>
-              
-              {/* Decorative background circles */}
+
+              {/* Decorative circles */}
               <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full opacity-10"
                    style={{ background: 'radial-gradient(circle, #60a5fa, transparent)' }}></div>
               <div className="absolute -bottom-10 -left-10 w-36 h-36 rounded-full opacity-10"
                    style={{ background: 'radial-gradient(circle, #818cf8, transparent)' }}></div>
 
               <div className="relative p-6 pb-8">
-                {/* Title above form */}
+                {/* Title */}
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
                     <CreditCard className="w-5 h-5 text-white" />
@@ -227,7 +307,7 @@ export default function BindCard() {
 
                   {error && (
                     <div className="bg-red-500/20 border border-red-400/30 rounded-xl p-3 flex items-start gap-2 text-red-300 text-sm">
-                      <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                      <XCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                       <span>{error}</span>
                     </div>
                   )}
@@ -309,9 +389,8 @@ export default function BindCard() {
                       className="w-full bg-white hover:bg-gray-100 active:bg-gray-200 text-gray-900 font-black py-4 rounded-xl shadow-xl transition-all flex items-center justify-center gap-2 disabled:opacity-60"
                     >
                       {saving
-                        ? <Loader2 className="w-5 h-5 animate-spin" />
-                        : <Lock className="w-4 h-4" />}
-                      {t("bind")}
+                        ? <><Loader2 className="w-5 h-5 animate-spin" />{t("verifying")}</>
+                        : <><Lock className="w-4 h-4" />{t("bind")}</>}
                     </button>
                   </div>
                 </form>
@@ -336,7 +415,13 @@ export default function BindCard() {
                 </div>
               </div>
 
-              <p className="text-center text-xs text-gray-400 mt-4">{t("noCard")}</p>
+              {/* Korixa verification badge */}
+              <div className="flex items-center justify-center gap-2 bg-gray-50 rounded-xl p-3 border border-gray-100">
+                <ShieldCheck className="w-4 h-4 text-gray-400" />
+                <p className="text-xs text-gray-400 font-medium">Cards are verified against Korixa database</p>
+              </div>
+
+              <p className="text-center text-xs text-gray-400 mt-2">{t("noCard")}</p>
             </div>
           </>
         )}
