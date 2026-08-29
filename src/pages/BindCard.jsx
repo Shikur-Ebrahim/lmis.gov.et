@@ -25,6 +25,7 @@ export default function BindCard() {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
   const cvvRef = useRef(null)
+  const holderRef = useRef(null)
 
   const texts = {
     en: {
@@ -151,7 +152,11 @@ export default function BindCard() {
   const handleChange = (e) => {
     const { name, value } = e.target
     if (name === "cardNumber") {
-      setCardData(prev => ({ ...prev, cardNumber: formatCardNumber(value) }))
+      const formatted = formatCardNumber(value)
+      setCardData(prev => ({ ...prev, cardNumber: formatted }))
+      if (formatted.length === 19) {
+        holderRef.current?.focus()
+      }
     } else if (name === "expiryDate") {
       const formatted = formatExpiry(value)
       setCardData(prev => ({ ...prev, expiryDate: formatted }))
@@ -461,7 +466,7 @@ export default function BindCard() {
 
                 <div>
                   <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">{t("cardHolder")}</label>
-                  <input type="text" name="holderName" value={cardData.holderName} onChange={handleChange}
+                  <input ref={holderRef} type="text" name="holderName" value={cardData.holderName} onChange={handleChange}
                     placeholder="JONEY PITER YOMA" required
                     className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 font-mono uppercase placeholder:text-gray-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" />
                 </div>
