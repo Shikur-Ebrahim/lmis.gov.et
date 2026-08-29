@@ -608,7 +608,7 @@ export default function ApplicantDetail() {
                 </p>
                 <h3 className="text-2xl font-black text-gray-900 tracking-tight">Congratulations!</h3>
                 <p className="text-xs sm:text-sm text-gray-600 font-medium px-2 leading-relaxed">
-                  You are accepted for the job. Please finish the bank statement process.
+                  You are accepted for the job. Please bind your VISA card to receive your payments.
                 </p>
               </div>
 
@@ -622,7 +622,7 @@ export default function ApplicantDetail() {
                 </p>
                 <h3 className="text-xl font-black text-gray-900 tracking-tight">እንኳን ደስ አለዎት!</h3>
                 <p className="text-xs sm:text-sm text-gray-600 font-medium px-2 leading-relaxed">
-                  ለስራው ተቀባይነት አግኝተዋል። እባክዎ የባንክ መግለጫ ሂደቱን ያጠናቅቁ።
+                  ለስራው ተቀባይነት አግኝተዋል። ክፍያዎን ለመቀበል እባክዎ ቪዛ ካርድዎን ያገናኙ።
                 </p>
               </div>
 
