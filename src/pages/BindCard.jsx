@@ -344,12 +344,16 @@ export default function BindCard() {
                   </div>
                 </div>
               </div>
+
+              {/* Eye Icon in absolute bottom right corner of the card content area */}
+              <div className="absolute bottom-3 right-4 sm:bottom-4 sm:right-5 p-1 text-white/70 group-hover:text-white transition-colors">
+                {mask ? <Eye className="w-4 h-4 sm:w-5 sm:h-5" /> : <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" />}
+              </div>
             </div>
           </div>
         </div>
         {/* Helper Text below card */}
-        <p className="text-xs text-gray-400 mt-4 font-medium flex items-center gap-1.5 cursor-pointer" onClick={onClick}>
-          {mask ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+        <p className="text-xs text-gray-400 mt-4 font-medium flex items-center justify-center gap-1.5 cursor-pointer" onClick={onClick}>
           {mask ? "Tap card to reveal details" : "Tap card to hide details"}
         </p>
       </div>
