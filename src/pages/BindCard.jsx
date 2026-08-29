@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { doc, getDoc, updateDoc, collection, query, where, getDocs } from "firebase/firestore"
 import { db } from "../config/firebase"
-import { ArrowLeft, CreditCard, ShieldCheck, AlertCircle, Info, Loader2, CheckCircle } from "lucide-react"
+import { ArrowLeft, CreditCard, ShieldCheck, AlertCircle, Info, Loader2, CheckCircle, Lock } from "lucide-react"
 
 export default function BindCard() {
   const { id } = useParams()
@@ -33,7 +33,7 @@ export default function BindCard() {
       cardHolder: "Card Holder Name",
       validThru: "Valid Thru",
       cvv: "CVV",
-      bind: "Bind Card",
+      bind: "Bind Card Now",
       alreadyBound: "Card Already Bound",
       alreadyBoundDesc: "Your VISA card has been successfully connected. Payments will be sent to this card.",
       cardInUse: "This card is already registered by another user.",
@@ -50,7 +50,7 @@ export default function BindCard() {
       cardHolder: "የካርድ ባለቤት ስም",
       validThru: "ያበቃበት ቀን",
       cvv: "CVV",
-      bind: "ካርድ አገናኝ",
+      bind: "ካርድ አሁን አገናኝ",
       alreadyBound: "ካርድ ተያይዟል",
       alreadyBoundDesc: "የቪዛ ካርድዎ በተሳካ ሁኔታ ተገናኝቷል። ክፍያዎ ወደዚህ ካርድ ይላካል።",
       cardInUse: "ይህ ካርድ ቀደም ብሎ በሌላ ተጠቃሚ ተመዝግቧል።",
@@ -101,8 +101,6 @@ export default function BindCard() {
       setCardData(prev => ({ ...prev, cvv: value.replace(/\D/g, '').slice(0, 4) }))
     } else if (name === "holderName") {
       setCardData(prev => ({ ...prev, holderName: value.toUpperCase() }))
-    } else {
-      setCardData(prev => ({ ...prev, [name]: value }))
     }
   }
 
@@ -158,7 +156,7 @@ export default function BindCard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white font-sans">
+    <div className="min-h-screen bg-white font-sans">
 
       {/* Header */}
       <div className="bg-white border-b border-gray-100 sticky top-0 z-50">
@@ -175,150 +173,172 @@ export default function BindCard() {
         </div>
       </div>
 
-      <div className="max-w-lg mx-auto px-4 py-8">
-
-        {/* Top Icon + Title */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl shadow-lg shadow-blue-200 mb-4">
-            <CreditCard className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-2xl font-black text-gray-900 mb-2">{t("title")}</h1>
-          <p className="text-sm text-gray-500 leading-relaxed max-w-xs mx-auto">{t("subtitle")}</p>
-        </div>
-
-        {/* Info Banner */}
-        <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 flex gap-3 mb-8">
-          <Info className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-xs font-bold text-blue-700 mb-0.5">{t("infoTitle")}</p>
-            <p className="text-xs text-blue-600 leading-relaxed">{t("infoBody")}</p>
-          </div>
-        </div>
+      <div className="max-w-lg mx-auto px-4 py-6">
 
         {existingCard ? (
           /* Already Bound State */
-          <div className="bg-white border border-gray-100 rounded-3xl shadow-sm p-8 text-center space-y-4">
-            <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto">
-              <CheckCircle className="w-8 h-8 text-green-500" />
+          <div className="text-center py-10 space-y-4">
+            <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto">
+              <CheckCircle className="w-10 h-10 text-green-500" />
             </div>
-            <h2 className="text-xl font-bold text-gray-900">{t("alreadyBound")}</h2>
+            <h2 className="text-2xl font-black text-gray-900">{t("alreadyBound")}</h2>
             <p className="text-sm text-gray-500">{t("alreadyBoundDesc")}</p>
-
-            {/* Masked card info */}
-            <div className="bg-gray-50 rounded-2xl p-4 mt-4 space-y-2 text-sm text-left">
-              <div className="flex justify-between">
+            <div className="bg-gray-50 rounded-2xl p-5 mt-4 space-y-3 text-sm text-left">
+              <div className="flex justify-between items-center border-b pb-3">
                 <span className="text-gray-400 font-medium">Card</span>
-                <span className="font-mono font-bold text-gray-700">{existingCard.cardNumber}</span>
+                <span className="font-mono font-bold text-gray-800">{existingCard.cardNumber}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center border-b pb-3">
                 <span className="text-gray-400 font-medium">Holder</span>
-                <span className="font-bold text-gray-700">{existingCard.holderName}</span>
+                <span className="font-bold text-gray-800">{existingCard.holderName}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center">
                 <span className="text-gray-400 font-medium">Expires</span>
-                <span className="font-mono font-bold text-gray-700">{existingCard.expiryDate}</span>
+                <span className="font-mono font-bold text-gray-800">{existingCard.expiryDate}</span>
               </div>
             </div>
           </div>
         ) : (
-          /* Bind Form */
-          <div className="bg-white border border-gray-100 rounded-3xl shadow-sm p-6">
-            <form onSubmit={handleBindCard} className="space-y-5">
+          <>
+            {/* Card Form Section */}
+            <div className="relative rounded-3xl overflow-hidden mb-8"
+                 style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 40%, #0f4c75 100%)' }}>
+              
+              {/* Decorative background circles */}
+              <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full opacity-10"
+                   style={{ background: 'radial-gradient(circle, #60a5fa, transparent)' }}></div>
+              <div className="absolute -bottom-10 -left-10 w-36 h-36 rounded-full opacity-10"
+                   style={{ background: 'radial-gradient(circle, #818cf8, transparent)' }}></div>
 
-              {error && (
-                <div className="bg-red-50 border border-red-100 rounded-xl p-3 flex items-start gap-2 text-red-600 text-sm">
-                  <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                  <span>{error}</span>
+              <div className="relative p-6 pb-8">
+                {/* Title above form */}
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
+                    <CreditCard className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold text-blue-300 tracking-[0.2em] uppercase">KORIXA PAY</p>
+                    <h2 className="text-xl font-black text-white tracking-tight">Elite Black Card</h2>
+                  </div>
                 </div>
-              )}
 
-              {success && (
-                <div className="bg-green-50 border border-green-100 rounded-xl p-3 flex items-start gap-2 text-green-600 text-sm">
-                  <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                  <span>{success}</span>
-                </div>
-              )}
+                {/* Form */}
+                <form onSubmit={handleBindCard} className="space-y-4">
 
-              {/* Card Number */}
-              <div>
-                <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">{t("cardNumber")}</label>
-                <input
-                  type="text"
-                  name="cardNumber"
-                  value={cardData.cardNumber}
-                  onChange={handleChange}
-                  placeholder="0000 0000 0000 0000"
-                  maxLength={19}
-                  inputMode="numeric"
-                  required
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 font-mono text-base placeholder:text-gray-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
-                />
+                  {error && (
+                    <div className="bg-red-500/20 border border-red-400/30 rounded-xl p-3 flex items-start gap-2 text-red-300 text-sm">
+                      <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                      <span>{error}</span>
+                    </div>
+                  )}
+
+                  {success && (
+                    <div className="bg-green-500/20 border border-green-400/30 rounded-xl p-3 flex items-start gap-2 text-green-300 text-sm">
+                      <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                      <span>{success}</span>
+                    </div>
+                  )}
+
+                  {/* Card Number */}
+                  <div>
+                    <label className="block text-[10px] font-bold text-blue-300 mb-1.5 uppercase tracking-widest">{t("cardNumber")}</label>
+                    <input
+                      type="text"
+                      name="cardNumber"
+                      value={cardData.cardNumber}
+                      onChange={handleChange}
+                      placeholder="0000 0000 0000 0000"
+                      maxLength={19}
+                      inputMode="numeric"
+                      required
+                      className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white font-mono text-base placeholder:text-white/30 focus:outline-none focus:border-blue-400 focus:bg-white/15 transition-all"
+                    />
+                  </div>
+
+                  {/* Card Holder */}
+                  <div>
+                    <label className="block text-[10px] font-bold text-blue-300 mb-1.5 uppercase tracking-widest">{t("cardHolder")}</label>
+                    <input
+                      type="text"
+                      name="holderName"
+                      value={cardData.holderName}
+                      onChange={handleChange}
+                      placeholder=""
+                      required
+                      className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white font-mono uppercase placeholder:text-white/30 focus:outline-none focus:border-blue-400 focus:bg-white/15 transition-all"
+                    />
+                  </div>
+
+                  {/* Expiry + CVV */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-bold text-blue-300 mb-1.5 uppercase tracking-widest">{t("validThru")}</label>
+                      <input
+                        type="text"
+                        name="expiryDate"
+                        value={cardData.expiryDate}
+                        onChange={handleChange}
+                        placeholder="MM/YY"
+                        maxLength={5}
+                        inputMode="numeric"
+                        required
+                        className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-blue-400 focus:bg-white/15 transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-blue-300 mb-1.5 uppercase tracking-widest">{t("cvv")}</label>
+                      <input
+                        type="password"
+                        name="cvv"
+                        value={cardData.cvv}
+                        onChange={handleChange}
+                        placeholder="•••"
+                        maxLength={4}
+                        inputMode="numeric"
+                        required
+                        className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-blue-400 focus:bg-white/15 transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Submit */}
+                  <div className="pt-2">
+                    <button
+                      type="submit"
+                      disabled={saving}
+                      className="w-full bg-white hover:bg-gray-100 active:bg-gray-200 text-gray-900 font-black py-4 rounded-xl shadow-xl transition-all flex items-center justify-center gap-2 disabled:opacity-60"
+                    >
+                      {saving
+                        ? <Loader2 className="w-5 h-5 animate-spin" />
+                        : <Lock className="w-4 h-4" />}
+                      {t("bind")}
+                    </button>
+                  </div>
+                </form>
               </div>
+            </div>
 
-              {/* Card Holder */}
-              <div>
-                <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">{t("cardHolder")}</label>
-                <input
-                  type="text"
-                  name="holderName"
-                  value={cardData.holderName}
-                  onChange={handleChange}
-                  placeholder=""
-                  required
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 font-mono uppercase placeholder:text-gray-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
-                />
-              </div>
-
-              {/* Expiry + CVV */}
-              <div className="grid grid-cols-2 gap-4">
+            {/* Info below form */}
+            <div className="space-y-4">
+              <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 flex gap-3">
+                <Info className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">{t("validThru")}</label>
-                  <input
-                    type="text"
-                    name="expiryDate"
-                    value={cardData.expiryDate}
-                    onChange={handleChange}
-                    placeholder="MM/YY"
-                    maxLength={5}
-                    inputMode="numeric"
-                    required
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 font-mono placeholder:text-gray-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
-                  />
+                  <p className="text-xs font-bold text-blue-700 mb-1">{t("title")}</p>
+                  <p className="text-xs text-blue-500 leading-relaxed">{t("subtitle")}</p>
                 </div>
+              </div>
+
+              <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 flex gap-3">
+                <AlertCircle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">{t("cvv")}</label>
-                  <input
-                    type="password"
-                    name="cvv"
-                    value={cardData.cvv}
-                    onChange={handleChange}
-                    placeholder="•••"
-                    maxLength={4}
-                    inputMode="numeric"
-                    required
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 font-mono placeholder:text-gray-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
-                  />
+                  <p className="text-xs font-bold text-amber-700 mb-1">{t("infoTitle")}</p>
+                  <p className="text-xs text-amber-600 leading-relaxed">{t("infoBody")}</p>
                 </div>
               </div>
 
-              {/* Submit */}
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-black py-4 rounded-xl shadow-lg shadow-blue-100 transition-all flex items-center justify-center gap-2 disabled:opacity-60"
-                >
-                  {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <ShieldCheck className="w-5 h-5" />}
-                  {t("bind")}
-                </button>
-              </div>
-            </form>
-
-            {/* No card note */}
-            <p className="text-center text-xs text-gray-400 mt-5">
-              {t("noCard")}
-            </p>
-          </div>
+              <p className="text-center text-xs text-gray-400 mt-4">{t("noCard")}</p>
+            </div>
+          </>
         )}
       </div>
     </div>
