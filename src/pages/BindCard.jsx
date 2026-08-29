@@ -305,7 +305,7 @@ export default function BindCard() {
               </div>
 
               {/* Middle Row: Card Number */}
-              <div className="my-auto">
+              <div className="mt-auto mb-3 sm:mb-6">
                 <p className="text-[7px] sm:text-[9px] uppercase tracking-wider text-gray-500 mb-0.5">CARD NUMBER</p>
                 <p className="font-mono text-[1.1rem] sm:text-[1.35rem] tracking-[0.1em] sm:tracking-[0.15em] text-white whitespace-nowrap overflow-hidden text-ellipsis">
                   {displayNum}
@@ -335,21 +335,24 @@ export default function BindCard() {
                   </div>
                 </div>
 
-                {/* Logos */}
-                <div className="flex flex-col items-end gap-1 pb-1 sm:pb-2 pr-1">
-                  <div className="text-white font-black italic text-base sm:text-xl tracking-tighter">VISA</div>
-                  {/* Master Card style overlap circles - Colored */}
-                  <div className="flex -mr-1 sm:-mr-2">
-                    <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-red-500/90 mix-blend-screen"></div>
-                    <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-yellow-500/90 -ml-2 sm:-ml-3 mix-blend-screen"></div>
+                {/* Eye Icon and Logos */}
+                <div className="flex items-end gap-3 pb-1 sm:pb-2">
+                  {/* Eye Icon */}
+                  <div className="mb-0.5 sm:mb-1 text-white/70 group-hover:text-white transition-colors">
+                    {mask ? <Eye className="w-4 h-4 sm:w-5 sm:h-5" /> : <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" />}
+                  </div>
+
+                  {/* Logos */}
+                  <div className="flex flex-col items-end gap-1">
+                    <div className="text-white font-black italic text-base sm:text-xl tracking-tighter">VISA</div>
+                    {/* Master Card style overlap circles - Colored */}
+                    <div className="flex -mr-1 sm:-mr-2">
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-red-500/90 mix-blend-screen"></div>
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-yellow-500/90 -ml-2 sm:-ml-3 mix-blend-screen"></div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-
-            {/* Eye Icon in absolute bottom right corner of the CARD (outside padding) */}
-            <div className="absolute bottom-1.5 right-2 sm:bottom-2 sm:right-3 p-1.5 text-white/70 group-hover:text-white transition-colors z-20">
-              {mask ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
             </div>
           </div>
         </div>
