@@ -470,7 +470,7 @@ export default function BindCard() {
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">{t("cvv")}</label>
-                    <input type="password" name="cvv" value={cardData.cvv} onChange={handleChange}
+                    <input type={showDetails ? "text" : "password"} name="cvv" value={cardData.cvv} onChange={handleChange}
                       placeholder="•••" maxLength={4} inputMode="numeric" required
                       className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 font-mono placeholder:text-gray-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" />
                   </div>
