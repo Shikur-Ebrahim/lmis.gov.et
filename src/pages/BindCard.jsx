@@ -305,7 +305,7 @@ export default function BindCard() {
               </div>
 
               {/* Middle Row: Card Number */}
-              <div className="mt-auto mb-3 sm:mb-6">
+              <div className="my-auto">
                 <p className="text-[7px] sm:text-[9px] uppercase tracking-wider text-gray-500 mb-0.5">CARD NUMBER</p>
                 <p className="font-mono text-[1.1rem] sm:text-[1.35rem] tracking-[0.1em] sm:tracking-[0.15em] text-white whitespace-nowrap overflow-hidden text-ellipsis">
                   {displayNum}
