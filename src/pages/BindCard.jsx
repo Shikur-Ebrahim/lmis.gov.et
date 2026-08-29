@@ -1,57 +1,75 @@
 import React, { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { doc, getDoc, updateDoc, collection, query, where, getDocs, serverTimestamp } from "firebase/firestore"
-import { db, auth } from "../config/firebase"
-import { ArrowLeft, CreditCard, ShieldCheck, AlertCircle, Info, Loader2 } from "lucide-react"
+import { doc, getDoc, updateDoc, collection, query, where, getDocs } from "firebase/firestore"
+import { db } from "../config/firebase"
+import { ArrowLeft, CreditCard, ShieldCheck, AlertCircle, Info, Loader2, CheckCircle } from "lucide-react"
 
 export default function BindCard() {
   const { id } = useParams()
   const navigate = useNavigate()
-  
+
   const [lang, setLang] = useState('am')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  
+
   const [cardData, setCardData] = useState({
     cardNumber: "",
     holderName: "",
     expiryDate: "",
     cvv: ""
   })
-  
+
   const [existingCard, setExistingCard] = useState(null)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
 
-  const t = (key) => {
-    const texts = {
-      bindCardTitle: { en: "Bind VISA Card", am: "ቪዛ ካርድ ያገናኙ" },
-      bindCardDesc: { en: "Connect your Elite Black Card to receive your salary", am: "ደሞዝዎን ለመቀበል የኤሊት ብላክ ካርድዎን ያገናኙ" },
-      cardNumber: { en: "Card Number", am: "የካርድ ቁጥር" },
-      cardHolder: { en: "Card Holder Name", am: "የካርድ ባለቤት ስም" },
-      validThru: { en: "Valid Thru (MM/YY)", am: "የሚያበቃበት ጊዜ (MM/YY)" },
-      cvv: { en: "CVV", am: "CVV ሚስጥር ቁጥር" },
-      bindButton: { en: "Bind Card Now", am: "አሁን ያገናኙ" },
-      infoTitle: { en: "Important Notice", am: "አስፈላጊ ማሳሰቢያ" },
-      infoDesc: { en: "Please bind your Visa card to receive your salary. The company pays with this card. If you do not have this card, you can get it from korixapay.com.", am: "ደሞዝዎን ለመቀበል እባክዎ ቪዛ ካርድዎን ያገናኙ። ኩባንያው ደሞዝ የሚከፍለው በዚህ ካርድ ነው። ይህ ካርድ ከሌለዎት ከ korixapay.com ማግኘት ይችላሉ።" },
-      alreadyBound: { en: "You have already bound a card.", am: "ቀደም ብለው ካርድ አገናኝተዋል" },
-      cardInUse: { en: "This card is already bound to another user.", am: "ይህ ካርድ በሌላ ተጠቃሚ ተገናኝቷል" },
-      successMsg: { en: "Card bound successfully!", am: "ካርዱ በተሳካ ሁኔታ ተገናኝቷል!" },
-      invalidCard: { en: "Please enter a valid 16-digit card number", am: "እባክዎ ትክክለኛ ባለ 16-ዲጂት የካርድ ቁጥር ያስገቡ" }
+  const texts = {
+    en: {
+      title: "Bind Your VISA Card",
+      subtitle: "Your payment for working abroad will be sent directly to this card. Please bind your card now.",
+      infoTitle: "Important",
+      infoBody: "After completing the process, the company will deposit your payments to this card. If you don't have a card yet, get one at korixapay.com",
+      cardNumber: "Card Number",
+      cardHolder: "Card Holder Name",
+      validThru: "Valid Thru",
+      cvv: "CVV",
+      bind: "Bind Card",
+      alreadyBound: "Card Already Bound",
+      alreadyBoundDesc: "Your VISA card has been successfully connected. Payments will be sent to this card.",
+      cardInUse: "This card is already registered by another user.",
+      invalidCard: "Please enter a valid 16-digit card number.",
+      success: "Card bound successfully!",
+      noCard: "Don't have a card? Get yours at korixapay.com"
+    },
+    am: {
+      title: "ቪዛ ካርድዎን ያገናኙ",
+      subtitle: "በውጭ ሀገር ለሚሰሩት ክፍያ ቀጥታ ወደዚህ ካርድ ይተላለፋል። አሁን ካርድዎን ያገናኙ።",
+      infoTitle: "አስፈላጊ ማሳሰቢያ",
+      infoBody: "ሂደቱን ከጨረሱ በኋላ፣ ኩባንያው ክፍያዎን ወደዚህ ካርድ ያስተላልፋል። ካርድ ከሌለዎት korixapay.com ላይ ያውጡ።",
+      cardNumber: "የካርድ ቁጥር",
+      cardHolder: "የካርድ ባለቤት ስም",
+      validThru: "ያበቃበት ቀን",
+      cvv: "CVV",
+      bind: "ካርድ አገናኝ",
+      alreadyBound: "ካርድ ተያይዟል",
+      alreadyBoundDesc: "የቪዛ ካርድዎ በተሳካ ሁኔታ ተገናኝቷል። ክፍያዎ ወደዚህ ካርድ ይላካል።",
+      cardInUse: "ይህ ካርድ ቀደም ብሎ በሌላ ተጠቃሚ ተመዝግቧል።",
+      invalidCard: "እባክዎ ትክክለኛ ባለ 16-ዲጂት የካርድ ቁጥር ያስገቡ።",
+      success: "ካርዱ በተሳካ ሁኔታ ተገናኝቷል!",
+      noCard: "ካርድ የለዎትም? korixapay.com ላይ ያግኙ"
     }
-    return texts[key]?.[lang] || texts[key]?.en || key
   }
+
+  const t = (key) => texts[lang][key] || texts.en[key] || key
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        if (!id) return;
+        if (!id) return
         const userDoc = await getDoc(doc(db, "users", id))
         if (userDoc.exists()) {
           const data = userDoc.data()
-          if (data.visaCard) {
-            setExistingCard(data.visaCard)
-          }
+          if (data.visaCard) setExistingCard(data.visaCard)
         }
       } catch (err) {
         console.error("Error fetching user data", err)
@@ -63,40 +81,28 @@ export default function BindCard() {
   }, [id])
 
   const formatCardNumber = (value) => {
-    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '')
-    const matches = v.match(/\d{4,16}/g)
-    const match = matches && matches[0] || ''
-    const parts = []
-
-    for (let i = 0, len = match.length; i < len; i += 4) {
-      parts.push(match.substring(i, i + 4))
-    }
-
-    if (parts.length) {
-      return parts.join(' ')
-    } else {
-      return value
-    }
+    const v = value.replace(/\D/g, '').slice(0, 16)
+    return v.replace(/(.{4})/g, '$1 ').trim()
   }
 
   const formatExpiry = (value) => {
-    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '')
-    if (v.length >= 3) {
-      return `${v.substring(0, 2)}/${v.substring(2, 4)}`
-    }
+    const v = value.replace(/\D/g, '').slice(0, 4)
+    if (v.length >= 3) return `${v.slice(0, 2)}/${v.slice(2)}`
     return v
   }
 
   const handleChange = (e) => {
     const { name, value } = e.target
     if (name === "cardNumber") {
-      setCardData({ ...cardData, [name]: formatCardNumber(value) })
+      setCardData(prev => ({ ...prev, cardNumber: formatCardNumber(value) }))
     } else if (name === "expiryDate") {
-      setCardData({ ...cardData, [name]: formatExpiry(value) })
+      setCardData(prev => ({ ...prev, expiryDate: formatExpiry(value) }))
     } else if (name === "cvv") {
-      setCardData({ ...cardData, [name]: value.replace(/\D/g, '').slice(0, 4) })
+      setCardData(prev => ({ ...prev, cvv: value.replace(/\D/g, '').slice(0, 4) }))
+    } else if (name === "holderName") {
+      setCardData(prev => ({ ...prev, holderName: value.toUpperCase() }))
     } else {
-      setCardData({ ...cardData, [name]: value.toUpperCase() })
+      setCardData(prev => ({ ...prev, [name]: value }))
     }
   }
 
@@ -104,246 +110,215 @@ export default function BindCard() {
     e.preventDefault()
     setError("")
     setSuccess("")
-    
-    const unformattedCard = cardData.cardNumber.replace(/\s/g, '')
-    if (unformattedCard.length !== 16) {
+
+    const raw = cardData.cardNumber.replace(/\s/g, '')
+    if (raw.length !== 16) {
       setError(t("invalidCard"))
       return
     }
 
     setSaving(true)
     try {
-      // Check if card is already used
-      const usersRef = collection(db, "users")
-      const q = query(usersRef, where("visaCard.cardNumber", "==", cardData.cardNumber))
-      const querySnapshot = await getDocs(q)
-      
-      if (!querySnapshot.empty) {
-        // Someone already has this card (maybe even the same user, but we checked existingCard above)
+      const q = query(collection(db, "users"), where("visaCard.cardNumber", "==", cardData.cardNumber))
+      const snap = await getDocs(q)
+      if (!snap.empty) {
         setError(t("cardInUse"))
         setSaving(false)
         return
       }
 
       const cardPayload = {
-        cardNumber: cardData.cardNumber, // save with spaces for display
+        cardNumber: cardData.cardNumber,
         holderName: cardData.holderName,
         expiryDate: cardData.expiryDate,
         cvv: cardData.cvv,
-        tierId: "silver", // Default tier per screenshot
+        tierId: "silver",
         frozen: false,
         displayInAssets: true,
-        createdAt: new Date().toISOString() // String date as requested
+        createdAt: new Date().toISOString()
       }
 
-      await updateDoc(doc(db, "users", id), {
-        visaCard: cardPayload
-      })
-
-      setSuccess(t("successMsg"))
+      await updateDoc(doc(db, "users", id), { visaCard: cardPayload })
+      setSuccess(t("success"))
       setExistingCard(cardPayload)
     } catch (err) {
       console.error(err)
-      setError("Error saving card")
+      setError("Error saving card. Please try again.")
     } finally {
       setSaving(false)
     }
   }
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center bg-gray-900"><Loader2 className="w-10 h-10 animate-spin text-cyan-500" /></div>
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      </div>
+    )
   }
 
-  // Preview data based on input or existing card
-  const previewData = existingCard || cardData
-  const displayCardNumber = previewData.cardNumber || "XXXX XXXX XXXX XXXX"
-  const displayHolder = previewData.holderName || "CARD HOLDER"
-  const displayExpiry = previewData.expiryDate || "MM/YY"
-  const displayCvv = previewData.cvv || "•••"
-
   return (
-    <div className="min-h-screen bg-gray-950 text-white font-sans selection:bg-cyan-500/30">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white font-sans">
+
       {/* Header */}
-      <div className="sticky top-0 z-50 bg-gray-950/80 backdrop-blur-xl border-b border-gray-800">
-        <div className="max-w-2xl mx-auto px-4 py-4 flex justify-between items-center">
-          <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-gray-800 transition-colors">
-            <ArrowLeft className="w-6 h-6 text-gray-300" />
+      <div className="bg-white border-b border-gray-100 sticky top-0 z-50">
+        <div className="max-w-lg mx-auto px-4 py-4 flex justify-between items-center">
+          <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-gray-100 transition-colors text-gray-600">
+            <ArrowLeft className="w-5 h-5" />
           </button>
-          
-          <button 
+          <button
             onClick={() => setLang(l => l === 'am' ? 'en' : 'am')}
-            className="flex items-center gap-2 bg-gray-900 border border-gray-700 px-3 py-1.5 rounded-full text-xs font-bold hover:bg-gray-800 transition-colors"
+            className="text-xs font-bold bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-full transition-colors text-gray-600"
           >
-            <span className={lang === 'am' ? 'text-cyan-400' : 'text-gray-500'}>አማ</span>
-            <span className="text-gray-600">|</span>
-            <span className={lang === 'en' ? 'text-cyan-400' : 'text-gray-500'}>EN</span>
+            {lang === 'am' ? 'English' : 'አማርኛ'}
           </button>
         </div>
       </div>
 
-      <div className="max-w-md mx-auto px-4 py-8 pb-20">
+      <div className="max-w-lg mx-auto px-4 py-8">
+
+        {/* Top Icon + Title */}
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-black text-white tracking-tight mb-2">{t("bindCardTitle")}</h1>
-          <p className="text-gray-400 text-sm">{t("bindCardDesc")}</p>
-        </div>
-
-        {/* Card Preview (Elite Black Card Style) */}
-        <div className="relative w-full h-[220px] rounded-[1.5rem] p-6 flex flex-col justify-between overflow-hidden shadow-2xl mb-8 transform transition-transform hover:scale-[1.02] duration-300"
-             style={{
-               background: 'linear-gradient(135deg, #2b2b2b 0%, #1a1a1a 100%)',
-               boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.1)'
-             }}>
-          {/* Background pattern overlay */}
-          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
-          
-          {/* Card Top */}
-          <div className="relative flex justify-between items-start w-full">
-            <div>
-              <p className="text-[10px] font-bold text-gray-400 tracking-[0.2em]">KORIXA PAY</p>
-              <p className="text-xs font-black text-gray-300 uppercase tracking-widest mt-1">SILVER</p>
-            </div>
-            {/* Chip icon */}
-            <div className="w-12 h-9 border-2 border-gray-600 rounded-md bg-gradient-to-br from-gray-300 to-gray-500 opacity-70 grid grid-cols-3 grid-rows-3 gap-[1px] p-[2px]">
-               <div className="border border-gray-500/50 rounded-sm"></div><div className="border border-gray-500/50 rounded-sm"></div><div className="border border-gray-500/50 rounded-sm"></div>
-               <div className="border border-gray-500/50 rounded-sm"></div><div className="border border-gray-500/50 rounded-sm"></div><div className="border border-gray-500/50 rounded-sm"></div>
-               <div className="border border-gray-500/50 rounded-sm"></div><div className="border border-gray-500/50 rounded-sm"></div><div className="border border-gray-500/50 rounded-sm"></div>
-            </div>
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl shadow-lg shadow-blue-200 mb-4">
+            <CreditCard className="w-8 h-8 text-white" />
           </div>
-
-          {/* Card Number */}
-          <div className="relative mt-2">
-            <p className="font-mono text-xl sm:text-2xl tracking-[0.2em] text-gray-100 drop-shadow-md">
-              {displayCardNumber}
-            </p>
-          </div>
-
-          {/* Card Bottom */}
-          <div className="relative flex justify-between items-end w-full">
-            <div className="flex gap-6">
-              <div>
-                <p className="text-[8px] font-bold text-gray-500 uppercase tracking-wider mb-1">Card Holder</p>
-                <p className="font-mono text-xs sm:text-sm text-gray-200 tracking-widest uppercase truncate max-w-[150px]">{displayHolder}</p>
-              </div>
-              <div>
-                <p className="text-[8px] font-bold text-gray-500 uppercase tracking-wider mb-1">Valid Thru</p>
-                <p className="font-mono text-xs sm:text-sm text-gray-200 tracking-widest">{displayExpiry}</p>
-              </div>
-              {!existingCard && (
-                <div>
-                  <p className="text-[8px] font-bold text-gray-500 uppercase tracking-wider mb-1">CVV</p>
-                  <p className="font-mono text-xs sm:text-sm text-gray-200 tracking-widest">{displayCvv}</p>
-                </div>
-              )}
-            </div>
-            {/* Visa Logo Mock */}
-            <div className="flex flex-col items-end">
-               <span className="text-xl italic font-black text-white">VISA</span>
-            </div>
-          </div>
+          <h1 className="text-2xl font-black text-gray-900 mb-2">{t("title")}</h1>
+          <p className="text-sm text-gray-500 leading-relaxed max-w-xs mx-auto">{t("subtitle")}</p>
         </div>
 
         {/* Info Banner */}
-        <div className="bg-gray-900/80 border border-cyan-900/50 rounded-2xl p-4 flex gap-4 mb-8">
-          <Info className="w-6 h-6 text-cyan-400 flex-shrink-0 mt-0.5" />
+        <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 flex gap-3 mb-8">
+          <Info className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
           <div>
-            <h3 className="font-bold text-cyan-400 text-sm mb-1">{t("infoTitle")}</h3>
-            <p className="text-xs text-gray-400 leading-relaxed">
-              {t("infoDesc")}
-            </p>
+            <p className="text-xs font-bold text-blue-700 mb-0.5">{t("infoTitle")}</p>
+            <p className="text-xs text-blue-600 leading-relaxed">{t("infoBody")}</p>
           </div>
         </div>
 
         {existingCard ? (
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 text-center space-y-4">
-            <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto">
-              <ShieldCheck className="w-8 h-8 text-emerald-500" />
+          /* Already Bound State */
+          <div className="bg-white border border-gray-100 rounded-3xl shadow-sm p-8 text-center space-y-4">
+            <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto">
+              <CheckCircle className="w-8 h-8 text-green-500" />
             </div>
-            <h2 className="text-xl font-bold text-white">{t("alreadyBound")}</h2>
-            <p className="text-sm text-gray-400">Your salary will be deposited to this Elite Black Card.</p>
+            <h2 className="text-xl font-bold text-gray-900">{t("alreadyBound")}</h2>
+            <p className="text-sm text-gray-500">{t("alreadyBoundDesc")}</p>
+
+            {/* Masked card info */}
+            <div className="bg-gray-50 rounded-2xl p-4 mt-4 space-y-2 text-sm text-left">
+              <div className="flex justify-between">
+                <span className="text-gray-400 font-medium">Card</span>
+                <span className="font-mono font-bold text-gray-700">{existingCard.cardNumber}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400 font-medium">Holder</span>
+                <span className="font-bold text-gray-700">{existingCard.holderName}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400 font-medium">Expires</span>
+                <span className="font-mono font-bold text-gray-700">{existingCard.expiryDate}</span>
+              </div>
+            </div>
           </div>
         ) : (
-          <form onSubmit={handleBindCard} className="space-y-5">
-            {error && (
-              <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3 flex items-center gap-3 text-red-400 text-sm font-medium">
-                <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                <p>{error}</p>
-              </div>
-            )}
-            
-            {success && (
-              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 flex items-center gap-3 text-emerald-400 text-sm font-medium">
-                <ShieldCheck className="w-5 h-5 flex-shrink-0" />
-                <p>{success}</p>
-              </div>
-            )}
+          /* Bind Form */
+          <div className="bg-white border border-gray-100 rounded-3xl shadow-sm p-6">
+            <form onSubmit={handleBindCard} className="space-y-5">
 
-            <div>
-              <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wider">{t("cardNumber")}</label>
-              <input
-                type="text"
-                name="cardNumber"
-                value={cardData.cardNumber}
-                onChange={handleChange}
-                placeholder="0000 0000 0000 0000"
-                maxLength={19}
-                required
-                className="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-3.5 text-white font-mono placeholder:text-gray-700 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
-              />
-            </div>
+              {error && (
+                <div className="bg-red-50 border border-red-100 rounded-xl p-3 flex items-start gap-2 text-red-600 text-sm">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  <span>{error}</span>
+                </div>
+              )}
 
-            <div>
-              <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wider">{t("cardHolder")}</label>
-              <input
-                type="text"
-                name="holderName"
-                value={cardData.holderName}
-                onChange={handleChange}
-                placeholder="e.g. SHIKUR YIBRIE MUHAMMED"
-                required
-                className="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-3.5 text-white font-mono uppercase placeholder:text-gray-700 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
-              />
-            </div>
+              {success && (
+                <div className="bg-green-50 border border-green-100 rounded-xl p-3 flex items-start gap-2 text-green-600 text-sm">
+                  <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  <span>{success}</span>
+                </div>
+              )}
 
-            <div className="grid grid-cols-2 gap-4">
+              {/* Card Number */}
               <div>
-                <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wider">{t("validThru")}</label>
+                <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">{t("cardNumber")}</label>
                 <input
                   type="text"
-                  name="expiryDate"
-                  value={cardData.expiryDate}
+                  name="cardNumber"
+                  value={cardData.cardNumber}
                   onChange={handleChange}
-                  placeholder="MM/YY"
-                  maxLength={5}
+                  placeholder="0000 0000 0000 0000"
+                  maxLength={19}
+                  inputMode="numeric"
                   required
-                  className="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-3.5 text-white font-mono placeholder:text-gray-700 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 font-mono text-base placeholder:text-gray-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                 />
               </div>
+
+              {/* Card Holder */}
               <div>
-                <label className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wider">{t("cvv")}</label>
+                <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">{t("cardHolder")}</label>
                 <input
                   type="text"
-                  name="cvv"
-                  value={cardData.cvv}
+                  name="holderName"
+                  value={cardData.holderName}
                   onChange={handleChange}
-                  placeholder="123"
-                  maxLength={4}
+                  placeholder=""
                   required
-                  className="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-3.5 text-white font-mono placeholder:text-gray-700 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 font-mono uppercase placeholder:text-gray-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                 />
               </div>
-            </div>
 
-            <div className="pt-4">
-              <button
-                type="submit"
-                disabled={saving}
-                className="w-full bg-cyan-600 hover:bg-cyan-500 active:bg-cyan-700 text-white font-black py-4 rounded-xl shadow-lg shadow-cyan-900/20 transition-all flex items-center justify-center gap-2 disabled:opacity-70"
-              >
-                {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <CreditCard className="w-5 h-5" />}
-                {t("bindButton")}
-              </button>
-            </div>
-          </form>
+              {/* Expiry + CVV */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">{t("validThru")}</label>
+                  <input
+                    type="text"
+                    name="expiryDate"
+                    value={cardData.expiryDate}
+                    onChange={handleChange}
+                    placeholder="MM/YY"
+                    maxLength={5}
+                    inputMode="numeric"
+                    required
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 font-mono placeholder:text-gray-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">{t("cvv")}</label>
+                  <input
+                    type="password"
+                    name="cvv"
+                    value={cardData.cvv}
+                    onChange={handleChange}
+                    placeholder="•••"
+                    maxLength={4}
+                    inputMode="numeric"
+                    required
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 font-mono placeholder:text-gray-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* Submit */}
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-black py-4 rounded-xl shadow-lg shadow-blue-100 transition-all flex items-center justify-center gap-2 disabled:opacity-60"
+                >
+                  {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <ShieldCheck className="w-5 h-5" />}
+                  {t("bind")}
+                </button>
+              </div>
+            </form>
+
+            {/* No card note */}
+            <p className="text-center text-xs text-gray-400 mt-5">
+              {t("noCard")}
+            </p>
+          </div>
         )}
       </div>
     </div>
