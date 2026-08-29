@@ -399,42 +399,25 @@ export default function BindCard() {
             {/* Card visual matching Korixa Elite Black Card */}
             {renderEliteBlackCard(existingCard.cardNumber, existingCard.holderName, existingCard.expiryDate, existingCard.cvv, !showDetails, () => setShowDetails(!showDetails))}
 
-            {/* Card Details */}
-            <div className="bg-white rounded-3xl p-6 space-y-4 shadow-sm border border-gray-100 mt-6">
-              {/* Balance */}
-              <div className="flex justify-between items-center pb-4 border-b border-gray-50">
-                <div className="flex items-center gap-2">
-                  <DollarSign className="w-5 h-5 text-green-500" />
-                  <span className="text-gray-500 font-medium text-sm">{t("balanceLabel")}</span>
+            {/* Status and Balance Grid */}
+            <div className="grid grid-cols-2 gap-4 mt-8">
+              {/* Status Box */}
+              <div className="bg-[#1c1d21] rounded-2xl p-5 flex flex-col items-center justify-center border border-white/5 shadow-[0_4px_20px_rgba(0,0,0,0.15)]">
+                <p className="text-[10px] sm:text-xs uppercase tracking-wider text-gray-500 mb-2 font-medium">STATUS</p>
+                <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full border ${existingCard.frozen ? 'border-red-500/30' : 'border-green-500/30'}`}>
+                  <div className={`w-2 h-2 rounded-full ${existingCard.frozen ? 'bg-red-500' : 'bg-green-500'}`}></div>
+                  <span className={`text-xs font-bold ${existingCard.frozen ? 'text-red-500' : 'text-green-500'}`}>
+                    {existingCard.frozen ? 'Inactive' : 'Active'}
+                  </span>
                 </div>
-                <span className="font-black text-green-600 text-xl">
-                  {showDetails ? `$${existingCard.balance ?? 0}` : '***'}
-                </span>
               </div>
 
-              {/* Tier */}
-              <div className="flex justify-between items-center pb-4 border-b border-gray-50">
-                <div className="flex items-center gap-2">
-                  <CreditCard className="w-4 h-4 text-gray-400" />
-                  <span className="text-gray-500 font-medium text-sm">{t("tierLabel")}</span>
-                </div>
-                <span className="font-black text-white uppercase px-3 py-1 bg-gray-900 rounded-full text-xs tracking-wider">
-                  {existingCard.tierId || "BLACK"}
-                </span>
-              </div>
-
-              {/* Holder */}
-              <div className="flex justify-between items-center pb-4 border-b border-gray-50">
-                <span className="text-gray-500 font-medium text-sm">{t("holderLabel")}</span>
-                <span className="font-bold text-gray-900 text-sm">{existingCard.holderName}</span>
-              </div>
-
-              {/* Expires */}
-              <div className="flex justify-between items-center pb-2">
-                <span className="text-gray-500 font-medium text-sm">{t("expiresLabel")}</span>
-                <span className="font-mono font-bold text-gray-900 text-sm">
-                  {showDetails ? existingCard.expiryDate : '**/**'}
-                </span>
+              {/* Balance Box */}
+              <div className="bg-[#1c1d21] rounded-2xl p-5 flex flex-col items-center justify-center border border-white/5 shadow-[0_4px_20px_rgba(0,0,0,0.15)]">
+                <p className="text-[10px] sm:text-xs uppercase tracking-wider text-gray-500 mb-2 font-medium">CARD BALANCE</p>
+                <p className="text-xl sm:text-2xl font-bold text-white tracking-wide">
+                  {!showDetails ? "***" : `$${(existingCard.balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
+                </p>
               </div>
             </div>
 
