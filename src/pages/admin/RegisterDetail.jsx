@@ -348,7 +348,8 @@ const RegisterDetail = () => {
                     onClick={() => {
                       setNewStatus(selectedRegistration.status || "Pending")
                       setEditSalary(selectedRegistration.monthlySalary || "")
-                      setEditCountries(selectedRegistration.selectedCountries || [])
+                      const prevCountries = selectedRegistration.selectedCountries || []
+                      setEditCountries(prevCountries.length === 1 ? prevCountries : [])
                       setConfirmStep(false)
                       setShowUpdateStatusModal(true)
                     }}
@@ -571,41 +572,42 @@ const RegisterDetail = () => {
 
                   {/* Countries */}
                   <div>
-                    <p className="text-xs font-black text-gray-500 uppercase mb-2">Target Countries (select up to 5)</p>
+                    <p className="text-xs font-black text-gray-500 uppercase mb-2">Final Destination Country (Must select exactly 1)</p>
                     <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
-                      {Object.keys(flagMapping).map(country => {
+                      {(selectedRegistration?.selectedCountries || []).map(country => {
                         const selected = editCountries.includes(country)
                         return (
                           <button
                             key={country}
                             onClick={() => {
-                              if (selected) {
-                                setEditCountries(editCountries.filter(c => c !== country))
-                              } else if (editCountries.length < 5) {
-                                setEditCountries([...editCountries, country])
-                              }
+                              setEditCountries([country])
                             }}
                             className={`w-full flex items-center gap-3 p-2.5 rounded-xl border-2 text-sm font-semibold transition-all ${
                               selected ? "border-blue-500 bg-blue-50" : "border-gray-100 hover:border-gray-200"
                             }`}
                           >
-                            <div className="w-8 h-5 rounded overflow-hidden border shadow-sm bg-white flex-shrink-0">
-                              <img src={`/images/${flagMapping[country]}`} alt="" className="w-full h-full object-cover" />
-                            </div>
+                            {flagMapping[country] && (
+                              <div className="w-8 h-5 rounded overflow-hidden border shadow-sm bg-white flex-shrink-0">
+                                <img src={`/images/${flagMapping[country]}`} alt="" className="w-full h-full object-cover" />
+                              </div>
+                            )}
                             <span className="flex-1 text-left">{country}</span>
                             {selected && <CheckCircle size={16} className="text-blue-500 flex-shrink-0" />}
                           </button>
                         )
                       })}
                     </div>
-                    {editCountries.length > 0 && (
-                      <p className="text-xs text-blue-600 font-bold mt-2">{editCountries.length}/5 selected</p>
-                    )}
                   </div>
 
                   <div className="flex gap-3 pt-2">
                     <button onClick={() => { setShowUpdateStatusModal(false); setConfirmStep(false) }} className="flex-1 py-3 bg-gray-100 rounded-xl font-bold text-gray-600 hover:bg-gray-200 transition">Cancel</button>
-                    <button onClick={() => setConfirmStep(true)} className="flex-1 py-3 bg-blue-600 rounded-xl font-bold text-white shadow-lg shadow-blue-200 hover:bg-blue-700 transition">Review Changes</button>
+                    <button 
+                      onClick={() => setConfirmStep(true)} 
+                      disabled={editCountries.length !== 1}
+                      className="flex-1 py-3 bg-blue-600 rounded-xl font-bold text-white shadow-lg shadow-blue-200 hover:bg-blue-700 transition disabled:opacity-50"
+                    >
+                      Review Changes
+                    </button>
                   </div>
                 </div>
               ) : (
