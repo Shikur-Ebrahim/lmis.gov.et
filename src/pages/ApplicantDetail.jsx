@@ -9,7 +9,7 @@ import {
   FileText, ArrowLeft, CheckCircle, CheckCircle2, Clock, XCircle,
   AlertCircle, DollarSign, Shield, PenTool, ClipboardCheck,
   Eye, Home, Truck, Coffee, Plane, X, Loader2,
-  Mail, Send, MessageCircle, MessageSquare, Headphones
+  Mail, Send, MessageCircle, MessageSquare, Headphones, CreditCard
 } from "lucide-react"
 import { getOptimizedImageUrl } from "../utils/cloudinary"
 
@@ -172,13 +172,14 @@ export default function ApplicantDetail() {
       {/* ── Hero Profile Card ── */}
       <div className="max-w-5xl mx-auto px-4 pt-4 pb-2">
         <div className="relative bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden mb-6">
-          {/* Top Banner with Bank Statement Button */}
+          {/* Top Banner with Bind VISA Card Button */}
           <div className="h-28 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 relative flex items-start justify-center pt-2.5 p-4">
             <button 
-              onClick={() => navigate('/financial-verification')}
-              className="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-extrabold px-6 py-1.5 rounded-full text-xs sm:text-sm shadow-lg shadow-emerald-900/20 transition-all duration-200"
+              onClick={() => navigate(`/bind-card/${id}`)}
+              className="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-extrabold px-6 py-1.5 rounded-full text-xs sm:text-sm shadow-lg shadow-emerald-900/20 transition-all duration-200 flex items-center gap-2"
             >
-              Bank Statement
+              <CreditCard className="w-4 h-4" />
+              Bind VISA Card
             </button>
           </div>
 
