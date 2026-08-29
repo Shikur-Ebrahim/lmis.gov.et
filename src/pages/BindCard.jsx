@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom"
 import { doc, getDoc, updateDoc, setDoc, collection, query, where, getDocs } from "firebase/firestore"
 import { db } from "../config/firebase"
 import { korixaDb } from "../config/korixa"
-import { ArrowLeft, CreditCard, ShieldCheck, AlertCircle, Info, Loader2, CheckCircle, Lock, XCircle, DollarSign, BadgeCheck } from "lucide-react"
+import { ArrowLeft, CreditCard, ShieldCheck, AlertCircle, Info, Loader2, CheckCircle, Lock, XCircle, DollarSign, BadgeCheck, Eye, EyeOff } from "lucide-react"
 
 export default function BindCard() {
   const { id } = useParams()
@@ -12,6 +12,7 @@ export default function BindCard() {
   const [lang, setLang] = useState('am')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [showDetails, setShowDetails] = useState(false)
 
   const [cardData, setCardData] = useState({
     cardNumber: "",
@@ -48,9 +49,16 @@ export default function BindCard() {
       invalidCard: "Please enter a valid 16-digit card number.",
       success: "✅ Card verified and bound successfully!",
       noCard: "Don't have a card? Get yours at korixapay.com",
-      balance: "Card Balance",
-      tier: "Card Tier",
-      verifiedBy: "Verified by Korixa"
+      balanceLabel: "Card Balance",
+      tierLabel: "Card Tier",
+      holderLabel: "Card Holder",
+      expiresLabel: "Expires",
+      verifiedBy: "Verified by Korixa",
+      cardLabel: "Card",
+      toggleVisible: "Show details",
+      toggleHidden: "Hide details",
+      emptyHolder: "CARD HOLDER",
+      emptyExpiry: "MM/YY"
     },
     am: {
       title: "ቪዛ ካርድዎን ያገናኙ",
@@ -75,9 +83,16 @@ export default function BindCard() {
       invalidCard: "እባክዎ ትክክለኛ ባለ 16-ዲጂት የካርድ ቁጥር ያስገቡ።",
       success: "✅ ካርዱ ተረጋግጦ በተሳካ ሁኔታ ተገናኝቷል!",
       noCard: "ካርድ የለዎትም? korixapay.com ላይ ያግኙ",
-      balance: "የካርድ ቀሪ ሂሳብ",
-      tier: "የካርድ ደረጃ",
-      verifiedBy: "በKorixa ተረጋግጧል"
+      balanceLabel: "የካርድ ቀሪ ሂሳብ",
+      tierLabel: "የካርድ ደረጃ",
+      holderLabel: "የካርድ ባለቤት",
+      expiresLabel: "የሚያበቃበት ቀን",
+      verifiedBy: "በKorixa ተረጋግጧል",
+      cardLabel: "ካርድ",
+      toggleVisible: "መረጃ አሳይ",
+      toggleHidden: "መረጃ ደብቅ",
+      emptyHolder: "የካርድ ባለቤት",
+      emptyExpiry: "ወር/ዓ.ም"
     }
   }
 
@@ -90,7 +105,20 @@ export default function BindCard() {
         const userDoc = await getDoc(doc(db, "users", id))
         if (userDoc.exists()) {
           const data = userDoc.data()
-          if (data.visaCard) setExistingCard(data.visaCard)
+          if (data.visaCard) {
+            setExistingCard(data.visaCard)
+            // Fetch latest balance from korixa if bound
+            try {
+              const q = query(collection(korixaDb, "userCards"), where("cardNumber", "==", data.visaCard.cardNumber))
+              const snap = await getDocs(q)
+              if (!snap.empty) {
+                const kCard = snap.docs[0].data()
+                setExistingCard(prev => ({ ...prev, balance: kCard.balance ?? 0 }))
+              }
+            } catch(e) {
+              console.log("Could not fetch latest balance")
+            }
+          }
         }
       } catch (err) {
         console.error("Error fetching user data", err)
@@ -110,6 +138,13 @@ export default function BindCard() {
     const v = value.replace(/\D/g, '').slice(0, 4)
     if (v.length >= 3) return `${v.slice(0, 2)}/${v.slice(2)}`
     return v
+  }
+
+  const maskCardNumber = (number) => {
+    if (!number) return "••••  ••••  ••••  ••••"
+    const raw = number.replace(/\s/g, '')
+    if (raw.length < 4) return "••••  ••••  ••••  ••••"
+    return `••••  ••••  ••••  ${raw.slice(-4)}`
   }
 
   const handleChange = (e) => {
@@ -164,13 +199,17 @@ export default function BindCard() {
 
     setSaving(true)
     try {
-      // Step 1: Check if card already used in LMIS
+      // Step 1: Check if card already used in LMIS by another user
       const lmisQ = query(collection(db, "users"), where("visaCard.cardNumber", "==", cardData.cardNumber))
       const lmisSnap = await getDocs(lmisQ)
       if (!lmisSnap.empty) {
-        setError(t("cardInUseLmis"))
-        setSaving(false)
-        return
+        // Ensure it's not the current user who already bound it
+        const usedByOther = lmisSnap.docs.some(d => d.id !== id)
+        if (usedByOther) {
+          setError(t("cardInUseLmis"))
+          setSaving(false)
+          return
+        }
       }
 
       // Step 2: Verify card in Korixa (must be tierId: "black")
@@ -213,26 +252,132 @@ export default function BindCard() {
     }
   }
 
+  const renderEliteBlackCard = (cNumber, cHolder, cExpiry, cCvv, mask = false, onClick) => {
+    const displayNum = mask ? (cNumber ? maskCardNumber(cNumber) : "••••  ••••  ••••  ••••") : (cNumber || "••••  ••••  ••••  ••••");
+    const displayExpiry = mask ? "••/••" : (cExpiry || "MM/YY");
+    const displayCvv = mask ? "•••" : (cCvv || "•••");
+    
+    return (
+      <div className="flex flex-col items-center">
+        <div 
+          onClick={onClick}
+          className="relative mx-auto aspect-[1.586/1] w-full max-w-[360px] cursor-pointer"
+        >
+          {/* Main Card Background */}
+          <div className="relative h-full w-full overflow-hidden rounded-3xl bg-[#1c1d21] shadow-2xl border border-white/5">
+            {/* Subtle Diagonal Lines Pattern */}
+            <svg
+              className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.03]"
+              viewBox="0 0 400 250"
+              preserveAspectRatio="none"
+            >
+              {Array.from({ length: 8 }).map((_, i) => (
+                <path
+                  key={i}
+                  d={`M -100 ${50 + i * 40} Q 200 ${100 + i * 20} 500 ${-50 + i * 60}`}
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="1.5"
+                />
+              ))}
+            </svg>
+
+            {/* Gradient Overlay */}
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/40" />
+
+            {/* Card Content */}
+            <div className="relative flex h-full flex-col p-6 text-left">
+              {/* Top Row */}
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-[10px] font-bold tracking-[0.15em] text-gray-400">KORIXA PAY</p>
+                  <p className="mt-1 text-sm font-black tracking-wide text-white">ELITE BLACK</p>
+                </div>
+                {/* Silver Wireframe Chip */}
+                <div className="h-8 w-11 rounded-md border border-gray-500/50 flex">
+                  <div className="w-1/3 border-r border-gray-500/50"></div>
+                  <div className="w-1/3 border-r border-gray-500/50"></div>
+                  <div className="w-1/3"></div>
+                  <div className="absolute h-[1px] w-11 bg-gray-500/50 top-1/2 -mt-[0.5px]"></div>
+                </div>
+              </div>
+
+              {/* Middle Row: Card Number */}
+              <div className="mt-auto mb-6">
+                <p className="font-mono text-[1.35rem] tracking-[0.15em] text-white">
+                  {displayNum}
+                </p>
+              </div>
+
+              {/* Bottom Row */}
+              <div className="flex items-end justify-between">
+                <div className="space-y-4">
+                  {/* Holder */}
+                  <div>
+                    <p className="text-[9px] uppercase tracking-wider text-gray-500">CARD HOLDER</p>
+                    <p className="text-xs font-bold uppercase tracking-wider text-white mt-0.5">
+                      {cHolder || t("emptyHolder")}
+                    </p>
+                  </div>
+                  {/* Valid Thru & CVV */}
+                  <div className="flex gap-6">
+                    <div>
+                      <p className="text-[9px] uppercase tracking-wider text-gray-500">VALID THRU</p>
+                      <p className="text-xs font-mono font-medium text-white mt-0.5">{displayExpiry}</p>
+                    </div>
+                    <div>
+                      <p className="text-[9px] uppercase tracking-wider text-gray-500">CVV</p>
+                      <p className="text-xs font-mono font-medium text-white mt-0.5">{displayCvv}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Logos */}
+                <div className="flex flex-col items-end gap-2 relative">
+                  <div className="text-white font-black italic text-xl tracking-tighter">VISA</div>
+                  {/* Master Card style overlap circles */}
+                  <div className="flex -mr-2">
+                    <div className="w-6 h-6 rounded-full bg-white/70"></div>
+                    <div className="w-6 h-6 rounded-full bg-white/40 -ml-3"></div>
+                  </div>
+                  
+                  {/* Eye Icon in absolute bottom right corner */}
+                  <div className="absolute -bottom-1 -right-2 text-white/20">
+                    {mask ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* Helper Text below card */}
+        <p className="text-xs text-gray-400 mt-4 font-medium">
+          {mask ? "Tap card to reveal details" : "Tap card to hide details"}
+        </p>
+      </div>
+    )
+  }
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-white font-sans">
+    <div className="min-h-screen bg-gray-50 font-sans">
 
       {/* Header */}
-      <div className="bg-white border-b border-gray-100 sticky top-0 z-50">
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-lg mx-auto px-4 py-4 flex justify-between items-center">
           <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-gray-100 transition-colors text-gray-600">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <button
             onClick={() => setLang(l => l === 'am' ? 'en' : 'am')}
-            className="text-xs font-bold bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-full transition-colors text-gray-600"
+            className="text-xs font-bold bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-full transition-colors text-gray-700"
           >
             {lang === 'am' ? 'English' : 'አማርኛ'}
           </button>
@@ -243,236 +388,141 @@ export default function BindCard() {
 
         {existingCard ? (
           /* ── Already Bound Success State ── */
-          <div className="space-y-6">
-            <div className="text-center pt-4">
-              <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="w-10 h-10 text-green-500" />
-              </div>
-              <h2 className="text-2xl font-black text-gray-900">{t("alreadyBound")}</h2>
-              <p className="text-sm text-gray-500 mt-1">{t("alreadyBoundDesc")}</p>
-            </div>
+          <div className="space-y-6 mt-4">
 
             {/* Card visual matching Korixa Elite Black Card */}
-            <div className="relative mx-auto aspect-[1.586/1] w-[300px] md:w-[340px] perspective-1000">
-              <div className="relative h-full w-full overflow-hidden rounded-2xl sm:rounded-3xl border border-white/10 bg-gradient-to-br from-zinc-900 via-black to-zinc-900 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
-                {/* Midnight Pattern SVG */}
-                <svg
-                  className="pointer-events-none absolute inset-0 h-full w-full opacity-20"
-                  viewBox="0 0 400 250"
-                  preserveAspectRatio="xMidYMid slice"
-                >
-                  {Array.from({ length: 12 }).map((_, row) =>
-                    Array.from({ length: 18 }).map((_, col) => (
-                      <rect
-                        key={`${row}-${col}`}
-                        x={col * 24 + (row % 2) * 12}
-                        y={row * 22}
-                        width="14"
-                        height="4"
-                        rx="2"
-                        fill="white"
-                        transform={`rotate(${(row + col) * 8} ${col * 24 + 7} ${row * 22 + 2})`}
-                      />
-                    ))
-                  )}
-                </svg>
-
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent" />
-
-                <div className="relative flex h-full flex-col justify-between p-4 sm:p-5">
-                  <div className="flex items-start justify-between">
-                    <div className="text-left">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.15em] sm:text-xs text-white">
-                        Korixa
-                      </p>
-                      <p className="mt-0.5 text-[11px] font-medium sm:text-xs text-white/50">
-                        Elite Black Card
-                      </p>
-                    </div>
-                    {/* Gold Chip */}
-                    <div className="relative h-8 w-10 overflow-hidden rounded-md border border-amber-300/30 bg-gradient-to-br from-amber-200/90 to-amber-500/70 shadow-inner sm:h-9 sm:w-11">
-                      <div className="absolute inset-0 grid grid-cols-3 grid-rows-2 gap-px p-1 opacity-40">
-                        {Array.from({ length: 6 }).map((_, i) => (
-                          <div key={i} className="rounded-sm bg-black/20" />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  <p className="text-right text-lg font-light tracking-wider sm:text-xl text-white">
-                    Premium
-                  </p>
-
-                  <div className="space-y-3">
-                    <p className="font-mono text-sm tracking-[0.1em] sm:text-base text-white text-left">
-                      {existingCard.cardNumber}
-                    </p>
-                    <div className="flex items-end justify-between gap-2 text-left">
-                      <div>
-                        <p className="text-[9px] uppercase tracking-wider text-white/50">Card Holder</p>
-                        <p className="text-[11px] font-medium uppercase sm:text-xs text-white">
-                          {existingCard.holderName}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[9px] uppercase tracking-wider text-white/50">Expires</p>
-                        <p className="text-[11px] font-medium sm:text-xs text-white">{existingCard.expiryDate}</p>
-                      </div>
-                      {/* Network Dots */}
-                      <div className="flex items-center">
-                        <div className="h-4 w-4 rounded-full bg-red-400/80 sm:h-5 sm:w-5" />
-                        <div className="-ml-2 h-4 w-4 rounded-full bg-amber-400/80 sm:h-5 sm:w-5" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {renderEliteBlackCard(existingCard.cardNumber, existingCard.holderName, existingCard.expiryDate, existingCard.cvv, !showDetails, () => setShowDetails(!showDetails))}
 
             {/* Card Details */}
-            <div className="bg-gray-50 rounded-2xl p-5 space-y-3 text-sm">
+            <div className="bg-white rounded-3xl p-6 space-y-4 shadow-sm border border-gray-100 mt-6">
               {/* Balance */}
-              <div className="flex justify-between items-center pb-3 border-b border-gray-100">
+              <div className="flex justify-between items-center pb-4 border-b border-gray-50">
                 <div className="flex items-center gap-2">
-                  <DollarSign className="w-4 h-4 text-green-500" />
-                  <span className="text-gray-500 font-medium">{t("balance")}</span>
+                  <DollarSign className="w-5 h-5 text-green-500" />
+                  <span className="text-gray-500 font-medium text-sm">{t("balanceLabel")}</span>
                 </div>
-                <span className="font-black text-green-600 text-lg">${existingCard.balance ?? 0}</span>
+                <span className="font-black text-green-600 text-xl">
+                  {showDetails ? `$${existingCard.balance ?? 0}` : '***'}
+                </span>
               </div>
 
               {/* Tier */}
-              <div className="flex justify-between items-center pb-3 border-b border-gray-100">
+              <div className="flex justify-between items-center pb-4 border-b border-gray-50">
                 <div className="flex items-center gap-2">
                   <CreditCard className="w-4 h-4 text-gray-400" />
-                  <span className="text-gray-500 font-medium">{t("tier")}</span>
+                  <span className="text-gray-500 font-medium text-sm">{t("tierLabel")}</span>
                 </div>
-                <span className="font-black text-gray-800 uppercase px-2 py-0.5 bg-gray-800 text-white rounded-full text-xs">{existingCard.tierId}</span>
+                <span className="font-black text-white uppercase px-3 py-1 bg-gray-900 rounded-full text-xs tracking-wider">
+                  {existingCard.tierId || "BLACK"}
+                </span>
               </div>
 
               {/* Holder */}
-              <div className="flex justify-between items-center pb-3 border-b border-gray-100">
-                <span className="text-gray-500 font-medium">Holder</span>
-                <span className="font-bold text-gray-800">{existingCard.holderName}</span>
+              <div className="flex justify-between items-center pb-4 border-b border-gray-50">
+                <span className="text-gray-500 font-medium text-sm">{t("holderLabel")}</span>
+                <span className="font-bold text-gray-900 text-sm">{existingCard.holderName}</span>
               </div>
 
               {/* Expires */}
-              <div className="flex justify-between items-center">
-                <span className="text-gray-500 font-medium">Expires</span>
-                <span className="font-mono font-bold text-gray-800">{existingCard.expiryDate}</span>
+              <div className="flex justify-between items-center pb-2">
+                <span className="text-gray-500 font-medium text-sm">{t("expiresLabel")}</span>
+                <span className="font-mono font-bold text-gray-900 text-sm">
+                  {showDetails ? existingCard.expiryDate : '**/**'}
+                </span>
               </div>
             </div>
 
             {/* Korixa verified badge */}
             {existingCard.korixaVerified && (
-              <div className="flex items-center justify-center gap-2 bg-green-50 border border-green-100 rounded-xl p-3">
-                <BadgeCheck className="w-5 h-5 text-green-500" />
-                <p className="text-sm font-bold text-green-600">{t("verifiedBy")}</p>
+              <div className="flex items-center justify-center gap-2 mt-6">
+                <BadgeCheck className="w-5 h-5 text-emerald-500" />
+                <p className="text-sm font-bold text-emerald-600">{t("verifiedBy")}</p>
               </div>
             )}
           </div>
         ) : (
           <>
             {/* ── Card Form Section ── */}
-            <div className="relative rounded-3xl overflow-hidden mb-8"
-                 style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 40%, #0f4c75 100%)' }}>
-              <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full opacity-10"
-                   style={{ background: 'radial-gradient(circle, #60a5fa, transparent)' }}></div>
-              <div className="absolute -bottom-10 -left-10 w-36 h-36 rounded-full opacity-10"
-                   style={{ background: 'radial-gradient(circle, #818cf8, transparent)' }}></div>
+            <div className="mb-8 mt-4">
+              {/* Live Preview */}
+              {renderEliteBlackCard(cardData.cardNumber, cardData.holderName, cardData.expiryDate, cardData.cvv, false)}
+            </div>
 
-              <div className="relative p-6 pb-8">
-                {/* Title */}
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
-                    <CreditCard className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-bold text-blue-300 tracking-[0.2em] uppercase">KORIXA PAY</p>
-                    <h2 className="text-xl font-black text-white tracking-tight">Elite Black Card</h2>
-                  </div>
-                </div>
-
-                {/* Only black tier notice */}
-                <div className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 mb-5 flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-amber-400 flex-shrink-0" />
-                  <p className="text-[11px] text-amber-300 font-semibold">Black Tier only — Silver & other tiers not accepted</p>
-                </div>
-
-                {/* Form */}
-                <form onSubmit={handleBindCard} className="space-y-4">
-                  {error && (
-                    <div className="bg-red-500/20 border border-red-400/30 rounded-xl p-3 flex items-start gap-2 text-red-300 text-sm">
-                      <XCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                      <span>{error}</span>
-                    </div>
-                  )}
-                  {success && (
-                    <div className="bg-green-500/20 border border-green-400/30 rounded-xl p-3 flex items-start gap-2 text-green-300 text-sm">
-                      <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                      <span>{success}</span>
-                    </div>
-                  )}
-
-                  <div>
-                    <label className="block text-[10px] font-bold text-blue-300 mb-1.5 uppercase tracking-widest">{t("cardNumber")}</label>
-                    <input type="text" name="cardNumber" value={cardData.cardNumber} onChange={handleChange}
-                      placeholder="0000 0000 0000 0000" maxLength={19} inputMode="numeric" required
-                      className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white font-mono text-base placeholder:text-white/30 focus:outline-none focus:border-blue-400 focus:bg-white/15 transition-all" />
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-bold text-blue-300 mb-1.5 uppercase tracking-widest">{t("cardHolder")}</label>
-                    <input type="text" name="holderName" value={cardData.holderName} onChange={handleChange}
-                      placeholder="" required
-                      className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white font-mono uppercase placeholder:text-white/30 focus:outline-none focus:border-blue-400 focus:bg-white/15 transition-all" />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[10px] font-bold text-blue-300 mb-1.5 uppercase tracking-widest">{t("validThru")}</label>
-                      <input type="text" name="expiryDate" value={cardData.expiryDate} onChange={handleChange}
-                        placeholder="MM/YY" maxLength={5} inputMode="numeric" required
-                        className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-blue-400 focus:bg-white/15 transition-all" />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-bold text-blue-300 mb-1.5 uppercase tracking-widest">{t("cvv")}</label>
-                      <input type="password" name="cvv" value={cardData.cvv} onChange={handleChange}
-                        placeholder="•••" maxLength={4} inputMode="numeric" required
-                        className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-blue-400 focus:bg-white/15 transition-all" />
-                    </div>
-                  </div>
-
-                  <div className="pt-2">
-                    <button type="submit" disabled={saving}
-                      className="w-full bg-white hover:bg-gray-100 active:bg-gray-200 text-gray-900 font-black py-4 rounded-xl shadow-xl transition-all flex items-center justify-center gap-2 disabled:opacity-60">
-                      {saving
-                        ? <><Loader2 className="w-5 h-5 animate-spin" />{t("verifying")}</>
-                        : <><Lock className="w-4 h-4" />{t("bind")}</>}
-                    </button>
-                  </div>
-                </form>
+            <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+              {/* Only black tier notice */}
+              <div className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 mb-6 flex items-start gap-3">
+                <ShieldCheck className="w-5 h-5 text-gray-900 flex-shrink-0 mt-0.5" />
+                <p className="text-[12px] text-gray-600 font-semibold leading-relaxed">Black Tier only — Silver & other tiers not accepted.</p>
               </div>
+
+              {/* Form */}
+              <form onSubmit={handleBindCard} className="space-y-5">
+                {error && (
+                  <div className="bg-red-50 border border-red-100 rounded-xl p-4 flex items-start gap-3 text-red-700 text-sm font-medium">
+                    <XCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                    <span>{error}</span>
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">{t("cardNumber")}</label>
+                  <input type="text" name="cardNumber" value={cardData.cardNumber} onChange={handleChange}
+                    placeholder="0000 0000 0000 0000" maxLength={19} inputMode="numeric" required
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 font-mono text-base placeholder:text-gray-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">{t("cardHolder")}</label>
+                  <input type="text" name="holderName" value={cardData.holderName} onChange={handleChange}
+                    placeholder="" required
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 font-mono uppercase placeholder:text-gray-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">{t("validThru")}</label>
+                    <input type="text" name="expiryDate" value={cardData.expiryDate} onChange={handleChange}
+                      placeholder="MM/YY" maxLength={5} inputMode="numeric" required
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 font-mono placeholder:text-gray-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">{t("cvv")}</label>
+                    <input type="password" name="cvv" value={cardData.cvv} onChange={handleChange}
+                      placeholder="•••" maxLength={4} inputMode="numeric" required
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 font-mono placeholder:text-gray-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" />
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <button type="submit" disabled={saving}
+                    className="w-full bg-gray-900 hover:bg-black active:scale-[0.98] text-white font-black py-4 rounded-xl shadow-lg shadow-gray-900/20 transition-all flex items-center justify-center gap-2 disabled:opacity-70">
+                    {saving
+                      ? <><Loader2 className="w-5 h-5 animate-spin" />{t("verifying")}</>
+                      : <><Lock className="w-4 h-4" />{t("bind")}</>}
+                  </button>
+                </div>
+              </form>
             </div>
 
             {/* Info below form */}
-            <div className="space-y-4">
+            <div className="space-y-4 mt-6">
               <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 flex gap-3">
                 <Info className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-xs font-bold text-blue-700 mb-1">{t("title")}</p>
-                  <p className="text-xs text-blue-500 leading-relaxed">{t("subtitle")}</p>
+                  <p className="text-sm font-bold text-blue-700 mb-1">{t("title")}</p>
+                  <p className="text-xs text-blue-600 leading-relaxed">{t("subtitle")}</p>
                 </div>
               </div>
               <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 flex gap-3">
                 <AlertCircle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-xs font-bold text-amber-700 mb-1">{t("infoTitle")}</p>
+                  <p className="text-sm font-bold text-amber-700 mb-1">{t("infoTitle")}</p>
                   <p className="text-xs text-amber-600 leading-relaxed">{t("infoBody")}</p>
                 </div>
               </div>
-              <div className="flex items-center justify-center gap-2 bg-gray-50 rounded-xl p-3 border border-gray-100">
+              <div className="flex items-center justify-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-gray-400" />
-                <p className="text-xs text-gray-400 font-medium">Cards are verified against Korixa database</p>
+                <p className="text-xs text-gray-500 font-medium">Cards are verified against Korixa database</p>
               </div>
               <p className="text-center text-xs text-gray-400 mt-2">{t("noCard")}</p>
             </div>
