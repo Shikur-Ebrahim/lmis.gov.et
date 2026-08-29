@@ -258,13 +258,13 @@ export default function BindCard() {
     const displayCvv = mask ? "•••" : (cCvv || "•••");
     
     return (
-      <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center w-full">
         <div 
           onClick={onClick}
           className="relative mx-auto aspect-[1.586/1] w-full max-w-[360px] cursor-pointer group"
         >
           {/* Main Card Background */}
-          <div className="relative h-full w-full overflow-hidden rounded-3xl bg-[#1c1d21] shadow-2xl border border-white/5">
+          <div className="relative h-full w-full overflow-hidden rounded-2xl sm:rounded-3xl bg-[#1c1d21] shadow-2xl border border-white/5">
             {/* Subtle Diagonal Lines Pattern */}
             <svg
               className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.03]"
@@ -286,68 +286,68 @@ export default function BindCard() {
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/40" />
 
             {/* Card Content */}
-            <div className="relative flex h-full flex-col p-6 text-left">
+            <div className="relative flex h-full flex-col p-4 sm:p-6 text-left">
               {/* Top Row */}
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-[10px] font-bold tracking-[0.15em] text-gray-400">KORIXA PAY</p>
-                  <p className="mt-1 text-sm font-black tracking-wide text-white">ELITE BLACK</p>
+                  <p className="text-[8px] sm:text-[10px] font-bold tracking-[0.15em] text-gray-400">KORIXA PAY</p>
+                  <p className="mt-0.5 sm:mt-1 text-xs sm:text-sm font-black tracking-wide text-white">ELITE BLACK</p>
                 </div>
                 {/* Gold Realistic Chip */}
-                <div className="relative h-9 w-12 rounded-md border border-yellow-500/50 bg-gradient-to-br from-yellow-300 via-yellow-500 to-yellow-600 shadow-inner flex overflow-hidden">
+                <div className="relative h-7 w-10 sm:h-9 sm:w-12 rounded-md border border-yellow-500/50 bg-gradient-to-br from-yellow-300 via-yellow-500 to-yellow-600 shadow-inner flex overflow-hidden">
                   <div className="absolute inset-0 opacity-40 mix-blend-overlay" 
                        style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 2px, black 2px, black 4px)' }}></div>
                   <div className="w-1/3 border-r border-yellow-700/40 relative z-10"></div>
                   <div className="w-1/3 border-r border-yellow-700/40 relative z-10"></div>
                   <div className="w-1/3 relative z-10"></div>
-                  <div className="absolute h-[1px] w-12 bg-yellow-700/40 top-1/2 -mt-[0.5px] z-10"></div>
+                  <div className="absolute h-[1px] w-full bg-yellow-700/40 top-1/2 -mt-[0.5px] z-10"></div>
                 </div>
               </div>
 
               {/* Middle Row: Card Number */}
-              <div className="mt-auto mb-6">
-                <p className="font-mono text-[1.35rem] tracking-[0.15em] text-white">
+              <div className="mt-auto mb-4 sm:mb-6">
+                <p className="font-mono text-[1.15rem] sm:text-[1.35rem] tracking-[0.15em] text-white">
                   {displayNum}
                 </p>
               </div>
 
               {/* Bottom Row */}
-              <div className="flex items-end justify-between relative">
-                <div className="space-y-4">
+              <div className="flex items-end justify-between">
+                <div className="space-y-3 sm:space-y-4">
                   {/* Holder */}
                   <div>
-                    <p className="text-[9px] uppercase tracking-wider text-gray-500">CARD HOLDER</p>
-                    <p className="text-xs font-bold uppercase tracking-wider text-white mt-0.5">
+                    <p className="text-[7px] sm:text-[9px] uppercase tracking-wider text-gray-500">CARD HOLDER</p>
+                    <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white mt-0.5 max-w-[150px] sm:max-w-[180px] truncate">
                       {cHolder || t("emptyHolder")}
                     </p>
                   </div>
                   {/* Valid Thru & CVV */}
-                  <div className="flex gap-6">
+                  <div className="flex gap-4 sm:gap-6">
                     <div>
-                      <p className="text-[9px] uppercase tracking-wider text-gray-500">VALID THRU</p>
-                      <p className="text-xs font-mono font-medium text-white mt-0.5">{displayExpiry}</p>
+                      <p className="text-[7px] sm:text-[9px] uppercase tracking-wider text-gray-500">VALID THRU</p>
+                      <p className="text-[10px] sm:text-xs font-mono font-medium text-white mt-0.5">{displayExpiry}</p>
                     </div>
                     <div>
-                      <p className="text-[9px] uppercase tracking-wider text-gray-500">CVV</p>
-                      <p className="text-xs font-mono font-medium text-white mt-0.5">{displayCvv}</p>
+                      <p className="text-[7px] sm:text-[9px] uppercase tracking-wider text-gray-500">CVV</p>
+                      <p className="text-[10px] sm:text-xs font-mono font-medium text-white mt-0.5">{displayCvv}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Logos */}
-                <div className="flex flex-col items-end gap-1.5 pb-1 pr-6">
-                  <div className="text-white font-black italic text-xl tracking-tighter">VISA</div>
+                <div className="flex flex-col items-end gap-1 pb-1 sm:pb-2">
+                  <div className="text-white font-black italic text-lg sm:text-xl tracking-tighter">VISA</div>
                   {/* Master Card style overlap circles - Colored */}
-                  <div className="flex -mr-2">
-                    <div className="w-6 h-6 rounded-full bg-red-500/90 mix-blend-screen"></div>
-                    <div className="w-6 h-6 rounded-full bg-yellow-500/90 -ml-3 mix-blend-screen"></div>
+                  <div className="flex -mr-1 sm:-mr-2">
+                    <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-red-500/90 mix-blend-screen"></div>
+                    <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-yellow-500/90 -ml-2.5 sm:-ml-3 mix-blend-screen"></div>
                   </div>
                 </div>
-                
-                {/* Eye Icon in absolute bottom right corner (well separated) */}
-                <div className="absolute -bottom-1 -right-1 p-2 text-white/30 group-hover:text-white/60 transition-colors">
-                  {mask ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
-                </div>
+              </div>
+              
+              {/* Eye Icon in absolute bottom right corner of the card content area */}
+              <div className="absolute bottom-3 right-4 sm:bottom-4 sm:right-5 p-1 text-white/30 group-hover:text-white/60 transition-colors">
+                {mask ? <Eye className="w-4 h-4 sm:w-5 sm:h-5" /> : <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" />}
               </div>
             </div>
           </div>
