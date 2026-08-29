@@ -178,6 +178,10 @@ const RegisterDetail = () => {
 
   const handleStatusUpdate = async () => {
     if (!selectedRegistration || !newStatus) return
+    if (editCountries.length !== 1) {
+      alert("You must select exactly one target country before updating.");
+      return;
+    }
     setUpdatingStatus(true)
     try {
       const updatePayload = { 
@@ -602,9 +606,14 @@ const RegisterDetail = () => {
                   <div className="flex gap-3 pt-2">
                     <button onClick={() => { setShowUpdateStatusModal(false); setConfirmStep(false) }} className="flex-1 py-3 bg-gray-100 rounded-xl font-bold text-gray-600 hover:bg-gray-200 transition">Cancel</button>
                     <button 
-                      onClick={() => setConfirmStep(true)} 
-                      disabled={editCountries.length !== 1}
-                      className="flex-1 py-3 bg-blue-600 rounded-xl font-bold text-white shadow-lg shadow-blue-200 hover:bg-blue-700 transition disabled:opacity-50"
+                      onClick={() => {
+                        if (editCountries.length !== 1) {
+                          alert("You must select exactly one target country before updating.");
+                          return;
+                        }
+                        setConfirmStep(true);
+                      }} 
+                      className="flex-1 py-3 bg-blue-600 rounded-xl font-bold text-white shadow-lg shadow-blue-200 hover:bg-blue-700 transition"
                     >
                       Review Changes
                     </button>
