@@ -141,9 +141,9 @@ export default function BindCard() {
   }
 
   const maskCardNumber = (number) => {
-    if (!number) return "••••  ••••  ••••  ••••"
+    if (!number) return "••••  ••••  ••••  7502"
     const raw = number.replace(/\s/g, '')
-    if (raw.length < 4) return "••••  ••••  ••••  ••••"
+    if (raw.length < 4) return "••••  ••••  ••••  7502"
     return `••••  ••••  ••••  ${raw.slice(-4)}`
   }
 
@@ -253,7 +253,7 @@ export default function BindCard() {
   }
 
   const renderEliteBlackCard = (cNumber, cHolder, cExpiry, cCvv, mask = false, onClick) => {
-    const displayNum = mask ? (cNumber ? maskCardNumber(cNumber) : "••••  ••••  ••••  ••••") : (cNumber || "••••  ••••  ••••  ••••");
+    const displayNum = mask ? (cNumber ? maskCardNumber(cNumber) : "••••  ••••  ••••  7502") : (cNumber || "••••  ••••  ••••  7502");
     const displayExpiry = mask ? "••/••" : (cExpiry || "MM/YY");
     const displayCvv = mask ? "•••" : (cCvv || "•••");
     
@@ -457,7 +457,7 @@ export default function BindCard() {
                 <div>
                   <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">{t("cardHolder")}</label>
                   <input type="text" name="holderName" value={cardData.holderName} onChange={handleChange}
-                    placeholder="JOHN DOE" required
+                    placeholder="JONEY PITER YOMA" required
                     className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 font-mono uppercase placeholder:text-gray-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" />
                 </div>
 
