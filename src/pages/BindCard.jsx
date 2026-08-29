@@ -261,7 +261,7 @@ export default function BindCard() {
       <div className="flex flex-col items-center">
         <div 
           onClick={onClick}
-          className="relative mx-auto aspect-[1.586/1] w-full max-w-[360px] cursor-pointer"
+          className="relative mx-auto aspect-[1.586/1] w-full max-w-[360px] cursor-pointer group"
         >
           {/* Main Card Background */}
           <div className="relative h-full w-full overflow-hidden rounded-3xl bg-[#1c1d21] shadow-2xl border border-white/5">
@@ -293,12 +293,14 @@ export default function BindCard() {
                   <p className="text-[10px] font-bold tracking-[0.15em] text-gray-400">KORIXA PAY</p>
                   <p className="mt-1 text-sm font-black tracking-wide text-white">ELITE BLACK</p>
                 </div>
-                {/* Silver Wireframe Chip */}
-                <div className="h-8 w-11 rounded-md border border-gray-500/50 flex">
-                  <div className="w-1/3 border-r border-gray-500/50"></div>
-                  <div className="w-1/3 border-r border-gray-500/50"></div>
-                  <div className="w-1/3"></div>
-                  <div className="absolute h-[1px] w-11 bg-gray-500/50 top-1/2 -mt-[0.5px]"></div>
+                {/* Gold Realistic Chip */}
+                <div className="relative h-9 w-12 rounded-md border border-yellow-500/50 bg-gradient-to-br from-yellow-300 via-yellow-500 to-yellow-600 shadow-inner flex overflow-hidden">
+                  <div className="absolute inset-0 opacity-40 mix-blend-overlay" 
+                       style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 2px, black 2px, black 4px)' }}></div>
+                  <div className="w-1/3 border-r border-yellow-700/40 relative z-10"></div>
+                  <div className="w-1/3 border-r border-yellow-700/40 relative z-10"></div>
+                  <div className="w-1/3 relative z-10"></div>
+                  <div className="absolute h-[1px] w-12 bg-yellow-700/40 top-1/2 -mt-[0.5px] z-10"></div>
                 </div>
               </div>
 
@@ -310,7 +312,7 @@ export default function BindCard() {
               </div>
 
               {/* Bottom Row */}
-              <div className="flex items-end justify-between">
+              <div className="flex items-end justify-between relative">
                 <div className="space-y-4">
                   {/* Holder */}
                   <div>
@@ -333,25 +335,26 @@ export default function BindCard() {
                 </div>
 
                 {/* Logos */}
-                <div className="flex flex-col items-end gap-2 relative">
+                <div className="flex flex-col items-end gap-1.5 pb-1 pr-6">
                   <div className="text-white font-black italic text-xl tracking-tighter">VISA</div>
-                  {/* Master Card style overlap circles */}
+                  {/* Master Card style overlap circles - Colored */}
                   <div className="flex -mr-2">
-                    <div className="w-6 h-6 rounded-full bg-white/70"></div>
-                    <div className="w-6 h-6 rounded-full bg-white/40 -ml-3"></div>
+                    <div className="w-6 h-6 rounded-full bg-red-500/90 mix-blend-screen"></div>
+                    <div className="w-6 h-6 rounded-full bg-yellow-500/90 -ml-3 mix-blend-screen"></div>
                   </div>
-                  
-                  {/* Eye Icon in absolute bottom right corner */}
-                  <div className="absolute -bottom-1 -right-2 text-white/20">
-                    {mask ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                  </div>
+                </div>
+                
+                {/* Eye Icon in absolute bottom right corner (well separated) */}
+                <div className="absolute -bottom-1 -right-1 p-2 text-white/30 group-hover:text-white/60 transition-colors">
+                  {mask ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
                 </div>
               </div>
             </div>
           </div>
         </div>
         {/* Helper Text below card */}
-        <p className="text-xs text-gray-400 mt-4 font-medium">
+        <p className="text-xs text-gray-400 mt-4 font-medium flex items-center gap-1.5">
+          {mask ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
           {mask ? "Tap card to reveal details" : "Tap card to hide details"}
         </p>
       </div>
