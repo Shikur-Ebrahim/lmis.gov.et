@@ -335,7 +335,7 @@ export default function BindCard() {
                 </div>
 
                 {/* Logos */}
-                <div className="flex flex-col items-end gap-1 pb-1 sm:pb-2">
+                <div className="flex flex-col items-end gap-1 pb-1 sm:pb-2 pr-1">
                   <div className="text-white font-black italic text-base sm:text-xl tracking-tighter">VISA</div>
                   {/* Master Card style overlap circles - Colored */}
                   <div className="flex -mr-1 sm:-mr-2">
@@ -344,11 +344,11 @@ export default function BindCard() {
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Eye Icon in absolute bottom right corner of the card content area */}
-              <div className="absolute bottom-3 right-4 sm:bottom-4 sm:right-5 p-1 text-white/70 group-hover:text-white transition-colors">
-                {mask ? <Eye className="w-4 h-4 sm:w-5 sm:h-5" /> : <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" />}
-              </div>
+            {/* Eye Icon in absolute bottom right corner of the CARD (outside padding) */}
+            <div className="absolute bottom-1.5 right-2 sm:bottom-2 sm:right-3 p-1.5 text-white/70 group-hover:text-white transition-colors z-20">
+              {mask ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
             </div>
           </div>
         </div>
