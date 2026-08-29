@@ -503,11 +503,7 @@ export default function BindCard() {
                   <p className="text-xs text-amber-600 leading-relaxed">{t("infoBody")}</p>
                 </div>
               </div>
-              <div className="flex items-center justify-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-gray-400" />
-                <p className="text-xs text-gray-500 font-medium">Cards are verified against Korixa database</p>
-              </div>
-              <div className="text-center mt-2">
+              <div className="text-center mt-4">
                 <a href="https://www.korixapay.com/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100 shadow-sm">
                   Get a new Elite Black Card <ExternalLink className="w-3.5 h-3.5" />
                 </a>
