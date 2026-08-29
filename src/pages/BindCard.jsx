@@ -252,23 +252,80 @@ export default function BindCard() {
               <p className="text-sm text-gray-500 mt-1">{t("alreadyBoundDesc")}</p>
             </div>
 
-            {/* Card visual */}
-            <div className="relative rounded-2xl overflow-hidden p-5"
-                 style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 40%, #0f4c75 100%)' }}>
-              <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-10 bg-blue-400"></div>
-              <p className="text-[9px] font-bold text-blue-300 tracking-widest uppercase mb-0.5">KORIXA PAY</p>
-              <p className="text-sm font-black text-white tracking-widest uppercase mb-4">Elite Black Card</p>
-              <p className="font-mono text-lg text-white tracking-[0.18em] mb-4">{existingCard.cardNumber}</p>
-              <div className="flex justify-between items-end">
-                <div>
-                  <p className="text-[8px] text-blue-300 uppercase tracking-wider mb-0.5">Card Holder</p>
-                  <p className="text-xs font-bold text-white uppercase">{existingCard.holderName}</p>
+            {/* Card visual matching Korixa Elite Black Card */}
+            <div className="relative mx-auto aspect-[1.586/1] w-[300px] md:w-[340px] perspective-1000">
+              <div className="relative h-full w-full overflow-hidden rounded-2xl sm:rounded-3xl border border-white/10 bg-gradient-to-br from-zinc-900 via-black to-zinc-900 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+                {/* Midnight Pattern SVG */}
+                <svg
+                  className="pointer-events-none absolute inset-0 h-full w-full opacity-20"
+                  viewBox="0 0 400 250"
+                  preserveAspectRatio="xMidYMid slice"
+                >
+                  {Array.from({ length: 12 }).map((_, row) =>
+                    Array.from({ length: 18 }).map((_, col) => (
+                      <rect
+                        key={`${row}-${col}`}
+                        x={col * 24 + (row % 2) * 12}
+                        y={row * 22}
+                        width="14"
+                        height="4"
+                        rx="2"
+                        fill="white"
+                        transform={`rotate(${(row + col) * 8} ${col * 24 + 7} ${row * 22 + 2})`}
+                      />
+                    ))
+                  )}
+                </svg>
+
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent" />
+
+                <div className="relative flex h-full flex-col justify-between p-4 sm:p-5">
+                  <div className="flex items-start justify-between">
+                    <div className="text-left">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.15em] sm:text-xs text-white">
+                        Korixa
+                      </p>
+                      <p className="mt-0.5 text-[11px] font-medium sm:text-xs text-white/50">
+                        Elite Black Card
+                      </p>
+                    </div>
+                    {/* Gold Chip */}
+                    <div className="relative h-8 w-10 overflow-hidden rounded-md border border-amber-300/30 bg-gradient-to-br from-amber-200/90 to-amber-500/70 shadow-inner sm:h-9 sm:w-11">
+                      <div className="absolute inset-0 grid grid-cols-3 grid-rows-2 gap-px p-1 opacity-40">
+                        {Array.from({ length: 6 }).map((_, i) => (
+                          <div key={i} className="rounded-sm bg-black/20" />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="text-right text-lg font-light tracking-wider sm:text-xl text-white">
+                    Premium
+                  </p>
+
+                  <div className="space-y-3">
+                    <p className="font-mono text-sm tracking-[0.1em] sm:text-base text-white text-left">
+                      {existingCard.cardNumber}
+                    </p>
+                    <div className="flex items-end justify-between gap-2 text-left">
+                      <div>
+                        <p className="text-[9px] uppercase tracking-wider text-white/50">Card Holder</p>
+                        <p className="text-[11px] font-medium uppercase sm:text-xs text-white">
+                          {existingCard.holderName}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[9px] uppercase tracking-wider text-white/50">Expires</p>
+                        <p className="text-[11px] font-medium sm:text-xs text-white">{existingCard.expiryDate}</p>
+                      </div>
+                      {/* Network Dots */}
+                      <div className="flex items-center">
+                        <div className="h-4 w-4 rounded-full bg-red-400/80 sm:h-5 sm:w-5" />
+                        <div className="-ml-2 h-4 w-4 rounded-full bg-amber-400/80 sm:h-5 sm:w-5" />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-[8px] text-blue-300 uppercase tracking-wider mb-0.5">Valid Thru</p>
-                  <p className="text-xs font-bold text-white">{existingCard.expiryDate}</p>
-                </div>
-                <span className="text-lg font-black italic text-white">VISA</span>
               </div>
             </div>
 
