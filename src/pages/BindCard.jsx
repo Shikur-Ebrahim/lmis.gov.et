@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { doc, getDoc, updateDoc, setDoc, collection, query, where, getDocs } from "firebase/firestore"
 import { db } from "../config/firebase"
@@ -24,6 +24,7 @@ export default function BindCard() {
   const [existingCard, setExistingCard] = useState(null)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
+  const cvvRef = useRef(null)
 
   const texts = {
     en: {
@@ -152,7 +153,11 @@ export default function BindCard() {
     if (name === "cardNumber") {
       setCardData(prev => ({ ...prev, cardNumber: formatCardNumber(value) }))
     } else if (name === "expiryDate") {
-      setCardData(prev => ({ ...prev, expiryDate: formatExpiry(value) }))
+      const formatted = formatExpiry(value)
+      setCardData(prev => ({ ...prev, expiryDate: formatted }))
+      if (formatted.length === 5) {
+        cvvRef.current?.focus()
+      }
     } else if (name === "cvv") {
       setCardData(prev => ({ ...prev, cvv: value.replace(/\D/g, '').slice(0, 4) }))
     } else if (name === "holderName") {
@@ -470,7 +475,7 @@ export default function BindCard() {
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">{t("cvv")}</label>
-                    <input type={showDetails ? "text" : "password"} name="cvv" value={cardData.cvv} onChange={handleChange}
+                    <input ref={cvvRef} type={showDetails ? "text" : "password"} name="cvv" value={cardData.cvv} onChange={handleChange}
                       placeholder="•••" maxLength={4} inputMode="numeric" required
                       className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 font-mono placeholder:text-gray-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" />
                   </div>
